@@ -2,6 +2,16 @@
 
 #include <limits>
 
+#ifdef __INTELLISENSE__
+#undef __AVX__
+#define __AVX__ 1
+#endif
+
+#ifdef __AVX__
+#define USE_AVX
+#endif
+
+
 #if 0 && defined(_WIN32)
 #define NOMINMAX
 #include <windows.h>
@@ -80,13 +90,16 @@ static double measure_seconds(F f)
     return t;
 }
 
-template <class F>
-static measure_results measure_ntimes(size_t n_times, F f)
+template <class F1, class F2>
+static measure_results measure_ntimes(
+    size_t n_times, F1 f, F2 preprocess)
 {
     auto sum = 0.0f;
     auto min = std::numeric_limits<double>::max();
     auto max = std::numeric_limits<double>::min();
     for (size_t i = 0; i < n_times; i++) {
+        preprocess();
+
         auto t = measure_seconds(f);
         sum += t;
         min = std::min(min, t);

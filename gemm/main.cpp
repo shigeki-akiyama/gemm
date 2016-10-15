@@ -58,15 +58,20 @@ static void benchmark(
     const char *name, bench_params<T>& bp, F f, 
     bool verify=true)
 {
-    size_t n_times = 30;
+    size_t n_times = 10;
+
+    auto preprocess = [&] {
+        std::fill_n(bp.C, bp.M * bp.N, elem_type(0.0));
+    };
 
     auto r = measure_ntimes(n_times, [&] {
         f(bp.M, bp.N, bp.K, bp.alpha, bp.A, bp.lda,
             bp.B, bp.ldb, bp.beta, bp.C, bp.ldc);
-    });
+    }, preprocess);
 
     std::printf("%-20s\t%10.6f\t%10.6f\t%10.6f\t%6zu\n",
         name, r.avg_time, r.min_time, r.max_time, n_times);
+    std::fflush(stdout);
 
     if (verify) {
         verify_results(bp.C, bp.result_C, bp.M, bp.N);
@@ -108,31 +113,43 @@ int main(int argc, char *argv[])
 {
     int size = (argc >= 2) ? atoi(argv[1]) : 32;
 
+    if (size % 8 != 0) {
+        std::fprintf(stderr,
+            "error: matrix size must be a multiple of 8\n");
+        return 1;
+    }
+
     int M = size;
     int N = size;
     int K = size;
     int lda = K;
     int ldb = N;
     int ldc = K;
-    auto alpha = elem_type(2.0);
-    auto beta  = elem_type(0.5);
+    auto alpha = elem_type(4.0);
+    auto beta  = elem_type(0.25);
 
-    elem_vector A(M * K, elem_type(2.0));
-    elem_vector B(K * N, elem_type(0.5));
-    elem_vector C(M * N, elem_type(0.0));
-    elem_vector result_C(M * N, elem_type(0.0));
+    elem_vector A(M * K);
+    elem_vector B(K * N);
+    elem_vector C(M * N);
+    elem_vector result_C(M * N);
+
+    std::fill(A.begin(), A.end(), elem_type(2.0));
+    std::fill(B.begin(), B.end(), elem_type(0.5));
 
     bench_params<elem_type> bp = {
         M, N, K, alpha, A.data(), lda, B.data(), ldb, beta, 
         C.data(), ldc, result_C.data(),
     };
 
-    // 0. Reference implementation
+    // Reference implementation
     benchmark("ref_gemm", bp, ref_gemm<elem_type>, false);
     std::copy(C.begin(), C.end(), result_C.begin());
 
-    // 1. Naive implementation
+    // 0-0. Naive implementation
     benchmark("naive", bp, naive::gemm<elem_type>);
+
+    // 0-1. Naive AVX implementation
+    benchmark("naive_avx", bp, naive_avx::gemm);
 
     return 0;
 }
