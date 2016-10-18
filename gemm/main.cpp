@@ -1,13 +1,12 @@
 
 #include "00naive.h"
 #include "01register.h"
+#include "02cache.h"
 #include "util.h"
 #include <vector>
 #include <algorithm>
 #include <cstdlib>
 #include <cstdio>
-
-#define USE_MKL
 
 #ifdef USE_MKL
 #include <mkl_blas.h>
@@ -73,7 +72,11 @@ static void benchmark(
     }, preprocess);
 
     auto flop = 3.0 * M * N * K + 2.0 * M * N;
+#if 1
+    auto gflops = flop / (1.0 * 1024 * 1024 * 1024 * r.min_time);
+#else
     auto gflops = flop / (1.0 * 1024 * 1024 * 1024 * r.avg_time);
+#endif
     std::printf("%-20s\t%10.3f\t%10.6f\t%10.6f\t%10.6f\t%6zu\n",
         name, gflops, r.avg_time, r.min_time, r.max_time,
         n_times);
@@ -118,11 +121,11 @@ static void ref_gemm(
 
 int main(int argc, char *argv[])
 {
-    int size = (argc >= 2) ? atoi(argv[1]) : 32;
+    int size = (argc >= 2) ? atoi(argv[1]) : 64;
 
     if (size % 32 != 0) {
         std::fprintf(stderr,
-            "error: matrix size must be a multiple of 8\n");
+            "error: matrix size must be a multiple of 32\n");
         return 1;
     }
     {
@@ -225,25 +228,47 @@ int main(int argc, char *argv[])
         C, ldc, result_C,
     };
 
+#ifdef USE_MKL
+    bool verify = true;
+
     // MKL warmup
     ref_gemm<elem_type>(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
 
     // Reference implementation
     benchmark("MKL", bp, ref_gemm<elem_type>, false);
     std::copy_n(C, M * N, result_C);
+#else
+    bool verify = false;
+#endif
 
     // 0-0. Naive implementation
-    //benchmark("naive", bp, naive::gemm<elem_type>);
+    //benchmark("naive", bp, naive::gemm<elem_type>, verify);
 
 #ifdef USE_AVX
+#if 0
     // 0-1. Naive AVX implementation
     benchmark("naive_avx", bp, naive_avx::gemm);
 
     // 1-0. Register blocking (but spilled) AVX implementation
-    benchmark("register_avx_0", bp, register_avx_0::gemm);
+    benchmark("register_avx_0", bp, register_avx_0::gemm, verify);
 
     // 1-1. Register blocking AVX implementation
-    benchmark("register_avx_1", bp, register_avx_1::gemm);
+    benchmark("register_avx_1", bp, register_avx_1::gemm, verify);
+
+    // 1-2. Register blocking AVX implementation (blocking with K)
+    benchmark("register_avx_2", bp, register_avx_2::gemm, verify);
+#endif
+    // 2-1. cache-oblivious implementation with 1-2.
+    benchmark("cache_oblivious", bp, cache_oblivious::gemm, verify);
+
+    // 2-2. L1-cache blocking implementation with 1-2.
+    benchmark("L1 blocking", bp, cache_blocking_L1::gemm, verify);
+
+    // 2-3. L2-cache blocking implementation with 2-2.
+    benchmark("L2 blocking", bp, cache_blocking_L2::gemm, verify);
+
+    // 2-3. L2-cache blocking implementation with 2-2.
+    benchmark("L3 blocking", bp, cache_blocking_L3::gemm, verify);
 #endif
 
     return 0;

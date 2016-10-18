@@ -10,6 +10,7 @@
 
 #ifdef __AVX__
 #define USE_AVX
+#include <immintrin.h>
 #endif
 
 
@@ -109,4 +110,22 @@ static measure_results measure_ntimes(
 
     auto avg = sum / double(n_times);
     return measure_results(avg, min, max);
+}
+
+static void scale_matrix(
+    float *A, int lda, int M, int N, float coeff)
+{
+    if (coeff == 1.0f)
+        return;
+
+    __m256 vcoeff = _mm256_set1_ps(coeff);
+
+    for (int i = 0; i < M; i++) {
+        for (int j = 0; j < N; j+=8) {
+            auto *pa = A + lda * i + j;
+            auto va = _mm256_load_ps(pa);
+            va = _mm256_mul_ps(vcoeff, va);
+            _mm256_store_ps(pa, va);
+        }
+    }
 }
