@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <limits>
 
 #ifdef __INTELLISENSE__
@@ -94,7 +95,7 @@ template <class F1, class F2>
 static measure_results measure_ntimes(
     size_t n_times, F1 f, F2 preprocess)
 {
-    auto sum = 0.0f;
+    auto sum = 0.0;
     auto min = std::numeric_limits<double>::max();
     auto max = std::numeric_limits<double>::min();
     for (size_t i = 0; i < n_times; i++) {
