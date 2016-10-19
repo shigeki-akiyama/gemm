@@ -207,14 +207,14 @@ int main(int argc, char *argv[])
     int M = size;
     int N = size;
     int K = size;
-#if 1
+#if 0
     int lda = K;
     int ldb = N;
     int ldc = K;
 #else
-    int lda = K + 8;
-    int ldb = N + 8;
-    int ldc = K + 8;
+    int lda = K + 16;
+    int ldb = N + 16;
+    int ldc = K + 16;
 #endif
     auto alpha = 1.0f; // elem_type(4.0);
     auto beta = 1.0f; // elem_type(0.25);
