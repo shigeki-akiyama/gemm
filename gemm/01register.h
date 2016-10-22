@@ -174,10 +174,9 @@ struct register_avx_1 {
             auto vb1 = _mm256_load_ps(pb + 8 * 1);
             auto vb2 = _mm256_load_ps(pb + 8 * 2);
             auto vb3 = _mm256_load_ps(pb + 8 * 3);
-            auto vb4 = _mm256_load_ps(pb + 8 * 3);
 
-            __m256 va0 = _mm256_broadcast_ss(&pa[lda * 0]);
-            __m256 va1 = _mm256_broadcast_ss(&pa[lda * 1]);
+            auto va0 = _mm256_broadcast_ss(&pa[lda * 0]);
+            auto va1 = _mm256_broadcast_ss(&pa[lda * 1]);
 
             // dot product (ii/jj loop)
             vab0 = _mm256_fmadd_ps(va0, vb0, vab0);
@@ -299,7 +298,7 @@ struct register_avx_2 {
             auto va0 = _mm256_broadcast_ss(&pa[lda * 0]);
             vab0 = _mm256_fmadd_ps(va0, vb0, vab0);
 
-            __m256 va1 = _mm256_broadcast_ss(&pa[lda * 1]);
+            auto va1 = _mm256_broadcast_ss(&pa[lda * 1]);
             auto vb1 = _mm256_load_ps(pb + 8 * 1);
             vab1 = _mm256_fmadd_ps(va0, vb1, vab1);
             vab5 = _mm256_fmadd_ps(va1, vb1, vab5);
