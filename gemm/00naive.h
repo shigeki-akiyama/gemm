@@ -2,7 +2,26 @@
 
 #include "util.h"
 
-namespace naive {
+struct naive {
+
+    template <class T>
+    static void matmul(
+        int M, int N, int K, T *A, int lda, T *B, int ldb, T *C, int ldc)
+    {
+        for (int i = 0; i < M; i++) {
+            for (int j = 0; j < N; j++) {
+                auto ab = T(0);
+                for (int k = 0; k < K; k++) {
+                    //ab += A[lda * i + k] * B[ldb * k + j];
+                    auto a = A[lda * i + k];
+                    auto b = B[ldb * k + j];
+                    ab += a * b;
+                }
+
+                C[ldc * i + j] += ab;
+            }
+        }
+    }
 
     template <class T>
     static void gemm(
@@ -22,19 +41,16 @@ namespace naive {
         }
     }
 
-}
+};
 
 #ifdef USE_AVX
 #include <immintrin.h>
 
-namespace naive_avx {
+struct naive_avx {
 
-    //template <class T>
     static void gemm(
         int M, int N, int K, float alpha, float *A, int lda,
         float *B, int ldb, float beta, float *C, int ldc)
-        //int M, int N, int K, T alpha, T *A, int lda,
-        //T *B, int ldb, T beta, T *C, int ldc)
     {
         auto valpha = _mm256_set1_ps(alpha);
         auto vbeta  = _mm256_set1_ps(beta);
@@ -58,6 +74,6 @@ namespace naive_avx {
         }
     }
 
-}
+};
 
 #endif
