@@ -5,7 +5,7 @@
 #ifdef USE_AVX
 #include <immintrin.h>
 
-namespace register_avx_0 {
+struct register_avx_0 {
 
     static void gemm(
         int M, int N, int K, float alpha, float *A, int lda,
@@ -119,13 +119,13 @@ namespace register_avx_0 {
         }
     }
 
-}
+};
 
-namespace register_avx_1 {
+struct register_avx_1 {
     
-    constexpr int TILE_M = 2;
-    constexpr int TILE_N = 8 * 4;
-    constexpr int TILE_SIZE = TILE_M * TILE_N;
+    static constexpr int TILE_M = 2;
+    static constexpr int TILE_N = 8 * 4;
+    static constexpr int TILE_SIZE = TILE_M * TILE_N;
 
     static void gemm_register(
         int K, float alpha, float *A, int lda, float *B, int ldb,
@@ -244,15 +244,14 @@ namespace register_avx_1 {
             }
         }
     }
+};
 
-}
+struct register_avx_2 {
 
-namespace register_avx_2 {
-
-    constexpr int TILE_M = 2;
-    constexpr int TILE_N = 8 * 4;
-    constexpr int TILE_K = 32;
-    constexpr int TILE_SIZE = TILE_M * TILE_N;
+    static constexpr int TILE_M = 2;
+    static constexpr int TILE_N = 8 * 4;
+    static constexpr int TILE_K = 32;
+    static constexpr int TILE_SIZE = TILE_M * TILE_N;
 
     static void matmul_register(
         float *A, int lda, float *B, int ldb, float *C, int ldc)
@@ -388,6 +387,6 @@ namespace register_avx_2 {
 #endif
     }
 
-}
+};
 
 #endif
