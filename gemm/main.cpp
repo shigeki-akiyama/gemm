@@ -2,6 +2,7 @@
 #include "00naive.h"
 #include "01register.h"
 #include "02cache.h"
+#include "03blis.h"
 #include "util.h"
 #include <vector>
 #include <algorithm>
@@ -123,7 +124,7 @@ static void ref_gemm(
     mkl_gemm(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
 #else
     //naive::gemm(
-    cache_oblivious::gemm(
+    cache_blocking_L3::gemm(
         M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
 #endif
 }
@@ -198,9 +199,9 @@ void transpose_test()
 
 int main(int argc, char *argv[])
 {
-    int size = (argc >= 2) ? atoi(argv[1]) : 64;
+    int size = (argc >= 2) ? atoi(argv[1]) : 96;
 
-    if (size % 32 != 0) {
+    if (0 && size % 32 != 0) {
         std::fprintf(stderr,
             "error: matrix size must be a multiple of 32\n");
         return 1;
@@ -284,6 +285,8 @@ int main(int argc, char *argv[])
     // 2-3. L2-cache blocking implementation with 2-2.
     benchmark("L3 blocking", bp, cache_blocking_L3::gemm);
 #endif
+    // 3-1. BLIS-based implementation
+    benchmark("BLIS_naive", bp, blis_naive::gemm);
 
     _mm_free(A);
     _mm_free(B);

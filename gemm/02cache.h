@@ -9,9 +9,20 @@ namespace cache_oblivious {
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
     {
-        constexpr int TILE_M = register_avx_2::TILE_M;
-        constexpr int TILE_N = register_avx_2::TILE_N;
-        constexpr int TILE_K = register_avx_2::TILE_K;
+#define USE_RAVX2
+#ifdef USE_RAVX2
+        using kernel = register_avx_2;
+#else
+        using kernel = register_avx_3_6x2;
+#endif
+
+        enum : int {
+            TILE_M = kernel::BLOCK_M,
+            TILE_N = kernel::BLOCK_N,
+#ifdef USE_RAVX2
+            TILE_K = kernel::BLOCK_K,
+#endif
+        };
 
         if (M > std::max(N, K) && M >= 2 * TILE_M) {
             int M_half = M / 2 / sizeof(__m256) * sizeof(__m256);
@@ -25,15 +36,18 @@ namespace cache_oblivious {
             auto C_half = C + N_half;
             matmul(M, N_half    , K, A, lda, B     , ldb, C     , ldc);
             matmul(M, N - N_half, K, A, lda, B_half, ldb, C_half, ldc);
+#ifdef USE_RAVX2
         } else if (K >= 2 * TILE_K) {
             int K_half = K / 2 / TILE_K * TILE_K;
             auto A_half = A + K_half;
             auto B_half = B + ldb * K_half;
             matmul(M, N, K_half    , A     , lda, B,      ldb, C, ldc);
             matmul(M, N, K - K_half, A_half, lda, B_half, ldb, C, ldc);
+#endif
         } else {
-            register_avx_2::matmul(M, N, K, A, lda, B, ldb, C, ldc);
+            kernel::matmul(M, N, K, A, lda, B, ldb, C, ldc);
         }
+#undef USE_RAVX2
     }
 
     static void gemm(
@@ -86,6 +100,7 @@ struct blocking_base {
     }
 };
 
+#if 1
 // L1 blocking: (32x64 + 32x32 + 32x64) * 4bytes = 20KB (< 32KB)
 using cache_blocking_L1 = blocking_base<32, 64, 32, register_avx_2>;
 
@@ -94,3 +109,8 @@ using cache_blocking_L2 = blocking_base<64, 128, 128, cache_blocking_L1>;
 
 // L3 blocking: 512KB (< 1MB/core)
 using cache_blocking_L3 = blocking_base<128, 256, 256, cache_blocking_L2>;
+#else
+using cache_blocking_L1 = blocking_base<24, 64, 32, register_avx_3>;
+using cache_blocking_L2 = blocking_base<48, 128, 128, cache_blocking_L1>;
+using cache_blocking_L3 = blocking_base<96, 256, 256, cache_blocking_L2>;
+#endif

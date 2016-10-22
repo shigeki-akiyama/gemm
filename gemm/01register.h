@@ -123,21 +123,22 @@ struct register_avx_0 {
 
 struct register_avx_1 {
     
-    static constexpr int TILE_M = 2;
-    static constexpr int TILE_N = 8 * 4;
-    static constexpr int TILE_SIZE = TILE_M * TILE_N;
+    enum : int {
+        BLOCK_M = 2,
+        BLOCK_N = 8 * 4,
+    };
 
     static void gemm_register(
         int K, float alpha, float *A, int lda, float *B, int ldb,
         float beta, float *C, int ldc, int i, int j)
     {
 #if 0
-        alignas(32) float vab[TILE_M][TILE_N] = {};
+        alignas(32) float vab[BLOCK_M][BLOCK_N] = {};
         for (int k = 0; k < K; k++) {
             auto pa = &A[lda * i + k];
             auto pb = &B[ldb * k + j];
-            for (int ii = 0; ii < TILE_M; ii++) {
-                for (int jj = 0; jj < TILE_N; jj++) {
+            for (int ii = 0; ii < BLOCK_M; ii++) {
+                for (int jj = 0; jj < BLOCK_N; jj++) {
                     vab[ii][jj] += pa[lda * ii] * pb[jj];
                 }
             }
@@ -236,8 +237,8 @@ struct register_avx_1 {
         int M, int N, int K, float alpha, float *A, int lda,
         float *B, int ldb, float beta, float *C, int ldc)
     {
-        for (int i = 0; i < M; i += TILE_M) {
-            for (int j = 0; j < N; j += TILE_N) {
+        for (int i = 0; i < M; i += BLOCK_M) {
+            for (int j = 0; j < N; j += BLOCK_N) {
                 gemm_register(
                     K, alpha, A, lda, B, ldb, beta, C, ldc, i, j);
             }
@@ -247,38 +248,15 @@ struct register_avx_1 {
 
 struct register_avx_2 {
 
-    static constexpr int TILE_M = 2;
-    static constexpr int TILE_N = 8 * 4;
-    static constexpr int TILE_K = 32;
-    static constexpr int TILE_SIZE = TILE_M * TILE_N;
+    enum : int {
+        BLOCK_M = 2,
+        BLOCK_N = 8 * 4,
+        BLOCK_K = 32,
+    };
 
     static void matmul_register(
         float *A, int lda, float *B, int ldb, float *C, int ldc)
     {
-#if 0
-        alignas(32) float vab[TILE_M][TILE_N] = {};
-        for (int k = 0; k < TILE_K; k++) {
-            auto pa = A + k;
-            auto pb = B + ldb * k;
-            for (int ii = 0; ii < TILE_M; ii++) {
-                for (int jj = 0; jj < TILE_N; jj++) {
-                    vab[ii][jj] += pa[lda * ii] * pb[jj];
-                }
-            }
-        }
-
-        // vab0 vab1 vab2 vab3
-        // vab4 vab5 vab6 vab7
-        auto vab0 = _mm256_load_ps(&vab[0][8 * 0]);
-        auto vab1 = _mm256_load_ps(&vab[0][8 * 1]);
-        auto vab2 = _mm256_load_ps(&vab[0][8 * 2]);
-        auto vab3 = _mm256_load_ps(&vab[0][8 * 3]);
-        auto vab4 = _mm256_load_ps(&vab[1][8 * 0]);
-        auto vab5 = _mm256_load_ps(&vab[1][8 * 1]);
-        auto vab6 = _mm256_load_ps(&vab[1][8 * 2]);
-        auto vab7 = _mm256_load_ps(&vab[1][8 * 3]);
-
-#else
         // vab0 vab1 vab2 vab3
         // vab4 vab5 vab6 vab7
         auto vab0 = _mm256_setzero_ps();
@@ -290,7 +268,7 @@ struct register_avx_2 {
         auto vab6 = _mm256_setzero_ps();
         auto vab7 = _mm256_setzero_ps();
 
-        for (int k = 0; k < TILE_K; k++) {
+        for (int k = 0; k < BLOCK_K; k++) {
             auto pa = A + k;
             auto pb = B + ldb * k;
 
@@ -313,7 +291,6 @@ struct register_avx_2 {
 
             vab4 = _mm256_fmadd_ps(va1, vb0, vab4);
         }
-#endif
 
         auto vc0 = _mm256_load_ps(C + ldc * 0 + 8 * 0);
         auto vc1 = _mm256_load_ps(C + ldc * 0 + 8 * 1);
@@ -347,9 +324,9 @@ struct register_avx_2 {
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
     {
-        for (int i = 0; i < M; i += TILE_M) {
-            for (int j = 0; j < N; j += TILE_N) {
-                for (int k = 0; k < K; k += TILE_K) {
+        for (int i = 0; i < M; i += BLOCK_M) {
+            for (int j = 0; j < N; j += BLOCK_N) {
+                for (int k = 0; k < K; k += BLOCK_K) {
                     auto Ar = A + lda * i + k;
                     auto Br = B + ldb * k + j;
                     auto Cr = C + ldc * i + j;
@@ -386,6 +363,254 @@ struct register_avx_2 {
 #endif
     }
 
+};
+
+struct register_avx_3_6x2 {
+
+    enum : int {
+        BLOCK_M = 6,
+        BLOCK_N = 8 * 2,
+    };
+
+    // for 6x16 matrix
+    static void matmul_register(
+        int K, float *A, int lda, float *B, int ldb,
+        float *C, int ldc)
+    {
+        //       b0    b1
+        // a0 vab00 vab01
+        // a1 vab02 vab03
+        // a2 vab04 vab05
+        // a3 vab06 vab07
+        // a4 vab08 vab09
+        // a5 vab10 vab11
+        auto vab00 = _mm256_setzero_ps();
+        auto vab01 = _mm256_setzero_ps();
+        auto vab02 = _mm256_setzero_ps();
+        auto vab03 = _mm256_setzero_ps();
+        auto vab04 = _mm256_setzero_ps();
+        auto vab05 = _mm256_setzero_ps();
+        auto vab06 = _mm256_setzero_ps();
+        auto vab07 = _mm256_setzero_ps();
+        auto vab08 = _mm256_setzero_ps();
+        auto vab09 = _mm256_setzero_ps();
+        auto vab10 = _mm256_setzero_ps();
+        auto vab11 = _mm256_setzero_ps();
+
+        for (int k = 0; k < K; k++) {
+            auto pa = &A[lda * 0 + k];
+            auto pb = &B[ldb * k + 0];
+
+            auto vb0 = _mm256_load_ps(pb + 8 * 0);
+            auto vb1 = _mm256_load_ps(pb + 8 * 1);
+
+            auto va0 = _mm256_broadcast_ss(&pa[lda * 0]);
+            auto va1 = _mm256_broadcast_ss(&pa[lda * 1]);
+            vab00 = _mm256_fmadd_ps(va0, vb0, vab00);
+            vab01 = _mm256_fmadd_ps(va0, vb1, vab01);
+            vab02 = _mm256_fmadd_ps(va1, vb0, vab02);
+            vab03 = _mm256_fmadd_ps(va1, vb1, vab03);
+
+            auto va2 = _mm256_broadcast_ss(&pa[lda * 2]);
+            auto va3 = _mm256_broadcast_ss(&pa[lda * 3]);
+            vab04 = _mm256_fmadd_ps(va2, vb0, vab04);
+            vab05 = _mm256_fmadd_ps(va2, vb1, vab05);
+            vab06 = _mm256_fmadd_ps(va3, vb0, vab06);
+            vab07 = _mm256_fmadd_ps(va3, vb1, vab07);
+
+            auto va4 = _mm256_broadcast_ss(&pa[lda * 4]);
+            auto va5 = _mm256_broadcast_ss(&pa[lda * 5]);
+            vab08 = _mm256_fmadd_ps(va4, vb0, vab08);
+            vab09 = _mm256_fmadd_ps(va4, vb1, vab09);
+            vab10 = _mm256_fmadd_ps(va5, vb0, vab10);
+            vab11 = _mm256_fmadd_ps(va5, vb1, vab11);
+        }
+
+        auto vc00 = _mm256_load_ps(C + ldc * 0 + 8 * 0);
+        auto vc01 = _mm256_load_ps(C + ldc * 0 + 8 * 1);
+        auto vc02 = _mm256_load_ps(C + ldc * 1 + 8 * 0);
+        auto vc03 = _mm256_load_ps(C + ldc * 1 + 8 * 1);
+        auto vc04 = _mm256_load_ps(C + ldc * 2 + 8 * 0);
+        auto vc05 = _mm256_load_ps(C + ldc * 2 + 8 * 1);
+        auto vc06 = _mm256_load_ps(C + ldc * 3 + 8 * 0);
+        auto vc07 = _mm256_load_ps(C + ldc * 3 + 8 * 1);
+        auto vc08 = _mm256_load_ps(C + ldc * 4 + 8 * 0);
+        auto vc09 = _mm256_load_ps(C + ldc * 4 + 8 * 1);
+        auto vc10 = _mm256_load_ps(C + ldc * 5 + 8 * 0);
+        auto vc11 = _mm256_load_ps(C + ldc * 5 + 8 * 1);
+
+        vc00 = _mm256_add_ps(vc00, vab00);
+        vc01 = _mm256_add_ps(vc01, vab01);
+        vc02 = _mm256_add_ps(vc02, vab02);
+        vc03 = _mm256_add_ps(vc03, vab03);
+        vc04 = _mm256_add_ps(vc04, vab04);
+        vc05 = _mm256_add_ps(vc05, vab05);
+        vc06 = _mm256_add_ps(vc06, vab06);
+        vc07 = _mm256_add_ps(vc07, vab07);
+        vc08 = _mm256_add_ps(vc08, vab08);
+        vc09 = _mm256_add_ps(vc09, vab09);
+        vc10 = _mm256_add_ps(vc10, vab10);
+        vc11 = _mm256_add_ps(vc11, vab11);
+
+        _mm256_store_ps(C + ldc * 0 + 8 * 0, vc00);
+        _mm256_store_ps(C + ldc * 0 + 8 * 1, vc01);
+        _mm256_store_ps(C + ldc * 1 + 8 * 0, vc02);
+        _mm256_store_ps(C + ldc * 1 + 8 * 1, vc03);
+        _mm256_store_ps(C + ldc * 2 + 8 * 0, vc04);
+        _mm256_store_ps(C + ldc * 2 + 8 * 1, vc05);
+        _mm256_store_ps(C + ldc * 3 + 8 * 0, vc06);
+        _mm256_store_ps(C + ldc * 3 + 8 * 1, vc07);
+        _mm256_store_ps(C + ldc * 4 + 8 * 0, vc08);
+        _mm256_store_ps(C + ldc * 4 + 8 * 1, vc09);
+        _mm256_store_ps(C + ldc * 5 + 8 * 0, vc10);
+        _mm256_store_ps(C + ldc * 5 + 8 * 1, vc11);
+    }
+
+    static void matmul(
+        int M, int N, int K, float *A, int lda,
+        float *B, int ldb, float *C, int ldc)
+    {
+        for (int i = 0; i < M; i += BLOCK_M) {
+            for (int j = 0; j < N; j += BLOCK_N) {
+                auto Ar = A + lda * i + 0;
+                auto Br = B + ldb * 0 + j;
+                auto Cr = C + ldc * i + j;
+                matmul_register(K, Ar, lda, Br, ldb, Cr, ldc);
+            }
+        }
+    }
+
+    static void gemm(
+        int M, int N, int K, float alpha, float *A, int lda,
+        float *B, int ldb, float beta, float *C, int ldc)
+    {
+        scale_matrix(A, lda, M, K, alpha);
+        scale_matrix(C, ldc, M, N, beta);
+
+        matmul(M, N, K, A, lda, B, ldb, C, ldc);
+    }
+};
+
+struct register_avx_3_4x3 {
+
+    enum : int {
+        BLOCK_M = 4,
+        BLOCK_N = 8 * 3,
+    };
+
+    // for 6x16 matrix
+    static void matmul_register(
+        int K, float *A, int lda, float *B, int ldb,
+        float *C, int ldc)
+    {
+        //       b0    b1    b2
+        // a0 vab00 vab01 vab02
+        // a1 vab03 vab04 vab05
+        // a2 vab06 vab07 vab08
+        // a3 vab09 vab10 vab11
+        auto vab00 = _mm256_setzero_ps();
+        auto vab01 = _mm256_setzero_ps();
+        auto vab02 = _mm256_setzero_ps();
+        auto vab03 = _mm256_setzero_ps();
+        auto vab04 = _mm256_setzero_ps();
+        auto vab05 = _mm256_setzero_ps();
+        auto vab06 = _mm256_setzero_ps();
+        auto vab07 = _mm256_setzero_ps();
+        auto vab08 = _mm256_setzero_ps();
+        auto vab09 = _mm256_setzero_ps();
+        auto vab10 = _mm256_setzero_ps();
+        auto vab11 = _mm256_setzero_ps();
+
+        for (int k = 0; k < K; k++) {
+            auto pa = &A[lda * 0 + k];
+            auto pb = &B[ldb * k + 0];
+
+            auto vb0 = _mm256_load_ps(pb + 8 * 0);
+            auto vb1 = _mm256_load_ps(pb + 8 * 1);
+            auto vb2 = _mm256_load_ps(pb + 8 * 2);
+
+            auto va0 = _mm256_broadcast_ss(&pa[lda * 0]);
+            auto va1 = _mm256_broadcast_ss(&pa[lda * 1]);
+            vab00 = _mm256_fmadd_ps(va0, vb0, vab00);
+            vab01 = _mm256_fmadd_ps(va0, vb1, vab01);
+            vab02 = _mm256_fmadd_ps(va0, vb2, vab02);
+            vab03 = _mm256_fmadd_ps(va1, vb0, vab03);
+            vab04 = _mm256_fmadd_ps(va1, vb1, vab04);
+            vab05 = _mm256_fmadd_ps(va1, vb2, vab05);
+
+            auto va2 = _mm256_broadcast_ss(&pa[lda * 2]);
+            auto va3 = _mm256_broadcast_ss(&pa[lda * 3]);
+            vab06 = _mm256_fmadd_ps(va2, vb0, vab06);
+            vab07 = _mm256_fmadd_ps(va2, vb1, vab07);
+            vab08 = _mm256_fmadd_ps(va2, vb2, vab08);
+            vab09 = _mm256_fmadd_ps(va3, vb0, vab09);
+            vab10 = _mm256_fmadd_ps(va3, vb1, vab10);
+            vab11 = _mm256_fmadd_ps(va3, vb2, vab11);
+        }
+
+        auto vc00 = _mm256_load_ps(C + ldc * 0 + 8 * 0);
+        auto vc01 = _mm256_load_ps(C + ldc * 0 + 8 * 1);
+        auto vc02 = _mm256_load_ps(C + ldc * 0 + 8 * 2);
+        auto vc03 = _mm256_load_ps(C + ldc * 1 + 8 * 0);
+        auto vc04 = _mm256_load_ps(C + ldc * 1 + 8 * 1);
+        auto vc05 = _mm256_load_ps(C + ldc * 1 + 8 * 2);
+        auto vc06 = _mm256_load_ps(C + ldc * 2 + 8 * 0);
+        auto vc07 = _mm256_load_ps(C + ldc * 2 + 8 * 1);
+        auto vc08 = _mm256_load_ps(C + ldc * 2 + 8 * 2);
+        auto vc09 = _mm256_load_ps(C + ldc * 3 + 8 * 0);
+        auto vc10 = _mm256_load_ps(C + ldc * 3 + 8 * 1);
+        auto vc11 = _mm256_load_ps(C + ldc * 3 + 8 * 2);
+
+        vc00 = _mm256_add_ps(vc00, vab00);
+        vc01 = _mm256_add_ps(vc01, vab01);
+        vc02 = _mm256_add_ps(vc02, vab02);
+        vc03 = _mm256_add_ps(vc03, vab03);
+        vc04 = _mm256_add_ps(vc04, vab04);
+        vc05 = _mm256_add_ps(vc05, vab05);
+        vc06 = _mm256_add_ps(vc06, vab06);
+        vc07 = _mm256_add_ps(vc07, vab07);
+        vc08 = _mm256_add_ps(vc08, vab08);
+        vc09 = _mm256_add_ps(vc09, vab09);
+        vc10 = _mm256_add_ps(vc10, vab10);
+        vc11 = _mm256_add_ps(vc11, vab11);
+
+        _mm256_store_ps(C + ldc * 0 + 8 * 0, vc00);
+        _mm256_store_ps(C + ldc * 0 + 8 * 1, vc01);
+        _mm256_store_ps(C + ldc * 0 + 8 * 2, vc02);
+        _mm256_store_ps(C + ldc * 1 + 8 * 0, vc03);
+        _mm256_store_ps(C + ldc * 1 + 8 * 1, vc04);
+        _mm256_store_ps(C + ldc * 1 + 8 * 2, vc05);
+        _mm256_store_ps(C + ldc * 2 + 8 * 0, vc06);
+        _mm256_store_ps(C + ldc * 2 + 8 * 1, vc07);
+        _mm256_store_ps(C + ldc * 2 + 8 * 2, vc08);
+        _mm256_store_ps(C + ldc * 3 + 8 * 0, vc09);
+        _mm256_store_ps(C + ldc * 3 + 8 * 1, vc10);
+        _mm256_store_ps(C + ldc * 3 + 8 * 2, vc11);
+    }
+
+    static void matmul(
+        int M, int N, int K, float *A, int lda,
+        float *B, int ldb, float *C, int ldc)
+    {
+        for (int i = 0; i < M; i += BLOCK_M) {
+            for (int j = 0; j < N; j += BLOCK_N) {
+                auto Ar = A + lda * i + 0;
+                auto Br = B + ldb * 0 + j;
+                auto Cr = C + ldc * i + j;
+                matmul_register(K, Ar, lda, Br, ldb, Cr, ldc);
+            }
+        }
+    }
+
+    static void gemm(
+        int M, int N, int K, float alpha, float *A, int lda,
+        float *B, int ldb, float beta, float *C, int ldc)
+    {
+        scale_matrix(A, lda, M, K, alpha);
+        scale_matrix(C, ldc, M, N, beta);
+
+        matmul(M, N, K, A, lda, B, ldb, C, ldc);
+    }
 };
 
 #endif
