@@ -286,7 +286,10 @@ int main(int argc, char *argv[])
     benchmark("L3 blocking", bp, cache_blocking_L3::gemm);
 #endif
     // 3-1. BLIS-based implementation
-    benchmark("BLIS_naive", bp, blis_naive::gemm);
+    benchmark("BLIS_naive", bp, blis<false>::gemm);
+
+    // 3-2. BLIS-based implementation w/ copy optimization
+    benchmark("BLIS_pack", bp, blis<true>::gemm);
 
     _mm_free(A);
     _mm_free(B);
