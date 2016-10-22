@@ -50,23 +50,26 @@ namespace cache_oblivious {
 
 template <int BLOCK_M_, int BLOCK_N_, int BLOCK_K_, class MM>
 struct blocking_base {
-    static constexpr int BLOCK_M = BLOCK_M_;
-    static constexpr int BLOCK_N = BLOCK_N_;
-    static constexpr int BLOCK_K = BLOCK_K_;
+    enum : int {
+        BLOCK_M = BLOCK_M_,
+        BLOCK_N = BLOCK_N_,
+        BLOCK_K = BLOCK_K_,
+    };
 
     static void matmul(
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
     {
-        for (int i = 0; i < M; i += BLOCK_M) {
-            for (int j = 0; j < N; j += BLOCK_N) {
-                for (int k = 0; k < K; k += BLOCK_K) {
+        for (int i = 0; i < M - 1; i += BLOCK_M) {
+            for (int j = 0; j < N - 1; j += BLOCK_N) {
+                for (int k = 0; k < K - 1; k += BLOCK_K) {
                     auto Ab = A + lda * i + k;
                     auto Bb = B + ldb * k + j;
                     auto Cb = C + ldc * i + j;
-                    MM::matmul(
-                        BLOCK_M, BLOCK_N, BLOCK_K, 
-                        Ab, lda, Bb, ldb, Cb, ldc);
+                    auto Mr = std::min<int>(M - i, BLOCK_M);
+                    auto Nr = std::min<int>(N - j, BLOCK_N);
+                    auto Kr = std::min<int>(K - k, BLOCK_K);
+                    MM::matmul(Mr, Nr, Kr, Ab, lda, Bb, ldb, Cb, ldc);
                 }
             }
         }
