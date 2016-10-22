@@ -251,23 +251,27 @@ int main(int argc, char *argv[])
     benchmark("MKL", bp, mkl_gemm<elem_type>);
 #endif
 
-    // 0-0. Naive implementation
-    benchmark("naive", bp, naive::gemm<elem_type>);
+    if (size <= 512) {
+        // 0-0. Naive implementation
+        benchmark("naive", bp, naive::gemm<elem_type>);
+    }
 
 #ifdef USE_AVX
-#if 1
-    // 0-1. Naive AVX implementation
-    benchmark("naive_avx", bp, naive_avx::gemm);
 
-    // 1-0. Register blocking (but spilled) AVX implementation
-    benchmark("register_avx_0", bp, register_avx_0::gemm);
+    if (size <= 768) {
+        // 0-1. Naive AVX implementation
+        benchmark("naive_avx", bp, naive_avx::gemm);
 
-    // 1-1. Register blocking AVX implementation
-    benchmark("register_avx_1", bp, register_avx_1::gemm);
+        // 1-0. Register blocking (but spilled) AVX implementation
+        benchmark("register_avx_0", bp, register_avx_0::gemm);
 
-    // 1-2. Register blocking AVX implementation (blocking with K)
-    benchmark("register_avx_2", bp, register_avx_2::gemm);
-#endif
+        // 1-1. Register blocking AVX implementation
+        benchmark("register_avx_1", bp, register_avx_1::gemm);
+
+        // 1-2. Register blocking AVX implementation (blocking with K)
+        benchmark("register_avx_2", bp, register_avx_2::gemm);
+    }
+
     // 2-1. cache-oblivious implementation with 1-2.
     benchmark("cache_oblivious", bp, cache_oblivious::gemm);
 
