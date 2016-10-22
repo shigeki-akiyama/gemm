@@ -30,13 +30,13 @@ struct bench_params {
 };
 
 template <class T>
-static bool verify_results(T *C, T *result_C, int M, int N)
+static bool verify_results(T *C, T *result_C, int ldc, int M, int N)
 {
     size_t err_count = 0;
     for (auto i = 0; i < M; i++) {
         for (auto j = 0; j < N; j++) {
-            T c0 = C[M * i + j];
-            T c1 = result_C[M * i + j];
+            T c0 = C[ldc * i + j];
+            T c1 = result_C[ldc * i + j];
 
             if (c0 != c1) {
                 std::printf(
@@ -63,7 +63,7 @@ static void benchmark(
     int M = bp.M, N = bp.N, K = bp.K;
 
     auto preprocess = [&] {
-        std::fill_n(bp.C, M * N, elem_type(0.0));
+        std::fill_n(bp.C, M * bp.ldc, elem_type(0.0));
     };
 
     auto r = measure_ntimes(n_times, [&] {
@@ -83,7 +83,7 @@ static void benchmark(
     std::fflush(stdout);
 
     if (verify) {
-        verify_results(bp.C, bp.result_C, M, N);
+        verify_results(bp.C, bp.result_C, bp.ldc, M, N);
     }
 }
 
@@ -219,19 +219,21 @@ int main(int argc, char *argv[])
     // add 64byte-padding
     int lda = K + PAD;
     int ldb = N + PAD;
-    int ldc = K + PAD;
+    int ldc = N + PAD;
 #endif
     auto alpha = elem_type(1.0); // elem_type(4.0);
     auto beta = elem_type(1.0); // elem_type(0.25);
 
     int align = sizeof(__m256);
-    elem_type *A = (elem_type *)_mm_malloc(sizeof(float) * lda * K, align);
-    elem_type *B = (elem_type *)_mm_malloc(sizeof(float) * ldb * N, align);
-    elem_type *C = (elem_type *)_mm_malloc(sizeof(float) * ldc * N, align);
-    elem_type *result_C = (elem_type *)_mm_malloc(sizeof(float) * M * N, align);
+    auto *A = (elem_type *)_mm_malloc(sizeof(elem_type) * M * lda, align);
+    auto *B = (elem_type *)_mm_malloc(sizeof(elem_type) * K * ldb, align);
+    auto *C = (elem_type *)_mm_malloc(sizeof(elem_type) * M * ldc, align);
+    auto *result_C = (elem_type *)_mm_malloc(sizeof(float) * M * ldc, align);
 
-    std::fill_n(A, M * K, elem_type(2.0));
-    std::fill_n(B, K * N, elem_type(0.5));
+    std::fill_n(A, M * lda, elem_type(2.0));
+    std::fill_n(B, K * ldb, elem_type(0.5));
+    std::fill_n(C, M * ldc, elem_type(0.0));
+    std::fill_n(result_C, M * ldc, elem_type(0.0));
 
     bench_params<elem_type> bp = {
         M, N, K, alpha, A, lda, B, ldb, beta, 
@@ -239,8 +241,7 @@ int main(int argc, char *argv[])
     };
 
     // make result_C
-    ref_gemm(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
-    std::copy_n(C, M * N, result_C);
+    ref_gemm(M, N, K, alpha, A, lda, B, ldb, beta, result_C, ldc);
 
 #ifdef USE_MKL
     // MKL warmup
@@ -251,10 +252,10 @@ int main(int argc, char *argv[])
 #endif
 
     // 0-0. Naive implementation
-    //benchmark("naive", bp, naive::gemm<elem_type>);
+    benchmark("naive", bp, naive::gemm<elem_type>);
 
 #ifdef USE_AVX
-#if 0
+#if 1
     // 0-1. Naive AVX implementation
     benchmark("naive_avx", bp, naive_avx::gemm);
 
