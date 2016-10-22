@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
     int ldb = N;
     int ldc = K;
 #else
-    constexpr int PAD = 64 / sizeof(elem_type);
+    constexpr int PAD = 0; // 64 / sizeof(elem_type);
 
     // add 64byte-padding
     int lda = K + PAD;
