@@ -72,7 +72,7 @@ static void benchmark(
             bp.B, bp.ldb, bp.beta, bp.C, bp.ldc);
     }, preprocess);
 
-    auto flop = 3.0 * M * N * K + 2.0 * M * N;
+    auto flop = 2.0 * M * N * K + 3.0 * M * N;
 #if 1
     auto gflops = flop / (1.0 * 1024 * 1024 * 1024 * r.min_time);
 #else
