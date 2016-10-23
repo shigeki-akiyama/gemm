@@ -102,15 +102,15 @@ struct blocking_base {
 
 #if 1
 // L1 blocking: (32x64 + 32x32 + 32x64) * 4bytes = 20KB (< 32KB)
-using cache_blocking_L1 = blocking_base<32, 64, 32, register_avx_2>;
+struct cache_blocking_L1 : blocking_base<32, 64, 32, register_avx_2> {};
 
 // L2 blocking: 128KB (< 256KB)
-using cache_blocking_L2 = blocking_base<64, 128, 128, cache_blocking_L1>;
+struct cache_blocking_L2 : blocking_base<64, 128, 128, cache_blocking_L1> {};
 
 // L3 blocking: 512KB (< 1MB/core)
-using cache_blocking_L3 = blocking_base<128, 256, 256, cache_blocking_L2>;
+struct cache_blocking_L3 : blocking_base<128, 256, 256, cache_blocking_L2> {};
 #else
-using cache_blocking_L1 = blocking_base<24, 64, 32, register_avx_3>;
-using cache_blocking_L2 = blocking_base<48, 128, 128, cache_blocking_L1>;
-using cache_blocking_L3 = blocking_base<96, 256, 256, cache_blocking_L2>;
+struct cache_blocking_L1 : blocking_base<24, 64, 32, register_avx_3_6x2> {};
+struct cache_blocking_L2 : blocking_base<48, 128, 128, cache_blocking_L1> {};
+struct cache_blocking_L3 : blocking_base<96, 256, 256, cache_blocking_L2> {};
 #endif
