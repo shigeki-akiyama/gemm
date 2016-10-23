@@ -429,7 +429,7 @@ struct register_avx_3_6x2 {
                 auto Ar = A + lda * i + 0;
                 auto Br = B + ldb * 0 + j;
                 auto Cr = C + ldc * i + j;
-                matmul_register<false>(
+                matmul_register(
                     BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
             }
         }
