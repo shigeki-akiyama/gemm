@@ -9,8 +9,14 @@
 #include <cstdlib>
 #include <cstdio>
 
-#ifdef USE_MKL
-#include <mkl_blas.h>
+#if defined(USE_MKL)
+#include <mkl_cblas.h>
+#define USE_CBLAS
+#define CBLAS_IMPL "MKL"
+#elif defined(USE_BLIS)
+#include <blis/cblas.h>
+#define USE_CBLAS
+#define CBLAS_IMPL "BLIS"
 #endif
 
 using elem_type = float;
@@ -28,6 +34,8 @@ struct bench_params {
     T *C;
     int ldc;
     T *result_C;
+    elem_type *buf;
+    int buf_size;
 };
 
 template <class T>
@@ -55,6 +63,13 @@ static bool verify_results(T *C, T *result_C, int ldc, int M, int N)
     return err_count == 0;
 }
 
+static void flush_all_cachelines(elem_type *buf, int buf_size)
+{
+    for (int i = 0; i < buf_size; i++) {
+        buf[i] += 0.1;
+    }
+}
+
 template <class T, class F>
 static void benchmark(
     const char *name, bench_params<T>& bp, F f, 
@@ -65,6 +80,7 @@ static void benchmark(
 
     auto preprocess = [&] {
         std::fill_n(bp.C, M * bp.ldc, elem_type(0.0));
+        flush_all_cachelines(bp.buf, bp.buf_size);
     };
 
     auto r = measure_ntimes(n_times, [&] {
@@ -88,30 +104,30 @@ static void benchmark(
     }
 }
 
-#ifdef USE_MKL
+#ifdef USE_CBLAS
 template <class T>
-void mkl_gemm(
+void cblas_gemm(
     int M, int N, int K, T alpha, T *A, int lda,
     T *B, int ldb, T beta, T *C, int ldc);
 
 template <>
-void mkl_gemm<float>(
+void cblas_gemm<float>(
     int M, int N, int K, float alpha, float *A, int lda,
     float *B, int ldb, float beta, float *C, int ldc)
 {
-    sgemm(
-        "N", "N", &M, &N, &K, &alpha, A, &lda, B, &ldb, &beta,
-        C, &ldc);
+    cblas_sgemm(
+        CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K,
+        alpha, A, lda, B, ldb, beta, C, ldc);
 }
 
 template <>
-void mkl_gemm<double>(
+void cblas_gemm<double>(
     int M, int N, int K, double alpha, double *A, int lda,
     double *B, int ldb, double beta, double *C, int ldc)
 {
-    dgemm(
-        "N", "N", &M, &N, &K, &alpha, A, &lda, B, &ldb, &beta,
-        C, &ldc);
+    cblas_dgemm(
+        CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K,
+        alpha, A, lda, B, ldb, beta, C, ldc);
 }
 #endif
 
@@ -120,8 +136,8 @@ static void ref_gemm(
     int M, int N, int K, T alpha, T *A, int lda,
     T *B, int ldb, T beta, T *C, int ldc)
 {
-#ifdef USE_MKL
-    mkl_gemm(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+#ifdef USE_CBLAS
+    cblas_gemm(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
 #else
     //naive::gemm(
     cache_blocking_L3::gemm(
@@ -231,6 +247,10 @@ int main(int argc, char *argv[])
     auto *C = (elem_type *)_mm_malloc(sizeof(elem_type) * M * ldc, align);
     auto *result_C = (elem_type *)_mm_malloc(sizeof(float) * M * ldc, align);
 
+    auto buf_size = 16 * 1024 * 1024;
+    auto *buf = (elem_type *)_mm_malloc(sizeof(elem_type) * buf_size, align);
+    std::fill_n(buf, buf_size, 0.1f);
+
     std::fill_n(A, M * lda, elem_type(2.0));
     std::fill_n(B, K * ldb, elem_type(0.5));
     std::fill_n(C, M * ldc, elem_type(0.0));
@@ -238,18 +258,18 @@ int main(int argc, char *argv[])
 
     bench_params<elem_type> bp = {
         M, N, K, alpha, A, lda, B, ldb, beta, 
-        C, ldc, result_C,
+        C, ldc, result_C, buf, buf_size,
     };
 
     // make result_C
     ref_gemm(M, N, K, alpha, A, lda, B, ldb, beta, result_C, ldc);
 
-#ifdef USE_MKL
+#ifdef USE_CBLAS
     // MKL warmup
-    mkl_gemm(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+    cblas_gemm(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
 
     // MKL
-    benchmark("MKL", bp, mkl_gemm<elem_type>);
+    benchmark(CBLAS_IMPL, bp, cblas_gemm<elem_type>);
 #endif
 
 #if 1
