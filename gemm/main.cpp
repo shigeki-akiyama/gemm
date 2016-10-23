@@ -252,13 +252,15 @@ int main(int argc, char *argv[])
     benchmark("MKL", bp, mkl_gemm<elem_type>);
 #endif
 
+#if 1
     if (size <= 512) {
         // 0-0. Naive implementation
         benchmark("naive", bp, naive::gemm<elem_type>);
     }
+#endif
 
 #ifdef USE_AVX
-
+#if 1
     if (size <= 768) {
         // 0-1. Naive AVX implementation
         benchmark("naive_avx", bp, naive_avx::gemm);
@@ -281,15 +283,21 @@ int main(int argc, char *argv[])
 
     // 2-3. L2-cache blocking implementation with 2-2.
     benchmark("L2 blocking", bp, cache_blocking_L2::gemm);
-
+#endif
     // 2-3. L2-cache blocking implementation with 2-2.
     benchmark("L3 blocking", bp, cache_blocking_L3::gemm);
 #endif
     // 3-1. BLIS-based implementation
-    benchmark("BLIS_naive", bp, blis<false>::gemm);
+    benchmark("BLIS_naive", bp, blis<blis_opt::naive>::gemm);
 
-    // 3-2. BLIS-based implementation w/ copy optimization
-    benchmark("BLIS_pack", bp, blis<true>::gemm);
+    // 3-2. BLIS-based implementation w/ copy optimization on L1
+    benchmark("BLIS_packL1", bp, blis<blis_opt::packL1>::gemm);
+
+    // 3-3. BLIS-based implementation w/ copy optimization on L1/L2
+    benchmark("BLIS_packL2", bp, blis<blis_opt::packL2>::gemm);
+
+    // 3-3. BLIS-based implementation w/ copy optimization on L1/L2
+    benchmark("BLIS_packL3", bp, blis<blis_opt::packL3>::gemm);
 
     _mm_free(A);
     _mm_free(B);

@@ -2,6 +2,9 @@
 
 #include "util.h"
 
+#include <cassert>
+#undef NODEBUG
+
 #ifdef USE_AVX
 #include <immintrin.h>
 
@@ -16,32 +19,6 @@ struct register_avx_0 {
 
         for (int i = 0; i < M; i += 8) {
             for (int j = 0; j < N; j += 8) {
-#if 0
-                alignas(32) float vab[64] = { 0.0f };
-                for (int k = 0; k < K; k += 8) {
-                    auto pa = &A[lda * i + k];
-                    auto pb = &B[ldb * k + j];
-                    for (int ii = 0; ii < 8; ii++) {
-                        for (int jj = 0; jj < 8; jj++) {
-                            float c = 0.0f;
-                            for (int kk = 0; kk < 8; kk++) {
-                                c += pa[lda * ii + kk] * pb[ldb * kk + jj];
-                            }
-                            vab[8 * ii + jj] += c;
-                        }
-                    }
-                }
-
-                auto vab0 = _mm256_load_ps(vab + 8 * 0);
-                auto vab1 = _mm256_load_ps(vab + 8 * 1);
-                auto vab2 = _mm256_load_ps(vab + 8 * 2);
-                auto vab3 = _mm256_load_ps(vab + 8 * 3);
-                auto vab4 = _mm256_load_ps(vab + 8 * 4);
-                auto vab5 = _mm256_load_ps(vab + 8 * 5);
-                auto vab6 = _mm256_load_ps(vab + 8 * 6);
-                auto vab7 = _mm256_load_ps(vab + 8 * 7);
-
-#else
                 auto vab0 = _mm256_setzero_ps();
                 auto vab1 = _mm256_setzero_ps();
                 auto vab2 = _mm256_setzero_ps();
@@ -77,7 +54,6 @@ struct register_avx_0 {
                         }
                     }
                 }
-#endif
 
                 auto pc = &C[ldc * i + j];
                 auto vc0 = _mm256_load_ps(pc + ldc * 0);
@@ -129,33 +105,12 @@ struct register_avx_1 {
     };
 
     static void gemm_register(
-        int K, float alpha, float *A, int lda, float *B, int ldb,
+        int M, int N, int K, float alpha, float *A, int lda, float *B, int ldb,
         float beta, float *C, int ldc, int i, int j)
     {
-#if 0
-        alignas(32) float vab[BLOCK_M][BLOCK_N] = {};
-        for (int k = 0; k < K; k++) {
-            auto pa = &A[lda * i + k];
-            auto pb = &B[ldb * k + j];
-            for (int ii = 0; ii < BLOCK_M; ii++) {
-                for (int jj = 0; jj < BLOCK_N; jj++) {
-                    vab[ii][jj] += pa[lda * ii] * pb[jj];
-                }
-            }
-        }
-        
-        // vab0 vab1 vab2 vab3
-        // vab4 vab5 vab6 vab7
-        auto vab0 = _mm256_load_ps(&vab[0][8 * 0]);
-        auto vab1 = _mm256_load_ps(&vab[0][8 * 1]);
-        auto vab2 = _mm256_load_ps(&vab[0][8 * 2]);
-        auto vab3 = _mm256_load_ps(&vab[0][8 * 3]);
-        auto vab4 = _mm256_load_ps(&vab[1][8 * 0]);
-        auto vab5 = _mm256_load_ps(&vab[1][8 * 1]);
-        auto vab6 = _mm256_load_ps(&vab[1][8 * 2]);
-        auto vab7 = _mm256_load_ps(&vab[1][8 * 3]);
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
 
-#else
         // vab0 vab1 vab2 vab3
         // vab4 vab5 vab6 vab7
         auto vab0 = _mm256_setzero_ps();
@@ -171,10 +126,10 @@ struct register_avx_1 {
             auto pa = &A[lda * i + k];
             auto pb = &B[ldb * k + j];
 
-            auto vb0 = _mm256_load_ps(pb + 8 * 0);
-            auto vb1 = _mm256_load_ps(pb + 8 * 1);
-            auto vb2 = _mm256_load_ps(pb + 8 * 2);
-            auto vb3 = _mm256_load_ps(pb + 8 * 3);
+            auto vb0 = _mm256_loadu_ps(pb + 8 * 0);
+            auto vb1 = _mm256_loadu_ps(pb + 8 * 1);
+            auto vb2 = _mm256_loadu_ps(pb + 8 * 2);
+            auto vb3 = _mm256_loadu_ps(pb + 8 * 3);
 
             auto va0 = _mm256_broadcast_ss(&pa[lda * 0]);
             auto va1 = _mm256_broadcast_ss(&pa[lda * 1]);
@@ -189,17 +144,16 @@ struct register_avx_1 {
             vab6 = _mm256_fmadd_ps(va1, vb2, vab6);
             vab7 = _mm256_fmadd_ps(va1, vb3, vab7);
         }
-#endif
 
         auto pc = &C[ldc * i + j];
-        auto vc0 = _mm256_load_ps(pc + ldc * 0 + 8 * 0);
-        auto vc1 = _mm256_load_ps(pc + ldc * 0 + 8 * 1);
-        auto vc2 = _mm256_load_ps(pc + ldc * 0 + 8 * 2);
-        auto vc3 = _mm256_load_ps(pc + ldc * 0 + 8 * 3);
-        auto vc4 = _mm256_load_ps(pc + ldc * 1 + 8 * 0);
-        auto vc5 = _mm256_load_ps(pc + ldc * 1 + 8 * 1);
-        auto vc6 = _mm256_load_ps(pc + ldc * 1 + 8 * 2);
-        auto vc7 = _mm256_load_ps(pc + ldc * 1 + 8 * 3);
+        auto vc0 = _mm256_loadu_ps(pc + ldc * 0 + 8 * 0);
+        auto vc1 = _mm256_loadu_ps(pc + ldc * 0 + 8 * 1);
+        auto vc2 = _mm256_loadu_ps(pc + ldc * 0 + 8 * 2);
+        auto vc3 = _mm256_loadu_ps(pc + ldc * 0 + 8 * 3);
+        auto vc4 = _mm256_loadu_ps(pc + ldc * 1 + 8 * 0);
+        auto vc5 = _mm256_loadu_ps(pc + ldc * 1 + 8 * 1);
+        auto vc6 = _mm256_loadu_ps(pc + ldc * 1 + 8 * 2);
+        auto vc7 = _mm256_loadu_ps(pc + ldc * 1 + 8 * 3);
 
         auto valpha = _mm256_set1_ps(alpha);
         auto vbeta = _mm256_set1_ps(beta);
@@ -222,25 +176,27 @@ struct register_avx_1 {
         vc6 = _mm256_fmadd_ps(vbeta, vc6, vab6);
         vc7 = _mm256_fmadd_ps(vbeta, vc7, vab7);
 
-        _mm256_store_ps(pc + ldc * 0 + 8 * 0, vc0);
-        _mm256_store_ps(pc + ldc * 0 + 8 * 1, vc1);
-        _mm256_store_ps(pc + ldc * 0 + 8 * 2, vc2);
-        _mm256_store_ps(pc + ldc * 0 + 8 * 3, vc3);
-        _mm256_store_ps(pc + ldc * 1 + 8 * 0, vc4);
-        _mm256_store_ps(pc + ldc * 1 + 8 * 1, vc5);
-        _mm256_store_ps(pc + ldc * 1 + 8 * 2, vc6);
-        _mm256_store_ps(pc + ldc * 1 + 8 * 3, vc7);
-
+        _mm256_storeu_ps(pc + ldc * 0 + 8 * 0, vc0);
+        _mm256_storeu_ps(pc + ldc * 0 + 8 * 1, vc1);
+        _mm256_storeu_ps(pc + ldc * 0 + 8 * 2, vc2);
+        _mm256_storeu_ps(pc + ldc * 0 + 8 * 3, vc3);
+        _mm256_storeu_ps(pc + ldc * 1 + 8 * 0, vc4);
+        _mm256_storeu_ps(pc + ldc * 1 + 8 * 1, vc5);
+        _mm256_storeu_ps(pc + ldc * 1 + 8 * 2, vc6);
+        _mm256_storeu_ps(pc + ldc * 1 + 8 * 3, vc7);
     }
 
     static void gemm(
         int M, int N, int K, float alpha, float *A, int lda,
         float *B, int ldb, float beta, float *C, int ldc)
     {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+
         for (int i = 0; i < M; i += BLOCK_M) {
             for (int j = 0; j < N; j += BLOCK_N) {
                 gemm_register(
-                    K, alpha, A, lda, B, ldb, beta, C, ldc, i, j);
+                    BLOCK_M, BLOCK_N, K, alpha, A, lda, B, ldb, beta, C, ldc, i, j);
             }
         }
     }
@@ -255,8 +211,12 @@ struct register_avx_2 {
     };
 
     static void matmul_register(
-        float *A, int lda, float *B, int ldb, float *C, int ldc)
+        int M, int N, int K, float *A, int lda, float *B, int ldb, float *C, int ldc)
     {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+        assert(K % BLOCK_K == 0);
+
         // vab0 vab1 vab2 vab3
         // vab4 vab5 vab6 vab7
         auto vab0 = _mm256_setzero_ps();
@@ -272,34 +232,34 @@ struct register_avx_2 {
             auto pa = A + k;
             auto pb = B + ldb * k;
 
-            auto vb0 = _mm256_load_ps(pb + 8 * 0);
+            auto vb0 = _mm256_loadu_ps(pb + 8 * 0);
             auto va0 = _mm256_broadcast_ss(&pa[lda * 0]);
             vab0 = _mm256_fmadd_ps(va0, vb0, vab0);
 
             auto va1 = _mm256_broadcast_ss(&pa[lda * 1]);
-            auto vb1 = _mm256_load_ps(pb + 8 * 1);
+            auto vb1 = _mm256_loadu_ps(pb + 8 * 1);
             vab1 = _mm256_fmadd_ps(va0, vb1, vab1);
             vab5 = _mm256_fmadd_ps(va1, vb1, vab5);
             
-            auto vb2 = _mm256_load_ps(pb + 8 * 2);
+            auto vb2 = _mm256_loadu_ps(pb + 8 * 2);
             vab2 = _mm256_fmadd_ps(va0, vb2, vab2);
             vab6 = _mm256_fmadd_ps(va1, vb2, vab6);
 
-            auto vb3 = _mm256_load_ps(pb + 8 * 3);
+            auto vb3 = _mm256_loadu_ps(pb + 8 * 3);
             vab3 = _mm256_fmadd_ps(va0, vb3, vab3);
             vab7 = _mm256_fmadd_ps(va1, vb3, vab7);
 
             vab4 = _mm256_fmadd_ps(va1, vb0, vab4);
         }
 
-        auto vc0 = _mm256_load_ps(C + ldc * 0 + 8 * 0);
-        auto vc1 = _mm256_load_ps(C + ldc * 0 + 8 * 1);
-        auto vc2 = _mm256_load_ps(C + ldc * 0 + 8 * 2);
-        auto vc3 = _mm256_load_ps(C + ldc * 0 + 8 * 3);
-        auto vc4 = _mm256_load_ps(C + ldc * 1 + 8 * 0);
-        auto vc5 = _mm256_load_ps(C + ldc * 1 + 8 * 1);
-        auto vc6 = _mm256_load_ps(C + ldc * 1 + 8 * 2);
-        auto vc7 = _mm256_load_ps(C + ldc * 1 + 8 * 3);
+        auto vc0 = _mm256_loadu_ps(C + ldc * 0 + 8 * 0);
+        auto vc1 = _mm256_loadu_ps(C + ldc * 0 + 8 * 1);
+        auto vc2 = _mm256_loadu_ps(C + ldc * 0 + 8 * 2);
+        auto vc3 = _mm256_loadu_ps(C + ldc * 0 + 8 * 3);
+        auto vc4 = _mm256_loadu_ps(C + ldc * 1 + 8 * 0);
+        auto vc5 = _mm256_loadu_ps(C + ldc * 1 + 8 * 1);
+        auto vc6 = _mm256_loadu_ps(C + ldc * 1 + 8 * 2);
+        auto vc7 = _mm256_loadu_ps(C + ldc * 1 + 8 * 3);
 
         vc0 = _mm256_add_ps(vab0, vc0);
         vc1 = _mm256_add_ps(vab1, vc1);
@@ -310,27 +270,32 @@ struct register_avx_2 {
         vc6 = _mm256_add_ps(vab6, vc6);
         vc7 = _mm256_add_ps(vab7, vc7);
         
-        _mm256_store_ps(C + ldc * 0 + 8 * 0, vc0);
-        _mm256_store_ps(C + ldc * 0 + 8 * 1, vc1);
-        _mm256_store_ps(C + ldc * 0 + 8 * 2, vc2);
-        _mm256_store_ps(C + ldc * 0 + 8 * 3, vc3);
-        _mm256_store_ps(C + ldc * 1 + 8 * 0, vc4);
-        _mm256_store_ps(C + ldc * 1 + 8 * 1, vc5);
-        _mm256_store_ps(C + ldc * 1 + 8 * 2, vc6);
-        _mm256_store_ps(C + ldc * 1 + 8 * 3, vc7);
+        _mm256_storeu_ps(C + ldc * 0 + 8 * 0, vc0);
+        _mm256_storeu_ps(C + ldc * 0 + 8 * 1, vc1);
+        _mm256_storeu_ps(C + ldc * 0 + 8 * 2, vc2);
+        _mm256_storeu_ps(C + ldc * 0 + 8 * 3, vc3);
+        _mm256_storeu_ps(C + ldc * 1 + 8 * 0, vc4);
+        _mm256_storeu_ps(C + ldc * 1 + 8 * 1, vc5);
+        _mm256_storeu_ps(C + ldc * 1 + 8 * 2, vc6);
+        _mm256_storeu_ps(C + ldc * 1 + 8 * 3, vc7);
     }
 
     static void matmul(
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
     {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+        assert(K % BLOCK_K == 0);
+
         for (int i = 0; i < M; i += BLOCK_M) {
             for (int j = 0; j < N; j += BLOCK_N) {
                 for (int k = 0; k < K; k += BLOCK_K) {
                     auto Ar = A + lda * i + k;
                     auto Br = B + ldb * k + j;
                     auto Cr = C + ldc * i + j;
-                    matmul_register(Ar, lda, Br, ldb, Cr, ldc);
+                    matmul_register(
+                        BLOCK_M, BLOCK_N, BLOCK_K, Ar, lda, Br, ldb, Cr, ldc);
                 }
             }
         }
@@ -340,27 +305,10 @@ struct register_avx_2 {
         int M, int N, int K, float alpha, float *A, int lda,
         float *B, int ldb, float beta, float *C, int ldc)
     {
-#if 1
         scale_matrix(A, lda, M, K, alpha);
         scale_matrix(C, ldc, M, N, beta);
         
         matmul(M, N, K, A, lda, B, ldb, C, ldc);
-#else
-        auto r = measure_ntimes(30, [&] {
-            scale_matrix(A, lda, M, K, alpha);
-            scale_matrix(C, ldc, M, N, beta);
-        }, [] {});
-
-        printf("SCALE: avg = %f, min = %f, max = %f\n",
-            r.avg_time, r.min_time, r.max_time);
-
-        r = measure_ntimes(30, [&] {
-            matmul(M, N, K, A, lda, B, ldb, C, ldc);
-        }, [] {});
-
-        printf("MATMUL: avg = %f, min = %f, max = %f\n",
-            r.avg_time, r.min_time, r.max_time);
-#endif
     }
 
 };
@@ -372,11 +320,14 @@ struct register_avx_3_6x2 {
         BLOCK_N = 8 * 2,
     };
 
-    // for 6x16 matrix
+    // C += A * B for 6x16 matrix
     static void matmul_register(
-        int K, float *A, int lda, float *B, int ldb,
+        int M, int N, int K, float *A, int lda, float *B, int ldb,
         float *C, int ldc)
     {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+
         //       b0    b1
         // a0 vab00 vab01
         // a1 vab02 vab03
@@ -470,12 +421,16 @@ struct register_avx_3_6x2 {
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
     {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+
         for (int i = 0; i < M; i += BLOCK_M) {
             for (int j = 0; j < N; j += BLOCK_N) {
                 auto Ar = A + lda * i + 0;
                 auto Br = B + ldb * 0 + j;
                 auto Cr = C + ldc * i + j;
-                matmul_register(K, Ar, lda, Br, ldb, Cr, ldc);
+                matmul_register<false>(
+                    BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
             }
         }
     }
@@ -500,9 +455,12 @@ struct register_avx_3_4x3 {
 
     // for 6x16 matrix
     static void matmul_register(
-        int K, float *A, int lda, float *B, int ldb,
+        int M, int N, int K, float *A, int lda, float *B, int ldb,
         float *C, int ldc)
     {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+
         //       b0    b1    b2
         // a0 vab00 vab01 vab02
         // a1 vab03 vab04 vab05
@@ -592,12 +550,15 @@ struct register_avx_3_4x3 {
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
     {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+
         for (int i = 0; i < M; i += BLOCK_M) {
             for (int j = 0; j < N; j += BLOCK_N) {
                 auto Ar = A + lda * i + 0;
                 auto Br = B + ldb * 0 + j;
                 auto Cr = C + ldc * i + j;
-                matmul_register(K, Ar, lda, Br, ldb, Cr, ldc);
+                matmul_register(BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
             }
         }
     }
