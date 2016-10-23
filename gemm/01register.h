@@ -348,33 +348,52 @@ struct register_avx_3_6x2 {
         auto vab10 = _mm256_setzero_ps();
         auto vab11 = _mm256_setzero_ps();
 
-        for (int k = 0; k < K; k++) {
-            auto pa = &A[lda * 0 + k];
-            auto pb = &B[ldb * k + 0];
+#define N_UNROLLS  8
 
-            auto vb0 = _mm256_load_ps(pb + 8 * 0);
-            auto vb1 = _mm256_load_ps(pb + 8 * 1);
+        for (int k = 0; k < K; k += N_UNROLLS) {
+#define MM(i) \
+            auto pa##i = &A[lda * 0 + (k + i)]; \
+            auto pb##i = &B[ldb * (k + i) + 0]; \
+            \
+            auto vb0##i = _mm256_load_ps(pb##i + 8 * 0); \
+            auto vb1##i = _mm256_load_ps(pb##i + 8 * 1); \
+            \
+            auto va0##i = _mm256_broadcast_ss(&pa##i[lda * 0]); \
+            auto va1##i = _mm256_broadcast_ss(&pa##i[lda * 1]); \
+            vab00 = _mm256_fmadd_ps(va0##i, vb0##i, vab00); \
+            vab01 = _mm256_fmadd_ps(va0##i, vb1##i, vab01); \
+            vab02 = _mm256_fmadd_ps(va1##i, vb0##i, vab02); \
+            vab03 = _mm256_fmadd_ps(va1##i, vb1##i, vab03); \
+            \
+            auto va2##i = _mm256_broadcast_ss(&pa##i[lda * 2]); \
+            auto va3##i = _mm256_broadcast_ss(&pa##i[lda * 3]); \
+            vab04 = _mm256_fmadd_ps(va2##i, vb0##i, vab04); \
+            vab05 = _mm256_fmadd_ps(va2##i, vb1##i, vab05); \
+            vab06 = _mm256_fmadd_ps(va3##i, vb0##i, vab06); \
+            vab07 = _mm256_fmadd_ps(va3##i, vb1##i, vab07); \
+            \
+            auto va4##i = _mm256_broadcast_ss(&pa##i[lda * 4]); \
+            auto va5##i = _mm256_broadcast_ss(&pa##i[lda * 5]); \
+            vab08 = _mm256_fmadd_ps(va4##i, vb0##i, vab08); \
+            vab09 = _mm256_fmadd_ps(va4##i, vb1##i, vab09); \
+            vab10 = _mm256_fmadd_ps(va5##i, vb0##i, vab10); \
+            vab11 = _mm256_fmadd_ps(va5##i, vb1##i, vab11)
 
-            auto va0 = _mm256_broadcast_ss(&pa[lda * 0]);
-            auto va1 = _mm256_broadcast_ss(&pa[lda * 1]);
-            vab00 = _mm256_fmadd_ps(va0, vb0, vab00);
-            vab01 = _mm256_fmadd_ps(va0, vb1, vab01);
-            vab02 = _mm256_fmadd_ps(va1, vb0, vab02);
-            vab03 = _mm256_fmadd_ps(va1, vb1, vab03);
-
-            auto va2 = _mm256_broadcast_ss(&pa[lda * 2]);
-            auto va3 = _mm256_broadcast_ss(&pa[lda * 3]);
-            vab04 = _mm256_fmadd_ps(va2, vb0, vab04);
-            vab05 = _mm256_fmadd_ps(va2, vb1, vab05);
-            vab06 = _mm256_fmadd_ps(va3, vb0, vab06);
-            vab07 = _mm256_fmadd_ps(va3, vb1, vab07);
-
-            auto va4 = _mm256_broadcast_ss(&pa[lda * 4]);
-            auto va5 = _mm256_broadcast_ss(&pa[lda * 5]);
-            vab08 = _mm256_fmadd_ps(va4, vb0, vab08);
-            vab09 = _mm256_fmadd_ps(va4, vb1, vab09);
-            vab10 = _mm256_fmadd_ps(va5, vb0, vab10);
-            vab11 = _mm256_fmadd_ps(va5, vb1, vab11);
+            MM(0);
+#if N_UNROLLS >= 2
+            MM(1);
+#if N_UNROLLS >= 4
+            MM(2);
+            MM(3);
+#if N_UNROLLS >= 8
+            MM(4);
+            MM(5);
+            MM(6);
+            MM(7);
+#endif
+#endif
+#endif
+#undef MM
         }
 
         auto vc00 = _mm256_load_ps(C + ldc * 0 + 8 * 0);
