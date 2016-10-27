@@ -5,20 +5,19 @@
 #include <cassert>
 #undef NODEBUG
 
-template <class Opt> struct blis;
+
+template <class Opt> struct blis_copy;
 
 template <class MM, class Opt>
-struct blis_L1_base {
-    using BLIS = blis<Opt>;
+struct make_blis_copy_L1 {
+    using BLIS = blis_copy<Opt>;
 
     enum : int {
         BLOCK_M = MM::BLOCK_M,
         BLOCK_N = MM::BLOCK_N,
-
-        LDB_R = BLOCK_N, // + 64 / sizeof(float),
     };
 
-    alignas(32) static float Br_buf[BLIS::BLOCK_K * LDB_R];
+    alignas(32) static float Br_buf[BLIS::BLOCK_K * BLOCK_N];
 
     static void matmul(
         int M, int N, int K, float *A, int lda,
@@ -31,13 +30,11 @@ struct blis_L1_base {
             auto Br = B + ldb * 0 + j;
 
             int Kc = std::min<int>(K, BLIS::BLOCK_K);
-            if (Opt::PACK >= 1 && K * N > Kc * 96) {
-                // Pack B to L1 (256x16) cache buffer
-                for (int l = 0; l < Kc; l++) {
-                    std::copy_n(Br + ldb * l, BLOCK_N, Br_buf + LDB_R * l);
-                }
+            if (Opt::PACK >= 1) {
+                // Copy B to L1 (256x16: 16KB) cache buffer
+                copy2d(B, ldb, Kc, BLOCK_N, Br_buf, BLOCK_N);
                 Br = Br_buf;
-                ldb = LDB_R;
+                ldb = BLOCK_N;
             }
 
             for (int i = 0; i < M; i += BLOCK_M) {
@@ -50,10 +47,10 @@ struct blis_L1_base {
     }
 };
 template <class MM, class Opt> 
-alignas(32) float blis_L1_base<MM, Opt>::Br_buf[];
+alignas(32) float make_blis_copy_L1<MM, Opt>::Br_buf[];
 
 struct blis_opt {
-    struct naive {
+    struct nopack {
         enum : int { PACK = 0 };
     };
     struct packL1 {
@@ -68,8 +65,8 @@ struct blis_opt {
 };
 
 template <class Opt>
-struct blis {
-    struct L1 : blis_L1_base<register_avx_3_6x2, Opt> {};
+struct blis_copy {
+    struct L1 : make_blis_copy_L1<register_avx_3_6x2, Opt> {};
 
     enum : int {
         BLOCK_M = 144,
@@ -90,10 +87,9 @@ struct blis {
                 auto Nc = std::min<int>(N - j, BLOCK_N);
                 auto Kc = std::min<int>(K - k, BLOCK_K);
 
-                if (Opt::PACK >= 3 && K * N > BLOCK_K * BLOCK_N) {
-                    // Pack B (256x3072) to L3 cache buffer
-                    for (int l = 0; l < Kc; l++)
-                        std::copy_n(Bc + ldb * l, Nc, Bc_buf + Nc * l);
+                if (Opt::PACK >= 3) {
+                    // Copy B (256x3072) to L3 cache buffer
+                    copy2d(Bc, ldb, Kc, Nc, Bc_buf, Nc);
                     Bc = Bc_buf;
                     ldb = Nc;
                 }
@@ -103,10 +99,9 @@ struct blis {
                     auto Cc = C + ldc * i + j;
                     auto Mc = std::min<int>(M - i, BLOCK_M);
 
-                    if (Opt::PACK >= 2 && M * K > BLOCK_M * BLOCK_K) {
-                        // Pack A (96x256) to L2 cache buffer
-                        for (int l = 0; l < Mc; l++)
-                            std::copy_n(Ac + lda * l, Kc, Ac_buf + Kc * l);
+                    if (Opt::PACK >= 2) {
+                        // Copy A (144x256) to L2 cache buffer
+                        copy2d(Ac, lda, Mc, Kc, Ac_buf, Kc);
                         Ac = Ac_buf;
                         lda = Kc;
                     }
@@ -128,7 +123,7 @@ struct blis {
     }
 };
 template <class Opt>
-alignas(32) float blis<Opt>::Ac_buf[];
+alignas(32) float blis_copy<Opt>::Ac_buf[];
 template <class Opt>
-alignas(32) float blis<Opt>::Bc_buf[];
+alignas(32) float blis_copy<Opt>::Bc_buf[];
 

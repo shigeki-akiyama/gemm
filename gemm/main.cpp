@@ -305,19 +305,19 @@ int main(int argc, char *argv[])
     benchmark("L2 blocking", bp, cache_blocking_L2::gemm);
 #endif
     // 2-3. L2-cache blocking implementation with 2-2.
-    benchmark("L3 blocking", bp, cache_blocking_L3::gemm);
+    //benchmark("L3 blocking", bp, cache_blocking_L3::gemm);
 #endif
     // 3-1. BLIS-based implementation
-    benchmark("BLIS_naive", bp, blis<blis_opt::naive>::gemm);
+    benchmark("BLIS_naive", bp, blis_copy<blis_opt::nopack>::gemm);
 
     // 3-2. BLIS-based implementation w/ copy optimization on L1
-    benchmark("BLIS_packL1", bp, blis<blis_opt::packL1>::gemm);
+    benchmark("BLIS_packL1", bp, blis_copy<blis_opt::packL1>::gemm);
 
     // 3-3. BLIS-based implementation w/ copy optimization on L1/L2
-    benchmark("BLIS_packL2", bp, blis<blis_opt::packL2>::gemm);
+    benchmark("BLIS_packL2", bp, blis_copy<blis_opt::packL2>::gemm);
 
     // 3-3. BLIS-based implementation w/ copy optimization on L1/L2
-    benchmark("BLIS_packL3", bp, blis<blis_opt::packL3>::gemm);
+    benchmark("BLIS_packL3", bp, blis_copy<blis_opt::packL3>::gemm);
 
     _mm_free(A);
     _mm_free(B);

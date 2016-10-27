@@ -124,6 +124,14 @@ static measure_results measure_ntimes(
     return measure_results(avg, min, max);
 }
 
+template <class T>
+static void copy2d(const T *A, int lda, int M, int N, T *B, int ldb)
+{
+    for (int i = 0; i < M; i++) {
+        std::copy_n(A + lda * i, N, B + ldb * i);
+    }
+}
+
 static void scale_matrix(
     float *A, int lda, int M, int N, float coeff)
 {
