@@ -335,7 +335,6 @@ struct register_avx_3_6x2 {
         // a3 vab06 vab07
         // a4 vab08 vab09
         // a5 vab10 vab11
-#if 0
         auto vab00 = _mm256_setzero_ps();
         auto vab01 = _mm256_setzero_ps();
         auto vab02 = _mm256_setzero_ps();
@@ -348,33 +347,11 @@ struct register_avx_3_6x2 {
         auto vab09 = _mm256_setzero_ps();
         auto vab10 = _mm256_setzero_ps();
         auto vab11 = _mm256_setzero_ps();
-#else
-        __m256 vab00, vab01, vab02;
-        __m256 vab03, vab04, vab05;
-        __m256 vab06, vab07, vab08;
-        __m256 vab09, vab10, vab11;
-        _mm256_zeroall();
-#endif
-
-        _mm_prefetch(reinterpret_cast<char *>(C + ldc * 0 + 8 * 0), _MM_HINT_T0);
-        _mm_prefetch(reinterpret_cast<char *>(C + ldc * 1 + 8 * 1), _MM_HINT_T0);
-        _mm_prefetch(reinterpret_cast<char *>(C + ldc * 2 + 8 * 0), _MM_HINT_T0);
-        _mm_prefetch(reinterpret_cast<char *>(C + ldc * 3 + 8 * 1), _MM_HINT_T0);
-        _mm_prefetch(reinterpret_cast<char *>(C + ldc * 0 + 8 * 0), _MM_HINT_T0);
-        _mm_prefetch(reinterpret_cast<char *>(C + ldc * 1 + 8 * 1), _MM_HINT_T0);
-        _mm_prefetch(reinterpret_cast<char *>(C + ldc * 2 + 8 * 0), _MM_HINT_T0);
-        _mm_prefetch(reinterpret_cast<char *>(C + ldc * 3 + 8 * 1), _MM_HINT_T0);
-        _mm_prefetch(reinterpret_cast<char *>(C + ldc * 0 + 8 * 0), _MM_HINT_T0);
-        _mm_prefetch(reinterpret_cast<char *>(C + ldc * 1 + 8 * 1), _MM_HINT_T0);
-        _mm_prefetch(reinterpret_cast<char *>(C + ldc * 2 + 8 * 0), _MM_HINT_T0);
-        _mm_prefetch(reinterpret_cast<char *>(C + ldc * 3 + 8 * 0), _MM_HINT_T0);
 
 #define N_UNROLLS  8
 
         for (int k = 0; k < K; k += N_UNROLLS) {
 #define MM(i) \
-            _mm_prefetch(reinterpret_cast<char *>(&A[lda * 0 + (k + i + 1)]), _MM_HINT_T0); \
-            \
             auto pa##i = &A[lda * 0 + (k + i)]; \
             auto pb##i = &B[ldb * (k + i) + 0]; \
             \

@@ -14,15 +14,15 @@
 #endif
 
 
-#if 0 && defined(_WIN32)
+#if defined(_WIN32)
 #define NOMINMAX
 #include <windows.h>
 
 class elapsed_time {
-    double *elapsed_;
+    double& elapsed_;
     LARGE_INTEGER start_;
 public:
-    elapsed_time(double *elapsed)
+    elapsed_time(double& elapsed)
         : elapsed_(elapsed)
     {
         QueryPerformanceCounter(&start_);
@@ -36,11 +36,15 @@ public:
         LARGE_INTEGER freq;
         QueryPerformanceFrequency(&freq);
 
-        *elapsed_ =
-            static_cast<double>(stop.QuadPart - start_.QuadPart) /
-            static_cast<double>(freq.QuadPart);
+        elapsed_ =
+            double(stop.QuadPart - start_.QuadPart) / double(freq.QuadPart);
     }
 };
+
+size_t rdtsc()
+{
+    return __rdtsc();
+}
 #else
 #include <chrono>
 
@@ -65,6 +69,14 @@ public:
         elapsed_ = seconds.count();
     }
 };
+
+size_t rdtsc()
+{
+    uint32_t hi, lo;
+    asm volatile("rdtsc" : "=a"(lo), "=d"(hi));
+    //asm volatile("lfence\nrdtsc" : "=a"(lo), "=d"(hi));
+    return uint64_t(hi) << 32 | lo;
+}
 #endif
 
 struct measure_results {

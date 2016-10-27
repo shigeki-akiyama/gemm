@@ -66,7 +66,7 @@ static bool verify_results(T *C, T *result_C, int ldc, int M, int N)
 static void flush_all_cachelines(elem_type *buf, int buf_size)
 {
     for (int i = 0; i < buf_size; i++) {
-        buf[i] += 0.1;
+        buf[i] += elem_type(0.1);
     }
 }
 
