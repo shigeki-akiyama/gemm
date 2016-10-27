@@ -72,7 +72,7 @@ struct blis {
     struct L1 : blis_L1_base<register_avx_3_6x2, Opt> {};
 
     enum : int {
-        BLOCK_M = 96,
+        BLOCK_M = 144,
         BLOCK_N = 3072,
         BLOCK_K = 256,
     };
