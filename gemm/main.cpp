@@ -2,7 +2,7 @@
 #include "00naive.h"
 #include "01register.h"
 #include "02cache.h"
-#include "03blis.h"
+#include "03blis_copy.h"
 #include "util.h"
 #include <vector>
 #include <algorithm>
@@ -20,89 +20,7 @@
 #endif
 
 using elem_type = float;
-using elem_vector = std::vector<elem_type>;
 
-template <class T>
-struct bench_params {
-    int M, N, K;
-    T alpha;
-    T *A;
-    int lda;
-    T *B;
-    int ldb;
-    T beta;
-    T *C;
-    int ldc;
-    T *result_C;
-    elem_type *buf;
-    int buf_size;
-};
-
-template <class T>
-static bool verify_results(T *C, T *result_C, int ldc, int M, int N)
-{
-    size_t err_count = 0;
-    for (auto i = 0; i < M; i++) {
-        for (auto j = 0; j < N; j++) {
-            T c0 = C[ldc * i + j];
-            T c1 = result_C[ldc * i + j];
-
-            if (c0 != c1) {
-                std::printf(
-                    "error: gemm result does not match at "
-                    "[%5d, %5d] (%f != %f)\n",
-                    i, j, c0, c1);
-
-                if (++err_count > 8) {
-                    return false;
-                }
-            }
-        }
-    }
-    
-    return err_count == 0;
-}
-
-static void flush_all_cachelines(elem_type *buf, int buf_size)
-{
-    for (int i = 0; i < buf_size; i++) {
-        buf[i] += elem_type(0.1);
-    }
-}
-
-template <class T, class F>
-static void benchmark(
-    const char *name, bench_params<T>& bp, F f, 
-    bool verify=true)
-{
-    size_t n_times = 10;
-    int M = bp.M, N = bp.N, K = bp.K;
-
-    auto preprocess = [&] {
-        std::fill_n(bp.C, M * bp.ldc, elem_type(0.0));
-        flush_all_cachelines(bp.buf, bp.buf_size);
-    };
-
-    auto r = measure_ntimes(n_times, [&] {
-        f(bp.M, bp.N, bp.K, bp.alpha, bp.A, bp.lda,
-            bp.B, bp.ldb, bp.beta, bp.C, bp.ldc);
-    }, preprocess);
-
-    auto flop = 2.0 * M * N * K + 3.0 * M * N;
-#if 1
-    auto gflops = flop / (1.0 * 1024 * 1024 * 1024 * r.min_time);
-#else
-    auto gflops = flop / (1.0 * 1024 * 1024 * 1024 * r.avg_time);
-#endif
-    std::printf("%-20s\t%10.3f\t%10.6f\t%10.6f\t%10.6f\t%6zu\n",
-        name, gflops, r.avg_time, r.min_time, r.max_time,
-        n_times);
-    std::fflush(stdout);
-
-    if (verify) {
-        verify_results(bp.C, bp.result_C, bp.ldc, M, N);
-    }
-}
 
 #ifdef USE_CBLAS
 template <class T>
@@ -242,31 +160,27 @@ int main(int argc, char *argv[])
     auto beta = elem_type(1.0); // elem_type(0.25);
 
     int align = sizeof(__m256);
-    auto *A = (elem_type *)_mm_malloc(sizeof(elem_type) * M * lda, align);
-    auto *B = (elem_type *)_mm_malloc(sizeof(elem_type) * K * ldb, align);
-    auto *C = (elem_type *)_mm_malloc(sizeof(elem_type) * M * ldc, align);
-    auto *result_C = (elem_type *)_mm_malloc(sizeof(float) * M * ldc, align);
-
-    auto buf_size = 16 * 1024 * 1024;
-    auto *buf = (elem_type *)_mm_malloc(sizeof(elem_type) * buf_size, align);
-    std::fill_n(buf, buf_size, 0.1f);
-
-    std::fill_n(A, M * lda, elem_type(2.0));
-    std::fill_n(B, K * ldb, elem_type(0.5));
-    std::fill_n(C, M * ldc, elem_type(0.0));
-    std::fill_n(result_C, M * ldc, elem_type(0.0));
+    auto A = make_aligned_array<elem_type>(M * lda, align, elem_type(2.0));
+    auto B = make_aligned_array<elem_type>(K * ldb, align, elem_type(0.5));
+    auto C = make_aligned_array<elem_type>(M * ldc, align, elem_type(0.0));
+    auto result_C = make_aligned_array<elem_type>(M * ldc, align, elem_type(0.0));
+    
+    auto buf_size = 16 * 1024 * 1024 / sizeof(elem_type);
+    auto buf = make_aligned_array<elem_type>(buf_size, align, 0.1);
 
     bench_params<elem_type> bp = {
-        M, N, K, alpha, A, lda, B, ldb, beta, 
-        C, ldc, result_C, buf, buf_size,
+        M, N, K, alpha, A.get(), lda, B.get(), ldb, beta, 
+        C.get(), ldc, result_C.get(), buf.get(), int(buf_size),
     };
 
+    register_bench::perform(bp);
+
     // make result_C
-    ref_gemm(M, N, K, alpha, A, lda, B, ldb, beta, result_C, ldc);
+    ref_gemm(M, N, K, alpha, A.get(), lda, B.get(), ldb, beta, result_C.get(), ldc);
 
 #ifdef USE_CBLAS
     // MKL warmup
-    cblas_gemm(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+    cblas_gemm(M, N, K, alpha, A.get(), lda, B.get(), ldb, beta, C.get(), ldc);
 
     // MKL
     benchmark(CBLAS_IMPL, bp, cblas_gemm<elem_type>);
@@ -280,7 +194,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef USE_AVX
-#if 1
+#if 0
     if (size <= 768) {
         // 0-1. Naive AVX implementation
         benchmark("naive_avx", bp, naive_avx::gemm);
@@ -318,11 +232,6 @@ int main(int argc, char *argv[])
 
     // 3-3. BLIS-based implementation w/ copy optimization on L1/L2
     benchmark("BLIS_packL3", bp, blis_copy<blis_opt::packL3>::gemm);
-
-    _mm_free(A);
-    _mm_free(B);
-    _mm_free(C);
-    _mm_free(result_C);
-
+    
     return 0;
 }

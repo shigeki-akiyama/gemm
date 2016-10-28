@@ -1,18 +1,19 @@
 #pragma once
 
-#include <algorithm>
-#include <limits>
+#include <cstddef>
+#include <cstdint>
 
-#ifdef __INTELLISENSE__
-#undef __AVX__
-#define __AVX__ 1
+static size_t rdtsc()
+{
+#if defined(_MSC_VER)
+    return __rdtsc();
+#else
+    uint32_t hi, lo;
+    asm volatile("rdtsc" : "=a"(lo), "=d"(hi));
+    //asm volatile("lfence\nrdtsc" : "=a"(lo), "=d"(hi));
+    return uint64_t(hi) << 32 | lo;
 #endif
-
-#ifdef __AVX__
-#define USE_AVX
-#include <immintrin.h>
-#endif
-
+}
 
 #if defined(_WIN32)
 #define NOMINMAX
@@ -36,18 +37,14 @@ public:
         LARGE_INTEGER freq;
         QueryPerformanceFrequency(&freq);
 
-        elapsed_ =
-            double(stop.QuadPart - start_.QuadPart) / double(freq.QuadPart);
+        elapsed_ = double(stop.QuadPart - start_.QuadPart) / double(freq.QuadPart);
     }
 };
 
-size_t rdtsc()
-{
-    return __rdtsc();
-}
 #else
 #include <chrono>
 
+#if 0
 namespace chrono = std::chrono;
 class elapsed_time {
     using clock = chrono::high_resolution_clock;
@@ -69,83 +66,23 @@ public:
         elapsed_ = seconds.count();
     }
 };
-
-size_t rdtsc()
-{
-    uint32_t hi, lo;
-    asm volatile("rdtsc" : "=a"(lo), "=d"(hi));
-    //asm volatile("lfence\nrdtsc" : "=a"(lo), "=d"(hi));
-    return uint64_t(hi) << 32 | lo;
-}
-#endif
-
-struct measure_results {
-    double avg_time;
-    double min_time;
-    double max_time;
-
-    measure_results(double avg, double min, double max)
-        : avg_time(avg)
-        , min_time(min)
-        , max_time(max)
+#else
+class elapsed_time {
+    double& elapsed_;
+    size_t start_;
+public:
+    elapsed_time(double& elapsed)
+        : elapsed_(elapsed)
+        , start_(rdtsc())
     {
+    }
+
+    ~elapsed_time()
+    {
+        auto stop = rdtsc();
+        elapsed_ = double(stop - start_) / 3.1e9;
     }
 };
+#endif
 
-template <class F>
-static double measure_seconds(F f)
-{
-    double t;
-    {
-        elapsed_time etime(t);
-        f();
-    }
-
-    return t;
-}
-
-template <class F1, class F2>
-static measure_results measure_ntimes(
-    size_t n_times, F1 f, F2 preprocess)
-{
-    auto sum = 0.0;
-    auto min = std::numeric_limits<double>::max();
-    auto max = std::numeric_limits<double>::min();
-    for (size_t i = 0; i < n_times; i++) {
-        preprocess();
-
-        auto t = measure_seconds(f);
-        sum += t;
-        min = std::min(min, t);
-        max = std::max(max, t);
-    }
-
-    auto avg = sum / double(n_times);
-    return measure_results(avg, min, max);
-}
-
-template <class T>
-static void copy2d(const T *A, int lda, int M, int N, T *B, int ldb)
-{
-    for (int i = 0; i < M; i++) {
-        std::copy_n(A + lda * i, N, B + ldb * i);
-    }
-}
-
-static void scale_matrix(
-    float *A, int lda, int M, int N, float coeff)
-{
-    if (coeff == 1.0f)
-        return;
-
-    __m256 vcoeff = _mm256_set1_ps(coeff);
-
-    for (int i = 0; i < M; i++) {
-        for (int j = 0; j < N; j+=8) {
-            auto *pa = A + lda * i + j;
-            auto va = _mm256_load_ps(pa);
-            va = _mm256_mul_ps(vcoeff, va);
-            _mm256_store_ps(pa, va);
-        }
-    }
-}
+#endif
