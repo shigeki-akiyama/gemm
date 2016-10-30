@@ -2,11 +2,15 @@
 
 #include "gemm_util.h"
 
+#include <cstring>
 #include <cassert>
 #undef NODEBUG
 
 #ifdef USE_AVX
 #include <immintrin.h>
+
+#define _mm256_stream_load_ps(p) \
+    _mm256_castsi256_ps(_mm256_stream_load_si256((__m256i *)(p)))
 
 struct register_avx_0 {
 
@@ -443,6 +447,11 @@ struct register_avx_3_6x2 {
     {
         assert(M % BLOCK_M == 0);
         assert(N % BLOCK_N == 0);
+        assert(lda == BLOCK_M);
+        assert(ldb == BLOCK_N);
+
+        lda = BLOCK_M;
+        ldb = BLOCK_N;
 
         //       b0    b1
         // a0 vab00 vab01
@@ -464,7 +473,7 @@ struct register_avx_3_6x2 {
         auto vab10 = _mm256_setzero_ps();
         auto vab11 = _mm256_setzero_ps();
 
-#define N_UNROLLS  8
+#define N_UNROLLS  1
 
         for (int k = 0; k < K; k += N_UNROLLS) {
 #define MM(i) \
@@ -694,6 +703,11 @@ struct register_avx_3_4x3 {
     {
         assert(M % BLOCK_M == 0);
         assert(N % BLOCK_N == 0);
+        assert(lda == BLOCK_M);
+        assert(ldb == BLOCK_N);
+
+        lda = BLOCK_M;
+        ldb = BLOCK_N;
 
         //       b0    b1    b2
         // a0 vab00 vab01 vab02
@@ -818,28 +832,54 @@ struct register_avx_3_4x3 {
 struct register_bench {
 
     template <class T>
-    static void perform(bench_params<T>& param)
+    static void performL1(bench_params<T>& bp_)
     {
         int n_times = 1000 * 1000;
 
+        struct matrices {
+            float A[256 * 256];  // 4 * 128 * 128 = 16KB
+            char padding0[LINE_SIZE * 1];
+            float B[256 * 256];
+            char padding1[LINE_SIZE * 2];
+            float C[256 * 256];
+        };
+        auto ms_ = make_aligned_ptr<matrices>(PAGE_SIZE);
+        auto& ms = *ms_.get();
+        memset(&ms, 0, sizeof(matrices));
+
         auto make_bp = [&](int M, int N, int K) {
-            bench_params<T> bp = param;
+            bench_params<T> bp = bp_;
+            bp.A = ms.A;
+            bp.B = ms.B;
+            bp.C = ms.C;
             bp.M = M;
             bp.N = bp.ldb = bp.ldc = N;
-            bp.K = bp.ldc = K;
+            bp.K = bp.lda = K;
             return bp;
         };
+
+#if 0
+        {
+            auto bp = make_bp(6, 32, 256);
+            benchmark("register_avx_1", bp, register_avx_1::gemm, false, true, n_times);
+            benchmark("register_avx_2", bp, register_avx_2::gemm, false, true, n_times);
+        }
+#endif
+        {
+            auto bp = make_bp(6, 16, 256);
+            benchmark("register_avx_3_6x2", bp, register_avx_3_6x2::gemm<false>, false, true, n_times);
+            bp.lda = register_avx_3_6x2::BLOCK_M;
+            bp.ldb = register_avx_3_6x2::BLOCK_N;
+            benchmark("register_avx_3_6x2p", bp, register_avx_3_6x2::gemm<true>, false, true, n_times);
+        }
         
-        bench_params<T> bp0 = make_bp(48, 32, 32);
-        benchmark("register_avx_0", bp0, register_avx_0::gemm, false, true, n_times);
-        benchmark("register_avx_1", bp0, register_avx_1::gemm, false, true, n_times);
-        benchmark("register_avx_2", bp0, register_avx_2::gemm, false, true, n_times);
-        benchmark("register_avx_3_6x2", bp0, register_avx_3_6x2::gemm<false>, false, true, n_times);
-        benchmark("register_avx_3_6x2p", bp0, register_avx_3_6x2::gemm<true>, false, true, n_times);
-        
-        bench_params<T> bp1 = make_bp(32, 48, 32);
-        benchmark("register_avx_3_4x3", bp1, register_avx_3_4x3::gemm<false>, false, true, n_times);
-        benchmark("register_avx_3_4x3p", bp1, register_avx_3_4x3::gemm<true>, false, true, n_times);
+        {
+            auto bp = make_bp(4, 24, 256);
+            benchmark("register_avx_3_4x3", bp, register_avx_3_4x3::gemm<false>, false, true, n_times);
+            bp.lda = register_avx_3_4x3::BLOCK_M;
+            bp.ldb = register_avx_3_4x3::BLOCK_N;
+            benchmark("register_avx_3_4x3p", bp, register_avx_3_4x3::gemm<true>, false, true, n_times);
+        }
     }
 
 };

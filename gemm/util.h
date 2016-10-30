@@ -1,7 +1,22 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
+
+static constexpr int LINE_SIZE = 64;
+static constexpr int PAGE_SIZE = 4096;
+
+#if defined(_MSC_VER)
+#define NOINLINE    __declspec(noinline)
+#else
+#define NOINLINE    __attribute__((noinline))
+#endif
+
+static int alignup(int size, int align)
+{
+    return (size + align - 1) / align * align;
+}
 
 static size_t rdtsc()
 {
@@ -86,3 +101,49 @@ public:
 #endif
 
 #endif
+
+
+struct measure_results {
+    double avg_time;
+    double min_time;
+    double max_time;
+
+    measure_results(double avg, double min, double max)
+        : avg_time(avg)
+        , min_time(min)
+        , max_time(max)
+    {
+    }
+};
+
+template <class F>
+static double measure_seconds(F f)
+{
+    double t;
+    {
+        elapsed_time etime(t);
+        f();
+    }
+
+    return t;
+}
+
+template <class F1, class F2>
+static measure_results measure_ntimes(
+    size_t n_times, F1 f, F2 preprocess)
+{
+    auto sum = 0.0;
+    auto min = std::numeric_limits<double>::max();
+    auto max = std::numeric_limits<double>::min();
+    for (size_t i = 0; i < n_times; i++) {
+        preprocess();
+
+        auto t = measure_seconds(f);
+        sum += t;
+        min = std::min(min, t);
+        max = std::max(max, t);
+    }
+
+    auto avg = sum / double(n_times);
+    return measure_results(avg, min, max);
+}

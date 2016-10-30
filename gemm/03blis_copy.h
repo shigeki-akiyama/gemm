@@ -1,23 +1,30 @@
 #pragma once
 
-#include "00naive.h"
+#include "01register.h"
 #include "util.h"
 #include <cassert>
 #undef NODEBUG
 
+template <class Kernel, class Opt> struct blis_copy;
 
-template <class Opt> struct blis_copy;
-
-template <class MM, class Opt>
+template <class Kernel, class Opt>
 struct make_blis_copy_L1 {
-    using BLIS = blis_copy<Opt>;
+    using BLIS = blis_copy<Kernel, Opt>;
 
     enum : int {
-        BLOCK_M = MM::BLOCK_M,
-        BLOCK_N = MM::BLOCK_N,
+        BLOCK_M = Kernel::BLOCK_M,
+        BLOCK_N = Kernel::BLOCK_N,
     };
 
-    alignas(32) static float Br_buf[BLIS::BLOCK_K * BLOCK_N];
+    struct alignas(LINE_SIZE) blis_buffer {
+        float Br[BLIS::BLOCK_K * BLOCK_N];          // L1: 256x24
+        float Ac[BLIS::BLOCK_M * (BLIS::BLOCK_K /*+ 8*/)];    // L2: 144x256
+        float Bc[BLIS::BLOCK_K * (BLIS::BLOCK_N /*+ 8*/)];    // L3: 256x3072
+    };
+
+    static blis_buffer *buf;
+
+    alignas(LINE_SIZE) static float Br_buf[BLIS::BLOCK_K * BLOCK_N];
 
     static void matmul(
         int M, int N, int K, float *A, int lda,
@@ -32,22 +39,33 @@ struct make_blis_copy_L1 {
             int Kc = std::min<int>(K, BLIS::BLOCK_K);
             if (Opt::PACK >= 1) {
                 // Copy B to L1 (256x16: 16KB) cache buffer
-                copy2d(B, ldb, Kc, BLOCK_N, Br_buf, BLOCK_N);
-                Br = Br_buf;
+                copy2d(B, ldb, Kc, BLOCK_N, buf->Br, BLOCK_N);
+                Br = buf->Br;
                 ldb = BLOCK_N;
             }
 
             for (int i = 0; i < M; i += BLOCK_M) {
                 auto Ar = A + lda * i + 0;
                 auto Cr = C + ldc * i + j;
-                MM::matmul_register(
-                    BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
+                lda = BLOCK_M;
+                ldb = BLOCK_N;
+                Kernel::matmul_register(BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
             }
         }
     }
+
+    static void initialize()
+    {
+        if (buf == nullptr) {
+            buf = (blis_buffer *)_mm_malloc(sizeof(blis_buffer), PAGE_SIZE);
+            memset(buf, 0, sizeof(blis_buffer));
+        }
+    }
 };
-template <class MM, class Opt> 
-alignas(32) float make_blis_copy_L1<MM, Opt>::Br_buf[];
+template <class Kernel, class Opt>
+typename make_blis_copy_L1<Kernel, Opt>::blis_buffer * make_blis_copy_L1<Kernel, Opt>::buf = nullptr;
+template <class Kernel, class Opt> 
+alignas(LINE_SIZE) float make_blis_copy_L1<Kernel, Opt>::Br_buf[];
 
 struct blis_opt {
     struct nopack {
@@ -64,18 +82,21 @@ struct blis_opt {
     };
 };
 
-template <class Opt>
+template <class Kernel, class Opt>
 struct blis_copy {
-    struct L1 : make_blis_copy_L1<register_avx_3_6x2, Opt> {};
+    struct L1 : make_blis_copy_L1<Kernel, Opt> {};
 
     enum : int {
         BLOCK_M = 144,
         BLOCK_N = 3072,
         BLOCK_K = 256,
+
+        LDA_C   = BLOCK_K + 8,
+        LDB_C   = BLOCK_N + 8,
     };
 
-    alignas(32) static float Ac_buf[BLOCK_M * BLOCK_K];
-    alignas(32) static float Bc_buf[BLOCK_K * BLOCK_N];
+    alignas(LINE_SIZE) static float Ac_buf[BLOCK_M * LDA_C];
+    alignas(LINE_SIZE) static float Bc_buf[BLOCK_K * LDB_C];
 
     static void matmul(
         int M, int N, int K, float *A, int lda,
@@ -89,8 +110,8 @@ struct blis_copy {
 
                 if (Opt::PACK >= 3) {
                     // Copy B (256x3072) to L3 cache buffer
-                    copy2d(Bc, ldb, Kc, Nc, Bc_buf, Nc);
-                    Bc = Bc_buf;
+                    copy2d(Bc, ldb, Kc, Nc, L1::buf->Bc, Nc);
+                    Bc = L1::buf->Bc;
                     ldb = Nc;
                 }
 
@@ -101,9 +122,9 @@ struct blis_copy {
 
                     if (Opt::PACK >= 2) {
                         // Copy A (144x256) to L2 cache buffer
-                        copy2d(Ac, lda, Mc, Kc, Ac_buf, Kc);
-                        Ac = Ac_buf;
-                        lda = Kc;
+                        copy2d(Ac, lda, Mc, Kc, L1::buf->Ac, L1::BLOCK_M + 8);
+                        Ac = L1::buf->Ac;
+                        lda = L1::BLOCK_M + 8;
                     }
 
                     L1::matmul(Mc, Nc, Kc, Ac, lda, Bc, ldb, Cc, ldc);
@@ -121,9 +142,14 @@ struct blis_copy {
 
         matmul(M, N, K, A, lda, B, ldb, C, ldc);
     }
+
+    static void intiialize()
+    {
+        L1::initialize();
+    }
 };
-template <class Opt>
-alignas(32) float blis_copy<Opt>::Ac_buf[];
-template <class Opt>
-alignas(32) float blis_copy<Opt>::Bc_buf[];
+template <class Kernel, class Opt>
+alignas(LINE_SIZE) float blis_copy<Kernel, Opt>::Ac_buf[];
+template <class Kernel, class Opt>
+alignas(LINE_SIZE) float blis_copy<Kernel, Opt>::Bc_buf[];
 
