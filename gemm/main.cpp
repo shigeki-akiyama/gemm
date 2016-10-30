@@ -2,7 +2,7 @@
 #include "00naive.h"
 #include "01register.h"
 #include "02cache.h"
-#include "03blis_copy.h"
+#include "03blis.h"
 #include "util.h"
 #include <vector>
 #include <algorithm>
@@ -165,8 +165,10 @@ int main(int argc, char *argv[])
         C.get(), ldc, result_C.get(), buf.get(), int(buf_size),
     };
 
-    //register_bench::performL1(bp);
-    //return 0;
+#if 0
+    register_bench::performL1(bp);
+    return 0;
+#endif
 
     // make result_C
     ref_gemm(M, N, K, alpha, A.get(), lda, B.get(), ldb, beta, result_C.get(), ldc);
@@ -214,38 +216,85 @@ int main(int argc, char *argv[])
     // 2-3. L2-cache blocking implementation with 2-2.
     //benchmark("L3 blocking", bp, cache_blocking_L3::gemm);
 #endif
+    using option = blis_opt<elem_type>;
+
     // 3-1. BLIS-based implementation
-    blis_copy<register_avx_3_6x2, blis_opt::nopack>::intiialize();
-    benchmark("BLIS_naive", bp, blis_copy<register_avx_3_6x2, blis_opt::nopack>::gemm);
+    {
+        using blis = blis<register_avx_3_6x2, option::naive>;
+        blis::intiialize();
+        benchmark("BLIS_naive_6x2", bp, blis::gemm);
+    }
 
     // 3-2. BLIS-based implementation w/ copy optimization on L1
-    blis_copy<register_avx_3_6x2, blis_opt::packL1>::intiialize();
-    benchmark("BLIS_packL1", bp, blis_copy<register_avx_3_6x2, blis_opt::packL1>::gemm);
+    {
+        using blis = blis<register_avx_3_6x2, option::copyL1>;
+        blis::intiialize();
+        benchmark("BLIS_copyL1_6x2", bp, blis::gemm);
+    }
 
     // 3-3. BLIS-based implementation w/ copy optimization on L1/L2
-    blis_copy<register_avx_3_6x2, blis_opt::packL2>::intiialize();
-    benchmark("BLIS_packL2", bp, blis_copy<register_avx_3_6x2, blis_opt::packL2>::gemm);
+    {
+        using blis = blis<register_avx_3_6x2, option::copyL2>;
+        blis::intiialize();
+        benchmark("BLIS_copyL2_6x2", bp, blis::gemm);
+    }
 
     // 3-4. BLIS-based implementation w/ copy optimization on L1/L2/L3
-    blis_copy<register_avx_3_6x2, blis_opt::packL3>::intiialize();
-    benchmark("BLIS_packL3", bp, blis_copy<register_avx_3_6x2, blis_opt::packL3>::gemm);
-
-    // 3-1. BLIS-based implementation
-    blis_copy<register_avx_3_4x3, blis_opt::nopack>::intiialize();
-    benchmark("BLIS_naive_4x3", bp, blis_copy<register_avx_3_4x3, blis_opt::nopack>::gemm);
+    {
+        using blis = blis<register_avx_3_6x2, option::copyL3>;
+        blis::intiialize();
+        benchmark("BLIS_copyL2_6x2", bp, blis::gemm);
+    }
+#if 0
+    // 3-1'. BLIS-based implementation
+    {
+        using blis = blis<register_avx_3_4x3, option::naive>;
+        blis::intiialize();
+        benchmark("BLIS_naive_4x3", bp, blis::gemm);
+    }
 
     // 3-2'. BLIS-based implementation w/ copy optimization on L1
-    blis_copy<register_avx_3_4x3, blis_opt::packL1>::intiialize();
-    benchmark("BLIS_packL1_4x3", bp, blis_copy<register_avx_3_4x3, blis_opt::packL1>::gemm);
+    {
+        using blis = blis<register_avx_3_4x3, option::copyL1>;
+        blis::intiialize();
+        benchmark("BLIS_copyL1_4x3", bp, blis::gemm);
+    }
 
     // 3-3'. BLIS-based implementation w/ copy optimization on L1/L2
-    blis_copy<register_avx_3_4x3, blis_opt::packL2>::intiialize();
-    benchmark("BLIS_packL2_4x3", bp, blis_copy<register_avx_3_4x3, blis_opt::packL2>::gemm);
+    {
+        using blis = blis<register_avx_3_4x3, option::copyL2>;
+        blis::intiialize();
+        benchmark("BLIS_copyL2_4x3", bp, blis::gemm);
+    }
 
     // 3-4'. BLIS-based implementation w/ copy optimization on L1/L2/L3
-    blis_copy<register_avx_3_4x3, blis_opt::packL3>::intiialize();
-    benchmark("BLIS_packL3_4x3", bp, blis_copy<register_avx_3_4x3, blis_opt::packL3>::gemm);
+    {
+        using blis = blis<register_avx_3_4x3, option::copyL3>;
+        blis::intiialize();
+        benchmark("BLIS_copyL3_4x3", bp, blis::gemm);
+    }
+#endif
 
+    // 4-1. BLIS-based implementation w/ copy with stride format on L1
+    {
+        using blis = blis<register_avx_3_6x2, option::packL1>;
+        blis::intiialize();
+        benchmark("BLIS_packL1_6x2", bp, blis::gemm);
+    }
+
+    // 4-2. BLIS-based implementation w/ copy with stride format on L1/L2
+    {
+        using blis = blis<register_avx_3_6x2, option::packL2>;
+        blis::intiialize();
+        benchmark("BLIS_packL2_6x2", bp, blis::gemm);
+    }
+
+    // 4-3. BLIS-based implementation w/ copy with stride format on L1/L2/L3
+    {
+        using blis = blis<register_avx_3_6x2, option::packL3>;
+        blis::intiialize();
+        benchmark("BLIS_packL3_6x2", bp, blis::gemm);
+    }
 
     return 0;
 }

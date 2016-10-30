@@ -32,6 +32,9 @@
     <ClInclude Include="02cache.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="gemm_util.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="03blis.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

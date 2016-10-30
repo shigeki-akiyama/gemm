@@ -26,6 +26,7 @@
     <ClInclude Include="01register.h" />
     <ClInclude Include="02cache.h" />
     <ClInclude Include="03blis.h" />
+    <ClInclude Include="gemm_util.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

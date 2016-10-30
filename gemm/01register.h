@@ -836,22 +836,22 @@ struct register_bench {
     {
         int n_times = 1000 * 1000;
 
-        struct matrices {
+        struct matmul_buffer {
             float A[256 * 256];  // 4 * 128 * 128 = 16KB
             char padding0[LINE_SIZE * 1];
             float B[256 * 256];
             char padding1[LINE_SIZE * 2];
             float C[256 * 256];
         };
-        auto ms_ = make_aligned_ptr<matrices>(PAGE_SIZE);
-        auto& ms = *ms_.get();
-        memset(&ms, 0, sizeof(matrices));
+        auto buf_ = make_aligned_ptr<matmul_buffer>(PAGE_SIZE);
+        auto& buf = *buf_.get();
+        memset(&buf, 0, sizeof(matmul_buffer));
 
         auto make_bp = [&](int M, int N, int K) {
             bench_params<T> bp = bp_;
-            bp.A = ms.A;
-            bp.B = ms.B;
-            bp.C = ms.C;
+            bp.A = buf.A;
+            bp.B = buf.B;
+            bp.C = buf.C;
             bp.M = M;
             bp.N = bp.ldb = bp.ldc = N;
             bp.K = bp.lda = K;
