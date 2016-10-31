@@ -4,6 +4,11 @@
 #include "02cache.h"
 #include "03blis.h"
 #include "util.h"
+
+#ifdef USE_AVX512
+#include "01register512.h"
+#endif
+
 #include <vector>
 #include <algorithm>
 #include <cstdlib>
@@ -62,6 +67,67 @@ static void ref_gemm(
         M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
 #endif
 }
+
+struct register_bench {
+
+	template <class T>
+	static void performL1(bench_params<T>& bp_)
+	{
+		int n_times = 100 * 1000;
+
+		struct matmul_buffer {
+			float A[256 * 256];  // 4 * 128 * 128 = 16KB
+			char padding0[LINE_SIZE * 1];
+			float B[256 * 256];
+			char padding1[LINE_SIZE * 2];
+			float C[256 * 256];
+		};
+		auto buf_ = make_aligned_ptr<matmul_buffer>(PAGE_SIZE);
+		auto& buf = *buf_.get();
+		memset(&buf, 0, sizeof(matmul_buffer));
+
+		auto make_bp = [&](int M, int N, int K) {
+			bench_params<T> bp = bp_;
+			bp.A = buf.A;
+			bp.B = buf.B;
+			bp.C = buf.C;
+			bp.M = M;
+			bp.N = bp.ldb = bp.ldc = N;
+			bp.K = bp.lda = K;
+			return bp;
+		};
+
+#if 0
+		{
+			auto bp = make_bp(6, 32, 256);
+			benchmark("register_avx_1", bp, register_avx_1::gemm, false, true, n_times);
+			benchmark("register_avx_2", bp, register_avx_2::gemm, false, true, n_times);
+		}
+#endif
+		{
+			auto bp = make_bp(6, 16, 256);
+			benchmark("register_avx_3_6x2", bp, register_avx_3_6x2::gemm<false>, false, true, n_times);
+			bp.lda = register_avx_3_6x2::BLOCK_M;
+			bp.ldb = register_avx_3_6x2::BLOCK_N;
+			benchmark("register_avx_3_6x2p", bp, register_avx_3_6x2::gemm<true>, false, true, n_times);
+		}
+
+		{
+			auto bp = make_bp(4, 24, 256);
+			benchmark("register_avx_3_4x3", bp, register_avx_3_4x3::gemm<false>, false, true, n_times);
+			bp.lda = register_avx_3_4x3::BLOCK_M;
+			bp.ldb = register_avx_3_4x3::BLOCK_N;
+			benchmark("register_avx_3_4x3p", bp, register_avx_3_4x3::gemm<true>, false, true, n_times);
+		}
+#ifdef USE_AVX512
+		{
+			auto bp = make_bp(9, 48, 32);
+			benchmark("register_avx512_9x3", bp, register_avx512_9x3::gemm<false>, false, true, n_times);
+		}
+#endif
+	}
+
+};
 
 void transpose_test()
 {
@@ -295,6 +361,36 @@ int main(int argc, char *argv[])
         blis::intiialize();
         benchmark("BLIS_packL3_6x2", bp, blis::gemm);
     }
+
+#ifdef USE_AVX512
+	// 5-1. AVX512 implementation based on naive BLIS
+	{
+		using blis = blis<register_avx512_9x3, option::naive>;
+		blis::intiialize();
+		benchmark("BLIS512_naive_9x3", bp, blis::gemm);
+	}
+
+	// 5-2. AVX512 implementation based on L1-BLIS
+	{
+		using blis = blis<register_avx512_9x3, option::copyL1>;
+		blis::intiialize();
+		benchmark("BLIS512_copyL1_9x3", bp, blis::gemm);
+	}
+
+	// 5-3. AVX512 implementation based on L2-BLIS
+	{
+		using blis = blis<register_avx512_9x3, option::copyL2>;
+		blis::intiialize();
+		benchmark("BLIS512_copyL2_9x3", bp, blis::gemm);
+	}
+
+	// 5-4. AVX512 implementation based on L3-BLIS
+	{
+		using blis = blis<register_avx512_9x3, option::copyL3>;
+		blis::intiialize();
+		benchmark("BLIS512_copyL3_9x3", bp, blis::gemm);
+	}
+#endif
 
     return 0;
 }

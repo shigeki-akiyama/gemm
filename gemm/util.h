@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 
@@ -82,6 +83,30 @@ public:
     }
 };
 #else
+
+static double calc_cpu_freq()
+{
+	namespace C = std::chrono;
+	using clock = C::high_resolution_clock;
+
+	constexpr double time = 0.01; // sec
+
+	auto t0 = clock::now();
+	auto cycle0 = rdtsc();
+
+	for (;;) {
+		auto d = C::duration_cast<C::duration<double>>(clock::now() - t0);
+		if (d.count() >= time) {
+			break;
+		}
+	}
+	auto cycle1 = rdtsc();
+
+	return double(cycle1 - cycle0) / time * 1e-9;
+}
+
+static double g_cpu_freq = calc_cpu_freq();
+
 class elapsed_time {
     double& elapsed_;
     size_t start_;
@@ -95,7 +120,7 @@ public:
     ~elapsed_time()
     {
         auto stop = rdtsc();
-        elapsed_ = double(stop - start_) / 3.1e9;
+        elapsed_ = double(stop - start_) / g_cpu_freq * 1e-9;
     }
 };
 #endif
