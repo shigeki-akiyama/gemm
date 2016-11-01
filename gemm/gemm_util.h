@@ -138,6 +138,11 @@ static void flush_all_cachelines(T *buf, int buf_size)
     }
 }
 
+template <class T>
+static void ref_gemm(
+    int M, int N, int K, T alpha, T *A, int lda,
+    T *B, int ldb, T beta, T *C, int ldc);
+
 template <class T, class F>
 static void benchmark(
     const char *name, bench_params<T>& bp, F f, 
