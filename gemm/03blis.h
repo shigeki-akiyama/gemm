@@ -105,29 +105,49 @@ struct make_blis_L1 {
     {
         assert(M % BLOCK_M == 0);
         assert(N % BLOCK_N == 0);
+        assert(K <= BLIS::BLOCK_K);
+
+        int Kc = std::min<int>(K, BLIS::BLOCK_K);
 
         for (int j = 0; j < N; j += BLOCK_N) {
             auto Br = B + ldb * 0 + j;
+            int ldb_r = ldb;
 
-            int Kc = std::min<int>(K, BLIS::BLOCK_K);
+#if 1
             if (Opt::pack_level() >= 1) {
                 // Copy B to L1 (256x16: 16KB) cache buffer
-                Opt::template pack<1>(B, ldb, Kc, BLOCK_N, buf->Br, BLOCK_N);
+                Opt::template pack<1>(Br, ldb, Kc, BLOCK_N, buf->Br, BLOCK_N);
+                //copy2d(Br, ldb_r, Kc, BLOCK_N, buf->Br, BLOCK_N);
                 Br = buf->Br;
-                ldb = BLOCK_N;
+                ldb_r = BLOCK_N;
             }
+#endif
 
             for (int i = 0; i < M; i += BLOCK_M) {
                 auto Ar = A + lda * i + 0;
                 auto Cr = C + ldc * i + j;
-                lda = BLOCK_M;
-                ldb = BLOCK_N;
-                if (Opt::do_pack())
-                    Kernel::matmul_register_packed(BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
-                else
-                    Kernel::matmul_register(BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
+
+                printf("# j = %d, i = %d, Mr = %d, Nr = %d, Kr = %d\n", j, i, BLOCK_M, BLOCK_N, Kc);
+#if 1
+                //if (Opt::do_pack())
+                //    Kernel::matmul_register_packed(BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
+                //else
+                    Kernel::matmul_register(BLOCK_M, BLOCK_N, Kc, Ar, lda, Br, ldb, Cr, ldc);
+#else  
+                naive::matmul(BLOCK_M, BLOCK_N, Kc, Ar, lda, Br, ldb_r, Cr, ldc);
+#endif
             }
         }
+    }
+
+    static void gemm(
+        int M, int N, int K, float alpha, float *A, int lda,
+        float *B, int ldb, float beta, float *C, int ldc)
+    {
+        scale_matrix(A, lda, M, K, alpha);
+        scale_matrix(C, ldc, M, N, beta);
+
+        matmul(M, N, K, A, lda, B, ldb, C, ldc);
     }
 
     static void initialize()
@@ -161,8 +181,8 @@ struct blis {
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
     {
-        for (int j = 0; j < N - 1; j += BLOCK_N) {
-            for (int k = 0; k < K - 1; k += BLOCK_K) {
+        for (int j = 0; j < N; j += BLOCK_N) {
+            for (int k = 0; k < K; k += BLOCK_K) {
                 auto Bc = B + ldb * k + j;
                 auto Nc = std::min<int>(N - j, BLOCK_N);
                 auto Kc = std::min<int>(K - k, BLOCK_K);
@@ -174,7 +194,7 @@ struct blis {
                     ldb = Nc;
                 }
 
-                for (int i = 0; i < M - 1; i += BLOCK_M) {
+                for (int i = 0; i < M; i += BLOCK_M) {
                     auto Ac = A + lda * i + k;
                     auto Cc = C + ldc * i + j;
                     auto Mc = std::min<int>(M - i, BLOCK_M);
@@ -185,6 +205,9 @@ struct blis {
                         Ac = L1::buf->Ac;
                         lda = L1::BLOCK_M + 8;
                     }
+
+                    //printf("# j = %d, k = %d, i = %d, Mc = %d, Nc = %d, Kc = %d\n",
+                    //    j, k, i, Mc, Nc, Kc);
 
                     L1::matmul(Mc, Nc, Kc, Ac, lda, Bc, ldb, Cc, ldc);
                 }
