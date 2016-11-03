@@ -7,7 +7,7 @@
 #undef NODEBUG
 
 
-template <class Kernel, class Opt>
+template <class Kernel>
 struct blisL2 {
     enum : int {
         BLOCK_M = M_CACHE,
@@ -110,11 +110,11 @@ struct blisL2 {
         }
     }
 };
-template <class Kernel, class Opt>
-typename blisL2<Kernel, Opt>::blis_buffer * blisL2<Kernel, Opt>::s_buf = nullptr;
+template <class Kernel>
+typename blisL2<Kernel>::blis_buffer * blisL2<Kernel>::s_buf = nullptr;
 
 
-template <class Kernel, class Opt>
+template <class Kernel>
 struct blis {
     enum : int {
         BLOCK_M = M_CACHE,
@@ -214,5 +214,5 @@ struct blis {
         }
     }
 };
-template <class Kernel, class Opt>
-typename blis<Kernel, Opt>::blis_buffer * blis<Kernel, Opt>::s_buf = nullptr;
+template <class Kernel>
+typename blis<Kernel>::blis_buffer * blis<Kernel>::s_buf = nullptr;

@@ -43,7 +43,6 @@ struct naive {
 
 };
 
-#ifdef USE_AVX
 #include <immintrin.h>
 
 struct naive_avx {
@@ -75,5 +74,3 @@ struct naive_avx {
     }
 
 };
-
-#endif
