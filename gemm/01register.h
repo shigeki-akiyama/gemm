@@ -476,6 +476,35 @@ struct register_avx_3_6x2 {
 #define N_UNROLLS  1
 
         for (int k = 0; k < K; k += N_UNROLLS) {
+
+            int i = 0;
+            auto pa = &A[lda * (k + i) + 0];
+            auto pb = &B[ldb * (k + i) + 0];
+           
+            auto vb0 = _mm256_load_ps(pb + 8 * 0);
+            auto vb1 = _mm256_load_ps(pb + 8 * 1);
+           
+            auto va0 = _mm256_broadcast_ss(&pa[8 * i + 0]);
+            auto va1 = _mm256_broadcast_ss(&pa[8 * i + 1]);
+            vab00 = _mm256_fmadd_ps(va0, vb0, vab00);
+            vab01 = _mm256_fmadd_ps(va0, vb1, vab01);
+            vab02 = _mm256_fmadd_ps(va1, vb0, vab02);
+            vab03 = _mm256_fmadd_ps(va1, vb1, vab03);
+           
+            auto va2 = _mm256_broadcast_ss(&pa[8 * i + 2]);
+            auto va3 = _mm256_broadcast_ss(&pa[8 * i + 3]);
+            vab04 = _mm256_fmadd_ps(va2, vb0, vab04);
+            vab05 = _mm256_fmadd_ps(va2, vb1, vab05);
+            vab06 = _mm256_fmadd_ps(va3, vb0, vab06);
+            vab07 = _mm256_fmadd_ps(va3, vb1, vab07);
+           
+            auto va4 = _mm256_broadcast_ss(&pa[8 * i + 4]);
+            auto va5 = _mm256_broadcast_ss(&pa[8 * i + 5]);
+            vab08 = _mm256_fmadd_ps(va4, vb0, vab08);
+            vab09 = _mm256_fmadd_ps(va4, vb1, vab09);
+            vab10 = _mm256_fmadd_ps(va5, vb0, vab10);
+            vab11 = _mm256_fmadd_ps(va5, vb1, vab11);
+
 #define MM(i) \
             auto pa##i = &A[lda * (k + i) + 0]; \
             auto pb##i = &B[ldb * (k + i) + 0]; \
@@ -504,7 +533,7 @@ struct register_avx_3_6x2 {
             vab10 = _mm256_fmadd_ps(va5##i, vb0##i, vab10); \
             vab11 = _mm256_fmadd_ps(va5##i, vb1##i, vab11)
 
-            MM(0);
+            //MM(0);
 #if N_UNROLLS >= 2
             MM(1);
 #if N_UNROLLS >= 4
@@ -827,6 +856,86 @@ struct register_avx_3_4x3 {
 
         matmul<PACKED>(M, N, K, A, lda, B, ldb, C, ldc);
     }
+};
+
+
+struct register_bench {
+
+    template <class T>
+    static void performL1(bench_params<T>& bp_)
+    {
+        int n_times = 1 * 1000;
+
+        struct matmul_buffer {
+            float A[256 * 256];  // 4 * 128 * 128 = 16KB
+            char padding0[LINE_SIZE * 1];
+            float B[256 * 256];
+            char padding1[LINE_SIZE * 2];
+            float C[256 * 256];
+        };
+        auto buf_ = make_aligned_ptr<matmul_buffer>(PAGE_SIZE);
+        auto& buf = *buf_.get();
+        memset(&buf, 0, sizeof(matmul_buffer));
+
+        auto make_bp = [&](int M, int N, int K) {
+            bench_params<T> bp = bp_;
+            bp.A = buf.A;
+            bp.B = buf.B;
+            bp.C = buf.C;
+            bp.M = M;
+            bp.N = bp.ldb = bp.ldc = N;
+            bp.K = bp.lda = K;
+            return bp;
+        };
+
+#if 0
+        {
+            auto bp = make_bp(6, 32, 256);
+            benchmark("register_avx_1", bp, register_avx_1::gemm, false, true, n_times);
+            benchmark("register_avx_2", bp, register_avx_2::gemm, false, true, n_times);
+        }
+#endif
+        {
+            auto bp = make_bp(6, 16, 256);
+            benchmark("register_avx_3_6x2", bp, register_avx_3_6x2::gemm<false>, false, true, n_times);
+
+            pack2d<T, 6, 1>(bp.A, bp.lda, bp.M, bp.K, bp.C, 1);
+            std::copy_n(bp.C, bp.M * bp.K, bp.A);
+            pack2d<T, 1, 16>(bp.B, bp.ldb, bp.K, bp.N, bp.C, 1);
+            std::copy_n(bp.C, bp.K * bp.N, bp.B);
+            std::fill_n(bp.C, bp.M * bp.ldc, T(0.0));
+            bp.lda = register_avx_3_6x2::BLOCK_M;
+            bp.ldb = register_avx_3_6x2::BLOCK_N;
+
+            benchmark("register_avx_3_6x2p", bp, register_avx_3_6x2::gemm<true>, false, true, n_times);
+        }
+
+#if 1
+        {
+            auto bp = make_bp(4, 24, 256);
+            benchmark("register_avx_3_4x3", bp, register_avx_3_4x3::gemm<false>, false, true, n_times);
+
+            pack2d<T, 4, 1>(bp.A, bp.lda, bp.M, bp.K, bp.C, 1);
+            std::copy_n(bp.C, bp.M * bp.K, bp.A);
+            pack2d<T, 1, 24>(bp.B, bp.ldb, bp.K, bp.N, bp.C, 1);
+            std::copy_n(bp.C, bp.K * bp.N, bp.B);
+            std::fill_n(bp.C, bp.M * bp.ldc, T(0.0));
+            bp.lda = register_avx_3_4x3::BLOCK_M;
+            bp.ldb = register_avx_3_4x3::BLOCK_N;
+
+            benchmark("register_avx_3_4x3p", bp, register_avx_3_4x3::gemm<true>, false, true, n_times);
+        }
+#endif
+
+
+#ifdef USE_AVX512
+        {
+            auto bp = make_bp(9, 48, 32);
+            benchmark("register_avx512_9x3", bp, register_avx512_9x3::gemm<false>, false, true, n_times);
+        }
+#endif
+    }
+
 };
 
 #endif

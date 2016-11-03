@@ -70,6 +70,26 @@ static void copy2d(const T *A, int lda, int M, int N, T *B, int ldb)
     }
 }
 
+template <class T, int RS, int CS>
+static void pack2d(const T *A, int lda, int M, int N, T *B, int ldb)
+{
+    if (RS > 0) {           // for matrix A
+        for (int i = 0; i < M; i++) {
+            for (int j = 0; j < N; j++) {
+                int k = RS * N * (i / RS) + RS * j + i % RS;
+                B[k] = A[lda * i + j];
+            }
+        }
+    } else if (CS > 0) {    // for matrix B
+        for (int i = 0; i < M; i++) {
+            for (int j = 0; j < N; j++) {
+                int k = CS * M * (j / CS) + CS * i + j % CS;
+                B[k] = A[lda * i + j];
+            }
+        }
+    }
+}
+
 static void scale_matrix(
     float *A, int lda, int M, int N, float coeff)
 {
@@ -137,6 +157,11 @@ static void flush_all_cachelines(T *buf, int buf_size)
         buf[i] += T(0.1);
     }
 }
+
+template <class T>
+static void ref_gemm(
+    int M, int N, int K, T alpha, T *A, int lda,
+    T *B, int ldb, T beta, T *C, int ldc);
 
 template <class T, class F>
 static void benchmark(

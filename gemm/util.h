@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <random>
 
 static constexpr int LINE_SIZE = 64;
 static constexpr int PAGE_SIZE = 4096;
@@ -19,6 +20,27 @@ static int alignup(int size, int align)
     return (size + align - 1) / align * align;
 }
 
+template <class T>
+static void fill_random(T *arr, size_t size, int seed)
+{
+    std::mt19937 engine(seed);
+    //std::uniform_real_distribution<T> dist(0.5, 2.0);
+    std::uniform_int_distribution<> dist(0, 3);
+
+    for (size_t i = 0; i < size; i++) {
+#if 1
+        switch (dist(engine)) {
+        case 0: arr[i] = T(0.25); break;
+        case 1: arr[i] = T(0.50); break;
+        case 2: arr[i] = T(1.00); break;
+        case 3: arr[i] = T(2.00); break;
+        }
+#else
+        arr[i] = T(dist(engine));
+#endif
+    }
+}
+
 static size_t rdtsc()
 {
 #if defined(_MSC_VER)
@@ -31,7 +53,7 @@ static size_t rdtsc()
 #endif
 }
 
-#if defined(_WIN32)
+#if 0 //defined(_WIN32)
 #define NOMINMAX
 #include <windows.h>
 
