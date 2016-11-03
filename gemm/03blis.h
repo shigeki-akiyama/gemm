@@ -6,26 +6,6 @@
 #undef NODEBUG
 
 
-template <class T, int RS, int CS>
-static void pack2d(const T *A, int lda, int M, int N, T *B, int ldb)
-{
-    if (RS > 0) {           // for matrix A
-        for (int i = 0; i < M; i++) {
-            for (int j = 0; j < N; j++) {
-                int k = RS * N * (i / RS) + RS * j + i % RS;
-                B[k] = A[lda * i + j];
-            }
-        }
-    } else if (CS > 0) {    // for matrix B
-        for (int i = 0; i < M; i++) {
-            for (int j = 0; j < N; j++) {
-                int k = CS * M * (j / CS) + CS * i + j % CS;
-                B[k] = A[lda * i + j];
-            }
-        }
-    }
-}
-
 template <class T>
 struct blis_opt {
     template <int LEVEL, class Packer>
