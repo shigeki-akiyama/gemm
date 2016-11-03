@@ -9,12 +9,12 @@ namespace cache_oblivious {
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
     {
-        using kernel = register_avx_3_6x2;
+        using kernel = register_avx_3_4x3;
 
         enum : int {
             TILE_M = kernel::BLOCK_M,
             TILE_N = kernel::BLOCK_N,
-            TILE_K = 256,
+            TILE_K = 32, //kernel::BLOCK_K,
         };
 
         if (M > std::max(N, K) && M >= 2 * TILE_M) {
@@ -64,9 +64,9 @@ struct blocking_base {
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
     {
-        for (int i = 0; i < M - 1; i += BLOCK_M) {
-            for (int j = 0; j < N - 1; j += BLOCK_N) {
-                for (int k = 0; k < K - 1; k += BLOCK_K) {
+        for (int i = 0; i < M; i += BLOCK_M) {
+            for (int j = 0; j < N; j += BLOCK_N) {
+                for (int k = 0; k < K; k += BLOCK_K) {
                     auto Ab = A + lda * i + k;
                     auto Bb = B + ldb * k + j;
                     auto Cb = C + ldc * i + j;
@@ -90,17 +90,17 @@ struct blocking_base {
     }
 };
 
-#if 1
-// L1 blocking: (32x64 + 32x32 + 32x64) * 4bytes = 20KB (< 32KB)
-struct cache_blocking_L1 : blocking_base<32, 64, 32, register_avx_2> {};
+#if 0
+// L1 blocking: (48x32 + 48x32 + 32x32) * 4bytes = 16KB (< 32KB)
+struct cache_blocking_L1 : blocking_base<48, 32, 32, register_avx_3_6x2> {};
 
-// L2 blocking: 128KB (< 256KB)
-struct cache_blocking_L2 : blocking_base<64, 128, 128, cache_blocking_L1> {};
+// L2 blocking: 96KB (< 256KB)
+struct cache_blocking_L2 : blocking_base<96, 96, 96, cache_blocking_L1> {};
 
-// L3 blocking: 512KB (< 1MB/core)
-struct cache_blocking_L3 : blocking_base<128, 256, 256, cache_blocking_L2> {};
+// L3 blocking: 432KB (< 1MB/core)
+struct cache_blocking_L3 : blocking_base<192, 192, 192, cache_blocking_L2> {};
 #else
-struct cache_blocking_L1 : blocking_base<24, 64, 32, register_avx_3_6x2> {};
-struct cache_blocking_L2 : blocking_base<48, 128, 128, cache_blocking_L1> {};
-struct cache_blocking_L3 : blocking_base<96, 256, 256, cache_blocking_L2> {};
+struct cache_blocking_L1 : blocking_base<32, 48, 32, register_avx_3_4x3> {};
+struct cache_blocking_L2 : blocking_base<64, 96, 128, cache_blocking_L1> {};
+struct cache_blocking_L3 : blocking_base<128, 192, 256, cache_blocking_L2> {};
 #endif

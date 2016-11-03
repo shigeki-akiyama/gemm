@@ -321,6 +321,7 @@ struct register_avx_3_6x2 {
     enum : int {
         BLOCK_M = 6,
         BLOCK_N = 8 * 2,
+        BLOCK_K = 32,
     };
 
     // C += A * B for 6x16 matrix
@@ -631,6 +632,7 @@ struct register_avx_3_4x3 {
     enum : int {
         BLOCK_M = 4,
         BLOCK_N = 8 * 3,
+        BLOCK_K = 32,
     };
 
     // for 6x16 matrix
