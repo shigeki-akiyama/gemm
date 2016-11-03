@@ -190,8 +190,8 @@ int main(int argc, char *argv[])
 #if 1
     // 3-1. BLIS-based implementation
     {
-        using blis = blis<register_avx_3_6x2, option::naive>;
-        blis::intiialize();
+        using blis = blis_copy<register_avx_3_6x2, option::naive>;
+        blis::initialize();
         benchmark("blis_naive_6x2", bp, blis::gemm);
     }
 #endif
@@ -199,8 +199,8 @@ int main(int argc, char *argv[])
 #if 1
     // 3-2. BLIS-based implementation w/ copy optimization on L1
     {
-        using blis = blis<register_avx_3_6x2, option::copyL1>;
-        blis::intiialize();
+        using blis = blis_copy<register_avx_3_6x2, option::copyL1>;
+        blis::initialize();
         benchmark("blis_copyL1_6x2", bp, blis::gemm);
     }
 #endif
@@ -208,44 +208,44 @@ int main(int argc, char *argv[])
 #if 1
     // 3-3. BLIS-based implementation w/ copy optimization on L1/L2
     {
-        using blis = blis<register_avx_3_6x2, option::copyL2>;
-        blis::intiialize();
+        using blis = blis_copy<register_avx_3_6x2, option::copyL2>;
+        blis::initialize();
         benchmark("blis_copyL2_6x2", bp, blis::gemm);
     }
 
     // 3-4. BLIS-based implementation w/ copy optimization on L1/L2/L3
     {
-        using blis = blis<register_avx_3_6x2, option::copyL3>;
-        blis::intiialize();
+        using blis = blis_copy<register_avx_3_6x2, option::copyL3>;
+        blis::initialize();
         benchmark("blis_copyL3_6x2", bp, blis::gemm);
     }
 #endif
 #if 1
     // 3-1'. BLIS-based implementation
     {
-        using blis = blis<register_avx_3_4x3, option::naive>;
-        blis::intiialize();
+        using blis = blis_copy<register_avx_3_4x3, option::naive>;
+        blis::initialize();
         benchmark("blis_naive_4x3", bp, blis::gemm);
     }
 
     // 3-2'. BLIS-based implementation w/ copy optimization on L1
     {
-        using blis = blis<register_avx_3_4x3, option::copyL1>;
-        blis::intiialize();
+        using blis = blis_copy<register_avx_3_4x3, option::copyL1>;
+        blis::initialize();
         benchmark("blis_copyL1_4x3", bp, blis::gemm);
     }
 
     // 3-3'. BLIS-based implementation w/ copy optimization on L1/L2
     {
-        using blis = blis<register_avx_3_4x3, option::copyL2>;
-        blis::intiialize();
+        using blis = blis_copy<register_avx_3_4x3, option::copyL2>;
+        blis::initialize();
         benchmark("blis_copyL2_4x3", bp, blis::gemm);
     }
 
     // 3-4'. BLIS-based implementation w/ copy optimization on L1/L2/L3
     {
-        using blis = blis<register_avx_3_4x3, option::copyL3>;
-        blis::intiialize();
+        using blis = blis_copy<register_avx_3_4x3, option::copyL3>;
+        blis::initialize();
         benchmark("blis_copyL3_4x3", bp, blis::gemm);
     }
 #endif
@@ -268,13 +268,13 @@ int main(int argc, char *argv[])
     */
     // 4-3. BLIS-based implementation w/ copy with stride format on L1/L2/L3
     {
-        using blis = blis_<register_avx_3_6x2, option::packL3>;
+        using blis = blis<register_avx_3_6x2, option::packL3>;
         blis::intiialize();
         benchmark("blis_packL3_6x2", bp, blis::gemm);
     }
     
     {
-        using blis = blis_<register_avx_3_6x2, option::packL3>;
+        using blis = blis<register_avx_3_6x2, option::packL3>;
         blis::intiialize();
         benchmark("blis_packL3_4x3", bp, blis::gemm);
     }
@@ -282,29 +282,29 @@ int main(int argc, char *argv[])
 #ifdef USE_AVX512
     // 5-1. AVX512 implementation based on naive BLIS
     {
-        using blis = blis<register_avx512_9x3, option::naive>;
-        blis::intiialize();
+        using blis = blis_copy<register_avx512_9x3, option::naive>;
+        blis::initialize();
         benchmark("blis512_naive_9x3", bp, blis::gemm);
     }
 
     // 5-2. AVX512 implementation based on L1-BLIS
     {
-        using blis = blis<register_avx512_9x3, option::copyL1>;
-        blis::intiialize();
+        using blis = blis_copy<register_avx512_9x3, option::copyL1>;
+        blis::initialize();
         benchmark("blis512_copyL1_9x3", bp, blis::gemm);
     }
 
     // 5-3. AVX512 implementation based on L2-BLIS
     {
-        using blis = blis<register_avx512_9x3, option::copyL2>;
-        blis::intiialize();
+        using blis = blis_copy<register_avx512_9x3, option::copyL2>;
+        blis::initialize();
         benchmark("blis512_copyL2_9x3", bp, blis::gemm);
     }
 
     // 5-4. AVX512 implementation based on L3-BLIS
     {
-        using blis = blis<register_avx512_9x3, option::copyL3>;
-        blis::intiialize();
+        using blis = blis_copy<register_avx512_9x3, option::copyL3>;
+        blis::initialize();
         benchmark("blis512_copyL3_9x3", bp, blis::gemm);
     }
 #endif

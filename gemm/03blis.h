@@ -60,11 +60,11 @@ struct blis_opt {
 };
 
 
-template <class Kernel, class Opt> struct blis;
+template <class Kernel, class Opt> struct blis_copy;
 
 template <class Kernel, class Opt>
-struct make_blis_L1 {
-    using BLIS = blis<Kernel, Opt>;
+struct make_blis_copy_L1 {
+    using BLIS = blis_copy<Kernel, Opt>;
 
     enum : int {
         BLOCK_M = Kernel::BLOCK_M,
@@ -132,11 +132,11 @@ struct make_blis_L1 {
     }
 };
 template <class Kernel, class Opt>
-typename make_blis_L1<Kernel, Opt>::blis_buffer * make_blis_L1<Kernel, Opt>::buf = nullptr;
+typename make_blis_copy_L1<Kernel, Opt>::blis_buffer * make_blis_copy_L1<Kernel, Opt>::buf = nullptr;
 
 template <class Kernel, class Opt>
-struct blis {
-    struct L1 : make_blis_L1<Kernel, Opt> {};
+struct blis_copy {
+    struct L1 : make_blis_copy_L1<Kernel, Opt> {};
 
     enum : int {
         BLOCK_M = 144,
@@ -204,7 +204,7 @@ struct blis {
         matmul(M, N, K, A, lda, B, ldb, C, ldc);
     }
 
-    static void intiialize()
+    static void initialize()
     {
         L1::initialize();
     }

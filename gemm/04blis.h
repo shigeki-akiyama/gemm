@@ -8,7 +8,7 @@
 template <class Kernel, class Opt> struct blis;
 
 template <class Kernel, class Opt>
-struct make_blis_L1_ {
+struct make_blis_L1 {
     using BLIS = blis<Kernel, Opt>;
 
     enum : int {
@@ -73,11 +73,11 @@ struct make_blis_L1_ {
     }
 };
 template <class Kernel, class Opt>
-typename make_blis_L1_<Kernel, Opt>::blis_buffer * make_blis_L1_<Kernel, Opt>::buf = nullptr;
+typename make_blis_L1<Kernel, Opt>::blis_buffer * make_blis_L1<Kernel, Opt>::buf = nullptr;
 
 template <class Kernel, class Opt>
-struct blis_ {
-    struct L1 : make_blis_L1_<Kernel, Opt> {};
+struct blis {
+    struct L1 : make_blis_L1<Kernel, Opt> {};
 
     enum : int {
         BLOCK_M = 144,
