@@ -25,14 +25,15 @@ static void fill_random(T *arr, size_t size, int seed)
 {
     std::mt19937 engine(seed);
     //std::uniform_real_distribution<T> dist(0.5, 2.0);
-    std::uniform_int_distribution<> dist(0, 1);
+    std::uniform_int_distribution<> dist(0, 3);
 
     for (size_t i = 0; i < size; i++) {
 #if 1
-        if (dist(engine)) {
-            arr[i] = 2.0;
-        } else {
-            arr[i] = 0.5;
+        switch (dist(engine)) {
+        case 0: arr[i] = T(0.25); break;
+        case 1: arr[i] = T(0.50); break;
+        case 2: arr[i] = T(1.00); break;
+        case 3: arr[i] = T(2.00); break;
         }
 #else
         arr[i] = T(dist(engine));
