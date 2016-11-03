@@ -58,7 +58,7 @@ struct blis_opt {
         template <int CURR_LEVEL>
         static void pack(const T *A, int lda, int M, int N, T *B, int ldb)
         {
-            if (CURR_LEVEL == LEVEL && LEVEL > 1) {
+            if (CURR_LEVEL == LEVEL && 2 <= LEVEL && LEVEL <= 3) {
                 pack2d<T, RS, CS>(A, lda, M, N, B, ldb);
             } else if (CURR_LEVEL == LEVEL) {
                 copy2d(A, lda, M, N, B, ldb);
@@ -113,29 +113,22 @@ struct make_blis_L1 {
             auto Br = B + ldb * 0 + j;
             int ldb_r = ldb;
 
-#if 1
             if (Opt::pack_level() >= 1) {
                 // Copy B to L1 (256x16: 16KB) cache buffer
                 Opt::template pack<1>(Br, ldb, Kc, BLOCK_N, buf->Br, BLOCK_N);
-                //copy2d(Br, ldb_r, Kc, BLOCK_N, buf->Br, BLOCK_N);
                 Br = buf->Br;
                 ldb_r = BLOCK_N;
             }
-#endif
 
             for (int i = 0; i < M; i += BLOCK_M) {
                 auto Ar = A + lda * i + 0;
                 auto Cr = C + ldc * i + j;
 
-                printf("# j = %d, i = %d, Mr = %d, Nr = %d, Kr = %d\n", j, i, BLOCK_M, BLOCK_N, Kc);
-#if 1
-                //if (Opt::do_pack())
-                //    Kernel::matmul_register_packed(BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
-                //else
-                    Kernel::matmul_register(BLOCK_M, BLOCK_N, Kc, Ar, lda, Br, ldb, Cr, ldc);
-#else  
-                naive::matmul(BLOCK_M, BLOCK_N, Kc, Ar, lda, Br, ldb_r, Cr, ldc);
-#endif
+                //printf("# j = %d, i = %d, Mr = %d, Nr = %d, Kr = %d\n", j, i, BLOCK_M, BLOCK_N, Kc);
+                if (Opt::do_pack())
+                    Kernel::matmul_register_packed(BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb_r, Cr, ldc);
+                else
+                    Kernel::matmul_register(BLOCK_M, BLOCK_N, Kc, Ar, lda, Br, ldb_r, Cr, ldc);
             }
         }
     }
@@ -186,30 +179,36 @@ struct blis {
                 auto Bc = B + ldb * k + j;
                 auto Nc = std::min<int>(N - j, BLOCK_N);
                 auto Kc = std::min<int>(K - k, BLOCK_K);
+                auto ldb_c = ldb;
 
                 if (Opt::pack_level() >= 3) {
                     // Copy B (256x3072) to L3 cache buffer
                     Opt::template pack<3>(Bc, ldb, Kc, Nc, L1::buf->Bc, Nc);
                     Bc = L1::buf->Bc;
-                    ldb = Nc;
+                    ldb_c = Nc;
                 }
 
                 for (int i = 0; i < M; i += BLOCK_M) {
                     auto Ac = A + lda * i + k;
                     auto Cc = C + ldc * i + j;
                     auto Mc = std::min<int>(M - i, BLOCK_M);
+                    
+                    auto lda_c = lda;
 
                     if (Opt::pack_level() >= 2) {
                         // Copy A (144x256) to L2 cache buffer
-                        Opt::template pack<2>(Ac, lda, Mc, Kc, L1::buf->Ac, L1::BLOCK_M + 8);
+                        Opt::template pack<2>(Ac, lda, Mc, Kc, L1::buf->Ac, Kc);
                         Ac = L1::buf->Ac;
-                        lda = L1::BLOCK_M + 8;
+                        lda_c = Opt::do_pack() ? L1::BLOCK_M : Kc;
                     }
 
                     //printf("# j = %d, k = %d, i = %d, Mc = %d, Nc = %d, Kc = %d\n",
                     //    j, k, i, Mc, Nc, Kc);
-
-                    L1::matmul(Mc, Nc, Kc, Ac, lda, Bc, ldb, Cc, ldc);
+#if 1
+                    L1::matmul(Mc, Nc, Kc, Ac, lda_c, Bc, ldb_c, Cc, ldc);
+#else
+                    naive::matmul(Mc, Nc, Kc, Ac, lda_c, Bc, ldb_c, Cc, ldc);
+#endif
                 }
             }
         }

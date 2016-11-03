@@ -9,19 +9,12 @@ namespace cache_oblivious {
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
     {
-#define USE_RAVX2
-#ifdef USE_RAVX2
-        using kernel = register_avx_2;
-#else
         using kernel = register_avx_3_6x2;
-#endif
 
         enum : int {
             TILE_M = kernel::BLOCK_M,
             TILE_N = kernel::BLOCK_N,
-#ifdef USE_RAVX2
-            TILE_K = kernel::BLOCK_K,
-#endif
+            TILE_K = 256,
         };
 
         if (M > std::max(N, K) && M >= 2 * TILE_M) {
@@ -36,18 +29,15 @@ namespace cache_oblivious {
             auto C_half = C + N_half;
             matmul(M, N_half    , K, A, lda, B     , ldb, C     , ldc);
             matmul(M, N - N_half, K, A, lda, B_half, ldb, C_half, ldc);
-#ifdef USE_RAVX2
         } else if (K >= 2 * TILE_K) {
             int K_half = K / 2 / TILE_K * TILE_K;
             auto A_half = A + K_half;
             auto B_half = B + ldb * K_half;
             matmul(M, N, K_half    , A     , lda, B,      ldb, C, ldc);
             matmul(M, N, K - K_half, A_half, lda, B_half, ldb, C, ldc);
-#endif
         } else {
             kernel::matmul(M, N, K, A, lda, B, ldb, C, ldc);
         }
-#undef USE_RAVX2
     }
 
     static void gemm(

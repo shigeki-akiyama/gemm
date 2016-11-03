@@ -24,11 +24,12 @@
     <ClInclude Include="01register512.h" />
     <ClInclude Include="02cache.h" />
     <ClInclude Include="03blis.h" />
+    <ClInclude Include="04blis.h" />
     <ClInclude Include="gemm_util.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\home\wrk\avx2\gemm\gemm\main.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AB47F1A9-A8D3-42B2-816E-49D8CD690B27}</ProjectGuid>

@@ -476,6 +476,35 @@ struct register_avx_3_6x2 {
 #define N_UNROLLS  1
 
         for (int k = 0; k < K; k += N_UNROLLS) {
+
+            int i = 0;
+            auto pa = &A[lda * (k + i) + 0];
+            auto pb = &B[ldb * (k + i) + 0];
+           
+            auto vb0 = _mm256_load_ps(pb + 8 * 0);
+            auto vb1 = _mm256_load_ps(pb + 8 * 1);
+           
+            auto va0 = _mm256_broadcast_ss(&pa[8 * i + 0]);
+            auto va1 = _mm256_broadcast_ss(&pa[8 * i + 1]);
+            vab00 = _mm256_fmadd_ps(va0, vb0, vab00);
+            vab01 = _mm256_fmadd_ps(va0, vb1, vab01);
+            vab02 = _mm256_fmadd_ps(va1, vb0, vab02);
+            vab03 = _mm256_fmadd_ps(va1, vb1, vab03);
+           
+            auto va2 = _mm256_broadcast_ss(&pa[8 * i + 2]);
+            auto va3 = _mm256_broadcast_ss(&pa[8 * i + 3]);
+            vab04 = _mm256_fmadd_ps(va2, vb0, vab04);
+            vab05 = _mm256_fmadd_ps(va2, vb1, vab05);
+            vab06 = _mm256_fmadd_ps(va3, vb0, vab06);
+            vab07 = _mm256_fmadd_ps(va3, vb1, vab07);
+           
+            auto va4 = _mm256_broadcast_ss(&pa[8 * i + 4]);
+            auto va5 = _mm256_broadcast_ss(&pa[8 * i + 5]);
+            vab08 = _mm256_fmadd_ps(va4, vb0, vab08);
+            vab09 = _mm256_fmadd_ps(va4, vb1, vab09);
+            vab10 = _mm256_fmadd_ps(va5, vb0, vab10);
+            vab11 = _mm256_fmadd_ps(va5, vb1, vab11);
+
 #define MM(i) \
             auto pa##i = &A[lda * (k + i) + 0]; \
             auto pb##i = &B[ldb * (k + i) + 0]; \
@@ -504,7 +533,7 @@ struct register_avx_3_6x2 {
             vab10 = _mm256_fmadd_ps(va5##i, vb0##i, vab10); \
             vab11 = _mm256_fmadd_ps(va5##i, vb1##i, vab11)
 
-            MM(0);
+            //MM(0);
 #if N_UNROLLS >= 2
             MM(1);
 #if N_UNROLLS >= 4
