@@ -65,8 +65,8 @@ static void ref_gemm(
 #ifdef USE_CBLAS
     cblas_gemm(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
 #else
-    naive::gemm(
-    //cache_blocking_L3::gemm(
+    //naive::gemm(
+    cache_blocking_L3::gemm(
         M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
 #endif
 }
@@ -250,7 +250,8 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
     return pairs;
 }
 
-static int real_main(int M, int N, int K, const std::vector<std::string>& fnames)
+static int real_main(
+    int M, int N, int K, const std::vector<std::string>& fnames, bool verify)
 {
     int lda = K;
     int ldb = N;
@@ -298,7 +299,8 @@ static int real_main(int M, int N, int K, const std::vector<std::string>& fnames
 #endif
 
     // make result_C
-    ref_gemm(M, N, K, alpha, A.get(), lda, B.get(), ldb, beta, result_C.get(), ldc);
+    if (verify)
+        ref_gemm(M, N, K, alpha, A.get(), lda, B.get(), ldb, beta, result_C.get(), ldc);
 
     auto all_benchs = make_benchmarks(M, N, K);
 
@@ -322,7 +324,7 @@ static int real_main(int M, int N, int K, const std::vector<std::string>& fnames
     for (auto& bench : benchs) {
         auto fname = std::get<0>(bench);
         auto f = std::get<1>(bench);
-         benchmark(fname, bp, f);
+         benchmark(fname, bp, f, verify);
     }
 
     return 0;
@@ -349,10 +351,18 @@ int main(int argc, char ** argv)
 
     // Parse select arguments (-s fname0,fname1,...)
     std::vector<std::string> fnames;
-    if (argc >= 2 && std::strcmp(argv[0], "-s") == 0) {
+    if (argc >= 2 && std::strcmp(argv[0], "-select") == 0) {
         fnames = parse_select(argv[1]);
         argc -= 2;
         argv += 2;
+    }
+
+    // Parse verify argument (specify to execute the verify code)
+    bool verify = false;
+    if (argc >= 1 && std::strcmp(argv[0], "-verify") == 0) {
+        verify = true;
+        argc -= 1;
+        argv += 1;
     }
 
     // Parse matrix size
@@ -391,5 +401,5 @@ int main(int argc, char ** argv)
             ss.str().c_str(), M, N, K);
     }
 
-    return real_main(M, N, K, fnames);
+    return real_main(M, N, K, fnames, verify);
 }
