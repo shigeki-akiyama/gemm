@@ -95,6 +95,10 @@ int main(int argc, char *argv[])
     K = 76;
 #endif
 
+#if 0
+    M = N = K = 384;
+#endif
+
     int lda = K;
     int ldb = N;
     int ldc = N;
@@ -146,14 +150,13 @@ int main(int argc, char *argv[])
     benchmark(CBLAS_IMPL, bp, cblas_gemm<elem_type>);
 #endif
 
-#if 1
+#if 0
     if (M <= 512) {
         // 0-0. Naive implementation
-        //benchmark("naive", bp, naive::gemm<elem_type>);
+        benchmark("naive", bp, naive::gemm<elem_type>);
     }
 #endif
 
-#ifdef USE_AVX
 #if 0
     if (size <= 768) {
         // 0-1. Naive AVX implementation
@@ -181,10 +184,11 @@ int main(int argc, char *argv[])
 
     // 2-3. L2-cache blocking implementation with 2-2.
     benchmark("L2 blocking", bp, cache_blocking_L2::gemm);
-#endif
+
     // 2-3. L2-cache blocking implementation with 2-2.
-    //benchmark("L3 blocking", bp, cache_blocking_L3::gemm);
+    benchmark("L3 blocking", bp, cache_blocking_L3::gemm);
 #endif
+
     using option = blis_opt<elem_type>;
 
 #if 1
@@ -250,23 +254,20 @@ int main(int argc, char *argv[])
     }
 #endif
 #if 1
-    /*
-    // 4-1. BLIS-based implementation w/ copy with stride format on L1
+    // 4-1. BLIS-based implementation w/ copy with stride format on L1/L2
     {
-        using blis = blis<register_avx_3_6x2, option::packL1>;
-        blis::intiialize();
-        benchmark("blis_packL1_6x2", bp, blis::gemm);
-    }
-    */
-    /*
-    // 4-2. BLIS-based implementation w/ copy with stride format on L1/L2
-    {
-        using blis = blis_<register_avx_3_6x2, option::packL2>;
+        using blis = blisL2<register_avx_3_6x2, option::packL3>;
         blis::intiialize();
         benchmark("blis_packL2_6x2", bp, blis::gemm);
     }
-    */
-    // 4-3. BLIS-based implementation w/ copy with stride format on L1/L2/L3
+
+    {
+        using blis = blis<register_avx_3_4x3, option::packL3>;
+        blis::intiialize();
+        benchmark("blis_packL2_4x3", bp, blis::gemm);
+    }
+
+    // 4-1'. BLIS-based implementation w/ copy with stride format on L1/L2
     {
         using blis = blis<register_avx_3_6x2, option::packL3>;
         blis::intiialize();
@@ -274,7 +275,7 @@ int main(int argc, char *argv[])
     }
     
     {
-        using blis = blis<register_avx_3_6x2, option::packL3>;
+        using blis = blis<register_avx_3_4x3, option::packL3>;
         blis::intiialize();
         benchmark("blis_packL3_4x3", bp, blis::gemm);
     }
