@@ -5,6 +5,7 @@
 #include <limits>
 #include <type_traits>
 #include <memory>
+#include <cstring>
 
 #ifdef __INTELLISENSE__
 #undef __AVX__
@@ -63,15 +64,19 @@ static aligned_ptr<T[]> make_aligned_array(size_t size, size_t align, const T& i
 }
 
 template <class T>
-static void copy2d(const T *A, int lda, int M, int N, T *B, int ldb)
+static NOINLINE void copy2d(const T *A, int lda, int M, int N, T *B, int ldb)
 {
     for (int i = 0; i < M; i++) {
-        std::copy_n(A + lda * i, N, B + ldb * i);
+        //std::copy_n(A + lda * i, N, B + ldb * i);
+        std::memcpy(
+            static_cast<void *>(B + ldb * i),
+            static_cast<const void *>(A + lda * i),
+            sizeof(T) * N);
     }
 }
 
 template <class T, int RS, int CS>
-static void pack2d(const T *A, int lda, int M, int N, T *B, int ldb)
+static NOINLINE void pack2d(const T *A, int lda, int M, int N, T *B, int ldb)
 {
     if (RS > 0) {           // for matrix A
         for (int i = 0; i < M; i++) {

@@ -325,7 +325,7 @@ struct register_avx_3_6x2 {
     };
 
     // C += A * B for 6x16 matrix
-    static void matmul_register(
+    static NOINLINE void matmul_register(
         int M, int N, int K, float *A, int lda, float *B, int ldb,
         float *C, int ldc)
     {
@@ -442,7 +442,7 @@ struct register_avx_3_6x2 {
     }
 
     // C += packed(A) * packed(B) for 6x16 matrix
-    static void matmul_register_packed(
+    static NOINLINE void matmul_register_packed(
         int M, int N, int K, float *A, int lda, float *B, int ldb,
         float *C, int ldc)
     {
@@ -636,7 +636,7 @@ struct register_avx_3_4x3 {
     };
 
     // for 6x16 matrix
-    static void matmul_register(
+    static NOINLINE void matmul_register(
         int M, int N, int K, float *A, int lda, float *B, int ldb,
         float *C, int ldc)
     {
@@ -728,7 +728,7 @@ struct register_avx_3_4x3 {
         _mm256_store_ps(C + ldc * 3 + 8 * 2, vc11);
     }
 
-    static void matmul_register_packed(
+    static void NOINLINE matmul_register_packed(
         int M, int N, int K, float *A, int lda, float *B, int ldb,
         float *C, int ldc)
     {
@@ -866,7 +866,7 @@ struct register_bench {
     template <class T>
     static void performL1(bench_params<T>& bp_)
     {
-        int n_times = 1 * 1000;
+        int n_times = 1000 * 1000;
 
         struct matmul_buffer {
             float A[256 * 256];  // 4 * 128 * 128 = 16KB
