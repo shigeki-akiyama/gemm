@@ -170,7 +170,7 @@ static void ref_gemm(
 
 template <class T, class F>
 static void benchmark(
-    const char *name, bench_params<T>& bp, F f, 
+    papix& papi, const char *name, bench_params<T>& bp, F f, 
     bool verify = true, bool on_cache = false, size_t n_times = 10)
 {
     int M = bp.M, N = bp.N, K = bp.K;
@@ -188,10 +188,10 @@ static void benchmark(
         }
     };
 
-    auto r = measure_ntimes(n_times, [&] {
+    auto r = measure_ntimes(papi, name, n_times, preprocess, [&] {
         f(bp.M, bp.N, bp.K, bp.alpha, bp.A, bp.lda,
             bp.B, bp.ldb, bp.beta, bp.C, bp.ldc);
-    }, preprocess);
+    });
 
     auto flop = 2.0 * M * N * K; // +3.0 * M * N;
 #if 1

@@ -321,11 +321,14 @@ static int real_main(
         }
     }
 
+    papix papi;
     for (auto& bench : benchs) {
         auto fname = std::get<0>(bench);
         auto f = std::get<1>(bench);
-         benchmark(fname, bp, f, verify);
+         benchmark(papi, fname, bp, f, verify);
     }
+
+    papi.print_results();
 
     return 0;
 }

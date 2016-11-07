@@ -1,5 +1,6 @@
 #pragma once
 
+#include "papix.h"
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
@@ -177,7 +178,7 @@ static double measure_seconds(F f)
 
 template <class F1, class F2>
 static measure_results measure_ntimes(
-    size_t n_times, F1 f, F2 preprocess)
+    papix& papi, const char * name, size_t n_times, F1 preprocess, F2 f)
 {
     auto sum = 0.0;
     auto min = std::numeric_limits<double>::max();
@@ -185,7 +186,11 @@ static measure_results measure_ntimes(
     for (size_t i = 0; i < n_times; i++) {
         preprocess();
 
-        auto t = measure_seconds(f);
+        double t;
+        papi.measure(name, [&] {
+            t = measure_seconds(f);
+        });
+
         sum += t;
         min = std::min(min, t);
         max = std::max(max, t);
