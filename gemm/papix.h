@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __INTELLISENSE__
+#define USE_PAPI
+#endif
+
 #ifdef USE_PAPI
 
 #include <string>
@@ -95,7 +99,7 @@ public:
 
         std::printf("\n");
         std::printf("==== PAPI Results ====\n");
-        std::printf("%-20s %-12s %7s %9s %9s %9s %9s\n",
+        std::printf("%-20s %-12s %7s %11s %10s %10s %10s\n",
             "func", "counter", "count", "total", "avg", "min", "max");
 
         for (auto& pair : prof_entries_) {
@@ -104,7 +108,7 @@ public:
 
             for (size_t i = 0; i < events_.size(); i++) {
                 std::printf(
-                    "%-20s %-12s %7zu %9lld %9lld %9lld %9lld\n",
+                    "%-20s %-12s %7zu %11lld %10lld %10lld %10lld\n",
                     name.c_str(), event_strs_[i].c_str(), e.count,
                     e.total[i], e.total[i] / e.count,
                     e.min[i], e.max[i]);

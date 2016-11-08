@@ -861,6 +861,8 @@ struct register_avx_3_4x3 {
 };
 
 
+#include "01register512.h"
+
 struct register_bench {
 
     template <class T>
