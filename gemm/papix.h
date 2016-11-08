@@ -50,6 +50,7 @@ class papix {
     std::vector<int> events_;
     std::vector<std::string> event_strs_;
     std::map<std::string, prof_entry> prof_entries_;
+    int event_set_;
 
 public:
     papix()
@@ -57,15 +58,35 @@ public:
         , events_()
         , event_strs_()
         , prof_entries_()
+        , event_set_(PAPI_NULL)
     {
+        int r = PAPI_library_init(PAPI_VER_CURRENT);
+        if (r != PAPI_VER_CURRENT) {
+            fprintf(stderr, "PAPI Error: PAPI_library_init failed.\n");
+            std::exit(1);
+        }
+
         auto events_str = getenv("PAPIX_EVENTS");
         auto pair = parse_event_list(events_str);
         events_ = pair.first;
         event_strs_ = pair.second;
+
+#if 0
+        int code;
+        char * name = const_cast<char *>("CYCLE_ACTIVITY:STALLS_LDM_PENDING");
+        PAPI_CHECK(PAPI_event_name_to_code(name, &code));
+        events_.push_back(code);
+        event_strs_.push_back(name);
+#endif
+
+        PAPI_CHECK(PAPI_create_eventset(&event_set_));
+        PAPI_CHECK(PAPI_add_events(event_set_, events_.data(), events_.size()));
     }
 
     ~papix()
     {
+        //PAPI_CHECK(PAPI_destroy_eventset(&event_set_));
+        PAPI_shutdown();
     }
 
     template <class F>
@@ -74,13 +95,12 @@ public:
         if (profiling_) return;
 
         auto n_events = events_.size();
-        PAPI_CHECK(PAPI_start_counters(
-            const_cast<int *>(events_.data()), n_events));
+        PAPI_CHECK(PAPI_start(event_set_));
 
         f();
 
         long long values[256];
-        PAPI_CHECK(PAPI_stop_counters(values, n_events));
+        PAPI_CHECK(PAPI_stop(event_set_, values));
 
         submit(name, values, n_events);
 
