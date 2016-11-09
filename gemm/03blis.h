@@ -104,11 +104,14 @@ struct make_blis_copy_L1 {
                 auto Ar = A + lda * i + 0;
                 auto Cr = C + ldc * i + j;
 
-                //printf("# j = %d, i = %d, Mr = %d, Nr = %d, Kr = %d\n", j, i, BLOCK_M, BLOCK_N, Kc);
+                //printf("# j = %d, i = %d, Mr = %d, Nr = %d, Kr = %d\n",
+                //       j, i, BLOCK_M, BLOCK_N, Kc);
                 if (Opt::do_pack())
-                    Kernel::matmul_register_packed(BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb_r, Cr, ldc);
+                    Kernel::matmul_register_packed(
+                        BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb_r, Cr, ldc);
                 else
-                    Kernel::matmul_register(BLOCK_M, BLOCK_N, Kc, Ar, lda, Br, ldb_r, Cr, ldc);
+                    Kernel::matmul_register(
+                        BLOCK_M, BLOCK_N, Kc, Ar, lda, Br, ldb_r, Cr, ldc);
             }
         }
     }
@@ -154,6 +157,14 @@ struct blis_copy {
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
     {
+        size_t total_time  = 0;
+        size_t packL3_time = 0;
+        size_t packL3_size = 0;
+        size_t packL2_time = 0;
+        size_t packL2_size = 0;
+
+        auto t = rdtsc();
+
         for (int j = 0; j < N; j += BLOCK_N) {
             for (int k = 0; k < K; k += BLOCK_K) {
                 auto Bc = B + ldb * k + j;
@@ -162,10 +173,16 @@ struct blis_copy {
                 auto ldb_c = ldb;
 
                 if (Opt::pack_level() >= 3) {
+
+                    auto t = rdtsc();
+
                     // Copy B (256x3072) to L3 cache buffer
                     Opt::template pack<3>(Bc, ldb, Kc, Nc, L1::buf->Bc, Nc);
                     Bc = L1::buf->Bc;
                     ldb_c = Nc;
+
+                    packL3_time += rdtsc() - t;
+                    packL3_size += Kc * Nc;
                 }
 
                 for (int i = 0; i < M; i += BLOCK_M) {
@@ -176,22 +193,38 @@ struct blis_copy {
                     auto lda_c = lda;
 
                     if (Opt::pack_level() >= 2) {
+
+                        auto t = rdtsc();
+
                         // Copy A (144x256) to L2 cache buffer
                         Opt::template pack<2>(Ac, lda, Mc, Kc, L1::buf->Ac, Kc);
                         Ac = L1::buf->Ac;
                         lda_c = Opt::do_pack() ? L1::BLOCK_M : Kc;
+
+                        packL2_time += rdtsc() - t;
+                        packL2_size += Mc * Kc;
                     }
 
-                    //printf("# j = %d, k = %d, i = %d, Mc = %d, Nc = %d, Kc = %d\n",
-                    //    j, k, i, Mc, Nc, Kc);
-#if 1
+                    //printf("# j = %d, k = %d, i = %d, "
+                    //       "Mc = %d, Nc = %d, Kc = %d\n",
+                    //       j, k, i, Mc, Nc, Kc);
+
                     L1::matmul(Mc, Nc, Kc, Ac, lda_c, Bc, ldb_c, Cc, ldc);
-#else
-                    naive::matmul(Mc, Nc, Kc, Ac, lda_c, Bc, ldb_c, Cc, ldc);
-#endif
                 }
             }
         }
+#if 0
+        total_time = rdtsc() - t;
+        auto packL3_bw = double (4 * packL3_size) / double(packL3_time);
+        auto packL2_bw = double (4 * packL2_size) / double(packL2_time);
+        printf("total_time  = %11zu\n", total_time);
+        printf("packL3_time = %11zu\n", packL3_time);
+        printf("packL2_time = %11zu\n", packL2_time);
+        printf("packL3_size = %11zu\n", packL3_size);
+        printf("packL2_size = %11zu\n", packL3_size);
+        printf("packL3_bw   = %11.6f\n", packL3_bw);
+        printf("packL2_bw   = %11.6f\n", packL2_bw);
+#endif
     }
 
     static void gemm(

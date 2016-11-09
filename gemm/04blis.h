@@ -45,8 +45,9 @@ struct blisL2 {
                 auto Cr = C + ldc * i + j;
 
 #if 0
-                printf("## j = %3d, i = %3d, Mr = %3d, Nr = %3d, Kr = %3d, Ar[0]= %f, Br[0] = %f\n",
-                    j, i, Kernel::BLOCK_M, Kernel::BLOCK_N, K, Ar[0], Br[0]);
+                printf("## j = %3d, i = %3d, Mr = %3d, Nr = %3d, Kr = %3d, "
+                       "Ar[0]= %f, Br[0] = %f\n",
+                       j, i, Kernel::BLOCK_M, Kernel::BLOCK_N, K, Ar[0], Br[0]);
 #endif
                 Kernel::matmul_register_packed(
                     Kernel::BLOCK_M, Kernel::BLOCK_N, K, Ar, lda, Br, ldb_r, Cr, ldc);
@@ -74,8 +75,9 @@ struct blisL2 {
                     Ac = s_buf->Ac;
                     auto lda_c = Kernel::BLOCK_M;
 #if 0
-                    printf("#  j = %3d, k = %3d, i  = %3d, Mc = %3d, Nc = %3d, Kc = %3d\n",
-                        j, k, i, Mc, Nc, Kc);
+                    printf("#  j = %3d, k = %3d, i  = %3d, "
+                           "Mc = %3d, Nc = %3d, Kc = %3d\n",
+                           j, k, i, Mc, Nc, Kc);
 #endif
                     matmul_cache(Mc, Nc, Kc, Ac, lda_c, Bc, ldb, Cc, ldc);
                 }
@@ -136,12 +138,15 @@ struct blis {
                 auto Cr = C + ldc * i + j;
 
 #if 0
-                printf("## j = %3d, i = %3d, Mr = %3d, Nr = %3d, Kr = %3d, Ar[0]= %f, Br[0] = %f\n",
-                    j, i, Kernel::BLOCK_M, Kernel::BLOCK_N, K, Ar[0], Br[0]);
+                printf("## j = %3d, i = %3d, Mr = %3d, Nr = %3d, Kr = %3d, "
+                       "Ar[0]= %f, Br[0] = %f\n",
+                       j, i, Kernel::BLOCK_M, Kernel::BLOCK_N, K,
+                       Ar[0], Br[0]);
 #endif
 
                 Kernel::matmul_register_packed(
-                    Kernel::BLOCK_M, Kernel::BLOCK_N, K, Ar, lda, Br, ldb_r, Cr, ldc);
+                    Kernel::BLOCK_M, Kernel::BLOCK_N, K,
+                    Ar, lda, Br, ldb, Cr, ldc);
             }
         }
     }
@@ -150,36 +155,68 @@ struct blis {
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
     {
+        size_t total_time  = 0;
+        size_t packL3_time = 0;
+        size_t packL3_size = 0;
+        size_t packL2_time = 0;
+        size_t packL2_size = 0;
+
+        auto t = rdtsc();
+
         for (int j = 0; j < N; j += BLOCK_N) {
             for (int k = 0; k < K; k += BLOCK_K) {
                 auto Bc = B + ldb * k + j;
                 auto Nc = std::min<int>(N - j, BLOCK_N);
                 auto Kc = std::min<int>(K - k, BLOCK_K);
 
+                auto t = rdtsc();
+
                 // Copy B (256x3072) to L3 cache buffer
                 pack2d<float, 0, Kernel::BLOCK_N>(Bc, ldb, Kc, Nc, s_buf->Bc);
                 Bc = s_buf->Bc;
                 auto ldb_c = Kernel::BLOCK_N;
+
+                packL3_time += rdtsc() - t;
+                packL3_size += Kc * Nc;
 
                 for (int i = 0; i < M; i += BLOCK_M) {
                     auto Ac = A + lda * i + k;
                     auto Cc = C + ldc * i + j;
                     auto Mc = std::min<int>(M - i, BLOCK_M);
 
+                    auto t = rdtsc();
+
                     // Copy A (144x256) to L2 cache buffer
                     pack2d<float, Kernel::BLOCK_M, 0>(
                         Ac, lda, Mc, Kc, s_buf->Ac);
                     Ac = s_buf->Ac;
                     auto lda_c = Kernel::BLOCK_M;
+
+                    packL2_time += rdtsc() - t;
+                    packL2_size += Mc * Kc;
+
 #if 0
-                    printf("#  j = %3d, k = %3d, i  = %3d, Mc = %3d, Nc = %3d, Kc = %3d\n",
-                        j, k, i, Mc, Nc, Kc);
+                    printf("#  j = %3d, k = %3d, i  = %3d, "
+                           "Mc = %3d, Nc = %3d, Kc = %3d\n",
+                           j, k, i, Mc, Nc, Kc);
 #endif
 
                     matmul_cache(Mc, Nc, Kc, Ac, lda_c, Bc, ldb_c, Cc, ldc);
                 }
             }
         }
+#if 0
+        total_time = rdtsc() - t;
+        auto packL3_bw = double (4 * packL3_size) / double(packL3_time);
+        auto packL2_bw = double (4 * packL2_size) / double(packL2_time);
+        printf("total_time  = %11zu\n", total_time);
+        printf("packL3_time = %11zu\n", packL3_time);
+        printf("packL2_time = %11zu\n", packL2_time);
+        printf("packL3_size = %11zu\n", packL3_size);
+        printf("packL2_size = %11zu\n", packL3_size);
+        printf("packL3_bw   = %11.6f\n", packL3_bw);
+        printf("packL2_bw   = %11.6f\n", packL2_bw);
+#endif
     }
 
     static void gemm(
