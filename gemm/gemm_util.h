@@ -6,6 +6,7 @@
 #include <type_traits>
 #include <memory>
 #include <cstring>
+#include <cassert>
 
 #ifdef __INTELLISENSE__
 #undef __AVX__
@@ -75,12 +76,97 @@ static NOINLINE void copy2d(const T *A, int lda, int M, int N, T *B, int ldb)
     }
 }
 
+static void transpose_matrix_4x16(const float *A, int lda, float *B)
+{
+    // a00 a10: a0 b0 c0 d0 e0 f0 g0 h0 | i0 j0 k0 l0 m0 n0 o0 p0
+    // a01 a11: a1 b1 c1 d1 e1 f1 g1 h1 | i1 j1 k1 l1 m1 n1 o1 p1
+    // a02 a12: a2 b2 c2 d1 e2 f2 g2 h2 | i2 j2 k2 l2 m2 n2 o2 p2
+    // a03 a13: a3 b3 c3 d1 e3 f3 g3 h3 | i2 j3 k2 l2 m2 n3 o3 p3
+    auto a00 = _mm256_load_ps(A + lda * 0 + 8 * 0);
+    auto a10 = _mm256_load_ps(A + lda * 0 + 8 * 1);
+    auto a01 = _mm256_load_ps(A + lda * 1 + 8 * 0);
+    auto a11 = _mm256_load_ps(A + lda * 1 + 8 * 1);
+    auto a02 = _mm256_load_ps(A + lda * 2 + 8 * 0);
+    auto a12 = _mm256_load_ps(A + lda * 2 + 8 * 1);
+    auto a03 = _mm256_load_ps(A + lda * 3 + 8 * 0);
+    auto a13 = _mm256_load_ps(A + lda * 3 + 8 * 1);
+
+    // t00 t10: a0 a1 b0 b1 e0 e1 f0 f1 | i0 i1 j0 j1 m0 m1 n0 n1
+    // t01 t11: c0 c1 d0 d1 g0 g1 h0 h1 | k0 k1 l0 l1 m2 m3 n2 n3
+    // t02 t12: a2 a3 b2 b3 e2 e3 f2 f3 | i2 i3 j2 j3 o0 o1 p0 p1
+    // t03 t13: c2 c3 c2 c3 g2 g3 h2 h3 | k2 k3 l2 l3 o2 o3 p2 p3
+    auto t00 = _mm256_unpacklo_ps(a00, a01);
+    auto t01 = _mm256_unpackhi_ps(a00, a01);
+    auto t02 = _mm256_unpacklo_ps(a02, a03);
+    auto t03 = _mm256_unpackhi_ps(a02, a03);
+    auto t10 = _mm256_unpacklo_ps(a10, a11);
+    auto t11 = _mm256_unpackhi_ps(a10, a11);
+    auto t12 = _mm256_unpacklo_ps(a12, a13);
+    auto t13 = _mm256_unpackhi_ps(a12, a13);
+
+    // u00 u10: a0 a1 a2 a3 e0 e1 e2 e3 | i0 i1 i2 i3 m0 m1 m2 m3
+    // u01 u11: b0 b1 b2 b3 f0 f1 f2 f3 | j0 j1 j2 j3 n0 n1 n2 n3
+    // u02 u12: c0 c1 c2 c3 g0 g1 g2 g3 | k0 k1 k2 k3 o0 o1 o2 o3
+    // u03 u13: d0 d1 d2 d3 h0 h1 h2 h3 | l0 l1 l2 l3 p0 p1 p2 p3
+    auto u00 = _mm256_shuffle_ps(t00, t02, _MM_SHUFFLE(1, 0, 1, 0));
+    auto u01 = _mm256_shuffle_ps(t00, t02, _MM_SHUFFLE(3, 2, 3, 2));
+    auto u02 = _mm256_shuffle_ps(t01, t03, _MM_SHUFFLE(1, 0, 1, 0));
+    auto u03 = _mm256_shuffle_ps(t01, t03, _MM_SHUFFLE(3, 2, 3, 2));
+    auto u10 = _mm256_shuffle_ps(t10, t12, _MM_SHUFFLE(1, 0, 1, 0));
+    auto u11 = _mm256_shuffle_ps(t10, t12, _MM_SHUFFLE(3, 2, 3, 2));
+    auto u12 = _mm256_shuffle_ps(t11, t13, _MM_SHUFFLE(1, 0, 1, 0));
+    auto u13 = _mm256_shuffle_ps(t11, t13, _MM_SHUFFLE(3, 2, 3, 2));
+
+    // b00L: a0 a1 a2 a3
+    // b00H: b0 b1 b2 b3
+    // b01L: c0 c1 c2 c3
+    // b01H: d0 d1 d2 d3
+    // ...
+    auto b00 = _mm256_permute2f128_ps(u00, u01, 0x20);
+    auto b01 = _mm256_permute2f128_ps(u02, u03, 0x20);
+    auto b02 = _mm256_permute2f128_ps(u00, u01, 0x31);
+    auto b03 = _mm256_permute2f128_ps(u02, u03, 0x31);
+    auto b10 = _mm256_permute2f128_ps(u10, u11, 0x20);
+    auto b11 = _mm256_permute2f128_ps(u12, u13, 0x20);
+    auto b12 = _mm256_permute2f128_ps(u10, u11, 0x31); 
+    auto b13 = _mm256_permute2f128_ps(u12, u13, 0x31);
+
+    _mm256_store_ps(B + 8 * 0, b00);
+    _mm256_store_ps(B + 8 * 1, b01);
+    _mm256_store_ps(B + 8 * 2, b02);
+    _mm256_store_ps(B + 8 * 3, b03);
+    _mm256_store_ps(B + 8 * 4, b10);
+    _mm256_store_ps(B + 8 * 5, b11);
+    _mm256_store_ps(B + 8 * 6, b12);
+    _mm256_store_ps(B + 8 * 7, b13);
+}
+
+static void transpose_matrix_4xN(const float *A, int lda, int N, float *B)
+{
+    assert(N % 16 == 0);
+
+    for (int i = 0; i < N / 16; i++) {
+        auto Ab = A + 16 * i;
+        auto Bb = B + (4 * 16) * i;
+        transpose_matrix_4x16(Ab, lda, Bb);
+    }
+}
+
 template <class T>
 static void transpose_matrix(const T *A, int lda, int M, int N, T *B)
 {
-    for (int i = 0; i < M; i++)
-        for (int j = 0; j < N; j++)
+#if 1
+    if (M == 4) {
+        transpose_matrix_4xN(A, lda, N, B);
+        return;
+    }
+#endif
+
+    for (int i = 0; i < M; i++) {
+        for (int j = 0; j < N; j++) {
             B[M * j + i] = A[lda * i + j];
+        }
+    }
 }
 
 template <class T, int RS, int CS>

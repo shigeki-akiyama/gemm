@@ -205,7 +205,7 @@ struct blis {
                 }
             }
         }
-#if 0
+#if PACK_CYCLES
         total_time = rdtsc() - t;
         auto packL3_bw = double (4 * packL3_size) / double(packL3_time);
         auto packL2_bw = double (4 * packL2_size) / double(packL2_time);

@@ -261,9 +261,17 @@ static void pack2d_test()
         40, 41, 42, 43, 44, 45, 46, 47,
         48, 49, 50, 51, 52, 53, 54, 55,
         56, 57, 58, 59, 60, 61, 62, 63,
+        0,  1,  2,  3,  4,  5,  6,  7,
+        8,  9, 10, 11, 12, 13, 14, 15,
+        16, 17, 18, 19, 20, 21, 22, 23,
+        24, 25, 26, 27, 28, 29, 30, 31,
+        32, 33, 34, 35, 36, 37, 38, 39,
+        40, 41, 42, 43, 44, 45, 46, 47,
+        48, 49, 50, 51, 52, 53, 54, 55,
+        56, 57, 58, 59, 60, 61, 62, 63,
     };
-    alignas(32) float b[64] = {};
-    
+    alignas(32) float b[128] = {};
+#if 0 
     int m = 8;
     int n = 8;
     int lda = 8;
@@ -275,11 +283,30 @@ static void pack2d_test()
         }
         printf("\n");
     }
+#endif
+
+#if 1
+    int n = 32;
+    int lda = n;
+    transpose_matrix_4xN(a, lda, n, b);
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < 4; j++) {
+            printf("%2d ", (int)b[4 * i + j]);
+        }
+        printf("\n");
+    }
+#endif
 }
 
 static int real_main(
     int M, int N, int K, const std::vector<std::string>& fnames, bool verify)
 {
+#if 0
+    pack2d_test();
+    return 0;
+#endif
+
     int lda = K;
     int ldb = N;
     int ldc = N;
