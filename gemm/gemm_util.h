@@ -75,22 +75,36 @@ static NOINLINE void copy2d(const T *A, int lda, int M, int N, T *B, int ldb)
     }
 }
 
+template <class T>
+static void transpose_matrix(const T *A, int lda, int M, int N, T *B)
+{
+    for (int i = 0; i < M; i++)
+        for (int j = 0; j < N; j++)
+            B[M * j + i] = A[lda * i + j];
+}
+
 template <class T, int RS, int CS>
-static NOINLINE void pack2d(const T *A, int lda, int M, int N, T *B, int ldb)
+static NOINLINE void pack2d(const T *A, int lda, int M, int N, T *B)
 {
     if (RS > 0) {           // for matrix A
-        for (int i = 0; i < M; i++) {
-            for (int j = 0; j < N; j++) {
-                int k = RS * N * (i / RS) + RS * j + i % RS;
-                B[k] = A[lda * i + j];
-            }
+        int b_idx = 0;
+        for (int i = 0; i < M; i += RS) {
+            auto Ab = A + lda * i;
+            auto Bb = B + b_idx;
+
+            transpose_matrix(Ab, lda, RS, N, Bb);
+
+            b_idx += RS * N;
         }
     } else if (CS > 0) {    // for matrix B
-        for (int i = 0; i < M; i++) {
-            for (int j = 0; j < N; j++) {
-                int k = CS * M * (j / CS) + CS * i + j % CS;
-                B[k] = A[lda * i + j];
-            }
+        int b_idx = 0;
+        for (int i = 0; i < N; i += CS) {
+            auto Ab = A + i;
+            auto Bb = B + b_idx;
+
+            copy2d(Ab, lda, M, CS, Bb, CS);
+
+            b_idx += M * CS;
         }
     }
 }

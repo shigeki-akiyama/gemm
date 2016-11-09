@@ -32,22 +32,13 @@ struct blisL2 {
         assert(K <= BLOCK_K);
 
         for (int j = 0; j < N; j += Kernel::BLOCK_N) {
-#if 1
             auto Br = B + ldb * 0 + j;
 
             // Pack B to L1 (256x16: 16KB) cache buffer
             pack2d<float, 0, Kernel::BLOCK_N>(
-                Br, ldb, K, Kernel::BLOCK_N, s_buf->Br, Kernel::BLOCK_N);
+                Br, ldb, K, Kernel::BLOCK_N, s_buf->Br);
             Br = s_buf->Br;
             auto ldb_r = Kernel::BLOCK_N;
-#else
-            auto Br = B + K * j;
-
-            // Pack B to L1 (256x16: 16KB) cache buffer
-            copy2d(Br, ldb, K, Kernel::BLOCK_N, s_buf->Br, Kernel::BLOCK_N);
-            Br = s_buf->Br;
-            int ldb_r = Kernel::BLOCK_N;
-#endif
 
             for (int i = 0; i < M; i += Kernel::BLOCK_M) {
                 auto Ar = A + K * i;
@@ -79,7 +70,7 @@ struct blisL2 {
                     auto Mc = std::min<int>(M - i, BLOCK_M);
 
                     // Copy A (144x256) to L2 cache buffer
-                    pack2d<float, Kernel::BLOCK_M, 0>(Ac, lda, Mc, Kc, s_buf->Ac, Kc);
+                    pack2d<float, Kernel::BLOCK_M, 0>(Ac, lda, Mc, Kc, s_buf->Ac);
                     Ac = s_buf->Ac;
                     auto lda_c = Kernel::BLOCK_M;
 #if 0
@@ -140,12 +131,6 @@ struct blis {
 
         for (int j = 0; j < N; j += Kernel::BLOCK_N) {
             auto Br = B + K * j;
-
-            // Pack B to L1 (256x16: 16KB) cache buffer
-            copy2d(Br, ldb, K, Kernel::BLOCK_N, s_buf->Br, Kernel::BLOCK_N);
-            Br = s_buf->Br;
-            int ldb_r = Kernel::BLOCK_N;
-
             for (int i = 0; i < M; i += Kernel::BLOCK_M) {
                 auto Ar = A + K * i;
                 auto Cr = C + ldc * i + j;
@@ -172,7 +157,7 @@ struct blis {
                 auto Kc = std::min<int>(K - k, BLOCK_K);
 
                 // Copy B (256x3072) to L3 cache buffer
-                pack2d<float, 0, Kernel::BLOCK_N>(Bc, ldb, Kc, Nc, s_buf->Bc, Nc);
+                pack2d<float, 0, Kernel::BLOCK_N>(Bc, ldb, Kc, Nc, s_buf->Bc);
                 Bc = s_buf->Bc;
                 auto ldb_c = Kernel::BLOCK_N;
 
@@ -182,7 +167,8 @@ struct blis {
                     auto Mc = std::min<int>(M - i, BLOCK_M);
 
                     // Copy A (144x256) to L2 cache buffer
-                    pack2d<float, Kernel::BLOCK_M, 0>(Ac, lda, Mc, Kc, s_buf->Ac, Kc);
+                    pack2d<float, Kernel::BLOCK_M, 0>(
+                        Ac, lda, Mc, Kc, s_buf->Ac);
                     Ac = s_buf->Ac;
                     auto lda_c = Kernel::BLOCK_M;
 #if 0

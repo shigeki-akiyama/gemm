@@ -130,6 +130,11 @@ static double calc_cpu_freq()
 
 static double g_cpu_freq = calc_cpu_freq();
 
+static double get_cpu_freq()
+{
+    return g_cpu_freq;
+}
+
 class elapsed_time {
     double& elapsed_;
     size_t start_;
