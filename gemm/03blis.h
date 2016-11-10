@@ -71,6 +71,8 @@ struct make_blis_copy_L1 {
         BLOCK_M = Kernel::BLOCK_M,
         BLOCK_N = Kernel::BLOCK_N,
     };
+    static_assert(BLIS::BLOCK_M % BLOCK_M == 0, "BLIS::BLOCK_M is invalid.");
+    static_assert(BLIS::BLOCK_N % BLOCK_N == 0, "BLIS::BLOCK_N is invalid.");
 
     struct alignas(LINE_SIZE) blis_buffer {
         float Br[BLIS::BLOCK_K * BLOCK_N];          // L1: 256x24
@@ -143,9 +145,9 @@ struct blis_copy {
     struct L1 : make_blis_copy_L1<Kernel, Opt> {};
 
     enum : int {
-        BLOCK_M = 144,
-        BLOCK_N = 3072,
-        BLOCK_K = 256,
+        BLOCK_M = M_CACHE,
+        BLOCK_N = N_CACHE,
+        BLOCK_K = K_CACHE,
 
         LDA_C   = BLOCK_K + 8,
         LDB_C   = BLOCK_N + 8,

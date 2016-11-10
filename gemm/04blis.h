@@ -14,6 +14,10 @@ struct blisL2 {
         BLOCK_N = N_CACHE,
         BLOCK_K = K_CACHE,
     };
+    static_assert(BLOCK_M % Kernel::BLOCK_M == 0, "BLOCK_M is invalid.");
+    static_assert(BLOCK_N % Kernel::BLOCK_N == 0, "BLOCK_N is invalid.");
+
+ 
 
     struct alignas(LINE_SIZE) blis_buffer {
         float Br[BLOCK_K * Kernel::BLOCK_N];    // L1: 256x24
