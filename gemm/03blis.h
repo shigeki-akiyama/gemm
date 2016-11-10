@@ -6,8 +6,6 @@
 #include <cassert>
 #undef NODEBUG
 
-
-template <class T>
 struct blis_opt {
     template <int LEVEL, class Packer>
     struct make_option {
@@ -15,17 +13,17 @@ struct blis_opt {
 
         static constexpr bool do_pack() { return Packer::do_pack(); }
 
-        template <int CURR_LEVEL>
+        template <class T, int CURR_LEVEL>
         static void pack(const T *A, int lda, int M, int N, T *B, int ldb)
         {
-            Packer::template pack<CURR_LEVEL>(A, lda, M, N, B, ldb);
+            Packer::template pack<T, CURR_LEVEL>(A, lda, M, N, B, ldb);
         }
     };
 
     struct matcopy {
         static constexpr bool do_pack() { return false; }
 
-        template <int CURR_LEVEL>
+        template <class T, int CURR_LEVEL>
         static void pack(const T *A, int lda, int M, int N, T *B, int ldb)
         {
             copy2d(A, lda, M, N, B, ldb);
@@ -36,7 +34,7 @@ struct blis_opt {
     struct matpack {
         static constexpr bool do_pack() { return true; }
 
-        template <int CURR_LEVEL>
+        template <class T, int CURR_LEVEL>
         static void pack(const T *A, int lda, int M, int N, T *B, int ldb)
         {
             if (CURR_LEVEL == LEVEL && 2 <= LEVEL && LEVEL <= 3) {
@@ -61,11 +59,11 @@ struct blis_opt {
 };
 
 
-template <class Kernel, class Opt> struct blis_copy;
+template <class Arch, class Kernel, class Opt> struct blis_copy;
 
-template <class Kernel, class Opt>
+template <class Arch, class Kernel, class Opt>
 struct make_blis_copy_L1 {
-    using BLIS = blis_copy<Kernel, Opt>;
+    using BLIS = blis_copy<Arch, Kernel, Opt>;
 
     enum : int {
         BLOCK_M = Kernel::BLOCK_M,
@@ -98,7 +96,8 @@ struct make_blis_copy_L1 {
 
             if (Opt::pack_level() >= 1) {
                 // Copy B to L1 (256x16: 16KB) cache buffer
-                Opt::template pack<1>(Br, ldb, Kc, BLOCK_N, buf->Br, BLOCK_N);
+                Opt::template pack<float, 1>(
+                    Br, ldb, Kc, BLOCK_N, buf->Br, BLOCK_N);
                 Br = buf->Br;
                 ldb_r = BLOCK_N;
             }
@@ -108,7 +107,7 @@ struct make_blis_copy_L1 {
                 auto Cr = C + ldc * i + j;
 
                 //printf("# j = %d, i = %d, Mr = %d, Nr = %d, Kr = %d\n",
-                //       j, i, BLOCK_M, BLOCK_N, Kc);
+                //       j, i_M_N, Kc);
                 if (Opt::do_pack())
                     Kernel::matmul_register_packed(
                         BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb_r, Cr, ldc);
@@ -137,17 +136,18 @@ struct make_blis_copy_L1 {
         }
     }
 };
-template <class Kernel, class Opt>
-typename make_blis_copy_L1<Kernel, Opt>::blis_buffer * make_blis_copy_L1<Kernel, Opt>::buf = nullptr;
+template <class Arch, class Kernel, class Opt>
+typename make_blis_copy_L1<Arch, Kernel, Opt>::blis_buffer *
+make_blis_copy_L1<Arch, Kernel, Opt>::buf = nullptr;
 
-template <class Kernel, class Opt>
+template <class Arch, class Kernel, class Opt>
 struct blis_copy {
-    struct L1 : make_blis_copy_L1<Kernel, Opt> {};
+    struct L1 : make_blis_copy_L1<Arch, Kernel, Opt> {};
 
     enum : int {
-        BLOCK_M = M_CACHE,
-        BLOCK_N = N_CACHE,
-        BLOCK_K = K_CACHE,
+        BLOCK_M = Arch::M_CACHE,
+        BLOCK_N = Arch::N_CACHE,
+        BLOCK_K = Arch::K_CACHE,
 
         LDA_C   = BLOCK_K + 8,
         LDB_C   = BLOCK_N + 8,
@@ -180,7 +180,8 @@ struct blis_copy {
                     auto t = rdtsc();
 
                     // Copy B (256x3072) to L3 cache buffer
-                    Opt::template pack<3>(Bc, ldb, Kc, Nc, L1::buf->Bc, Nc);
+                    Opt::template pack<float, 3>(
+                        Bc, ldb, Kc, Nc, L1::buf->Bc, Nc);
                     Bc = L1::buf->Bc;
                     ldb_c = Nc;
 
@@ -200,7 +201,8 @@ struct blis_copy {
                         auto t = rdtsc();
 
                         // Copy A (144x256) to L2 cache buffer
-                        Opt::template pack<2>(Ac, lda, Mc, Kc, L1::buf->Ac, Kc);
+                        Opt::template pack<float, 2>(
+                            Ac, lda, Mc, Kc, L1::buf->Ac, Kc);
                         Ac = L1::buf->Ac;
                         lda_c = Opt::do_pack() ? L1::BLOCK_M : Kc;
 

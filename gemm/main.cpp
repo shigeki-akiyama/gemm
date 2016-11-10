@@ -112,12 +112,12 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
     }
 #endif
 
-#if 1
+#if 0
     // 2-1. cache-oblivious implementation with 1-2.
     push("cache_oblivious", cache_oblivious::gemm);
 #endif
 
-#if 1
+#if 0
     // 2-2. L1-cache blocking implementation with 1-2.
     push("L1_blocking", cache_blocking_L1::gemm);
 
@@ -128,12 +128,15 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
     push("L3_blocking", cache_blocking_L3::gemm);
 #endif
 
-    using option = blis_opt<elem_type>;
+    using option = blis_opt;
+    using haswell = blis_arch::haswell;
+    using knl_9x3 = blis_arch::knl_9x3;
+    using knl_5x5 = blis_arch::knl_5x5;
 
 #if 1
     // 3-1. BLIS-based implementation
     {
-        using blis = blis_copy<register_avx_3_6x2, option::naive>;
+        using blis = blis_copy<haswell, register_avx_3_6x2, option::naive>;
         blis::initialize();
         push("blis_naive_6x2", blis::gemm);
     }
@@ -142,7 +145,7 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
 #if 1
     // 3-2. BLIS-based implementation w/ copy optimization on L1
     {
-        using blis = blis_copy<register_avx_3_6x2, option::copyL1>;
+        using blis = blis_copy<haswell, register_avx_3_6x2, option::copyL1>;
         blis::initialize();
         push("blis_copyL1_6x2", blis::gemm);
     }
@@ -151,14 +154,14 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
 #if 1
     // 3-3. BLIS-based implementation w/ copy optimization on L1/L2
     {
-        using blis = blis_copy<register_avx_3_6x2, option::copyL2>;
+        using blis = blis_copy<haswell, register_avx_3_6x2, option::copyL2>;
         blis::initialize();
         push("blis_copyL2_6x2", blis::gemm);
     }
 
     // 3-4. BLIS-based implementation w/ copy optimization on L1/L2/L3
     {
-        using blis = blis_copy<register_avx_3_6x2, option::copyL3>;
+        using blis = blis_copy<haswell, register_avx_3_6x2, option::copyL3>;
         blis::initialize();
         push("blis_copyL3_6x2", blis::gemm);
     }
@@ -166,28 +169,28 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
 #if 1
     // 3-1'. BLIS-based implementation
     {
-        using blis = blis_copy<register_avx_3_4x3, option::naive>;
+        using blis = blis_copy<haswell, register_avx_3_4x3, option::naive>;
         blis::initialize();
         push("blis_naive_4x3", blis::gemm);
     }
 
     // 3-2'. BLIS-based implementation w/ copy optimization on L1
     {
-        using blis = blis_copy<register_avx_3_4x3, option::copyL1>;
+        using blis = blis_copy<haswell, register_avx_3_4x3, option::copyL1>;
         blis::initialize();
         push("blis_copyL1_4x3", blis::gemm);
     }
 
     // 3-3'. BLIS-based implementation w/ copy optimization on L1/L2
     {
-        using blis = blis_copy<register_avx_3_4x3, option::copyL2>;
+        using blis = blis_copy<haswell, register_avx_3_4x3, option::copyL2>;
         blis::initialize();
         push("blis_copyL2_4x3", blis::gemm);
     }
 
     // 3-4'. BLIS-based implementation w/ copy optimization on L1/L2/L3
     {
-        using blis = blis_copy<register_avx_3_4x3, option::copyL3>;
+        using blis = blis_copy<haswell, register_avx_3_4x3, option::copyL3>;
         blis::initialize();
         push("blis_copyL3_4x3", blis::gemm);
     }
@@ -195,70 +198,118 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
 #if 1
     // 4-1. BLIS-based implementation w/ copy with stride format on L1/L2
     {
-        using blis = blisL2<register_avx_3_6x2>;
+        using blis = blisL2<haswell, register_avx_3_6x2>;
         blis::intiialize();
         push("blis_packL2_6x2", blis::gemm);
     }
     {
-        using blis = blisL2<register_avx_3_4x3>;
+        using blis = blisL2<haswell, register_avx_3_4x3>;
         blis::intiialize();
         push("blis_packL2_4x3", blis::gemm);
     }
 
     // 4-1'. BLIS-based implementation w/ copy with stride format on L1/L2/L3
     {
-        using blis = blis<register_avx_3_6x2>;
+        using blis = blis<haswell, register_avx_3_6x2>;
         blis::intiialize();
         push("blis_packL3_6x2", blis::gemm);
     }
     {
-        using blis = blis<register_avx_3_4x3>;
+        using blis = blis<haswell, register_avx_3_4x3>;
         blis::intiialize();
         push("blis_packL3_4x3", blis::gemm);
     }
 #endif
 #ifdef USE_AVX512
+#if 1
     // 5-1. AVX512 implementation based on naive BLIS
     {
-        using blis = blis_copy<register_avx512_9x3, option::naive>;
+        using blis = blis_copy<knl_9x3, register_avx512_9x3, option::naive>;
         blis::initialize();
         push("blis512_naive_9x3", blis::gemm);
     }
 
     // 5-2. AVX512 implementation based on L1-BLIS
     {
-        using blis = blis_copy<register_avx512_9x3, option::copyL1>;
+        using blis = blis_copy<knl_9x3, register_avx512_9x3, option::copyL1>;
         blis::initialize();
         push("blis512_copyL1_9x3", blis::gemm);
     }
 
     // 5-3. AVX512 implementation based on L2-BLIS
     {
-        using blis = blis_copy<register_avx512_9x3, option::copyL2>;
+        using blis = blis_copy<knl_9x3, register_avx512_9x3, option::copyL2>;
         blis::initialize();
         push("blis512_copyL2_9x3", blis::gemm);
     }
 
     // 5-4. AVX512 implementation based on L3-BLIS
     {
-        using blis = blis_copy<register_avx512_9x3, option::copyL3>;
+        using blis = blis_copy<knl_9x3, register_avx512_9x3, option::copyL3>;
         blis::initialize();
         push("blis512_copyL3_9x3", blis::gemm);
     }
+#endif
 #if 1
     // 6-1. BLIS-based implementation w/ copy with stride format on L1/L2
     {
-        using blis = blisL2<register_avx512_9x3>;
+        using blis = blisL2<knl_9x3, register_avx512_9x3>;
         blis::intiialize();
         push("blis512_packL2_9x3", blis::gemm);
     }
     
     // 6-2. BLIS-based implementation w/ copy with stride format on L1/L2
     {
-        using blis = blis<register_avx512_9x3>;
+        using blis = blis<knl_9x3, register_avx512_9x3>;
         blis::intiialize();
         push("blis512_packL3_9x3", blis::gemm);
     }
+#endif
+#if 1
+    // 7-1. AVX512 implementation based on naive BLIS
+    {
+        using blis = blis_copy<knl_5x5, register_avx512_5x5, option::naive>;
+        blis::initialize();
+        push("blis512_naive_5x5", blis::gemm);
+    }
+#endif
+#if 1
+    // 7-2. AVX512 implementation based on L1-BLIS
+    {
+        using blis = blis_copy<knl_5x5, register_avx512_5x5, option::copyL1>;
+        blis::initialize();
+        push("blis512_copyL1_5x5", blis::gemm);
+    }
+
+    // 7-3. AVX512 implementation based on L2-BLIS
+    {
+        using blis = blis_copy<knl_5x5, register_avx512_5x5, option::copyL2>;
+        blis::initialize();
+        push("blis512_copyL2_5x5", blis::gemm);
+    }
+
+    // 7-4. AVX512 implementation based on L3-BLIS
+    {
+        using blis = blis_copy<knl_5x5, register_avx512_5x5, option::copyL3>;
+        blis::initialize();
+        push("blis512_copyL3_5x5", blis::gemm);
+    }
+#endif
+#if 1
+    // 8-1. BLIS-based implementation w/ copy with stride format on L1/L2
+    {
+        using blis = blisL2<knl_5x5, register_avx512_5x5>;
+        blis::intiialize();
+        push("blis512_packL2_5x5", blis::gemm);
+    }
+    
+    // 8-2. BLIS-based implementation w/ copy with stride format on L1/L2
+    {
+        using blis = blis<knl_5x5, register_avx512_5x5>;
+        blis::intiialize();
+        push("blis512_packL3_5x5", blis::gemm);
+    }
+
 #endif
 #endif
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config.h"
 #include "util.h"
 #include <algorithm>
 #include <limits>
@@ -8,20 +9,11 @@
 #include <cstring>
 #include <cassert>
 
-#ifdef __INTELLISENSE__
-#undef __AVX__
-#define __AVX__ 1
-#undef __AVX512F__
-#define __AVX512F__ 1
-#endif
-
-#ifdef __AVX__
-#define USE_AVX
+#ifdef USE_AVX
 #include <immintrin.h>
 #endif
 
-#ifdef __AVX512F__
-#define USE_AVX512
+#ifdef USE_AVX512
 #include <immintrin.h>
 #endif
 

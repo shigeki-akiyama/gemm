@@ -1,12 +1,44 @@
 #pragma once
 
-#define M_CACHE     144
-#define N_CACHE     4080 //3072
-#define K_CACHE     256
+#ifdef __AVX__
+#define USE_AVX
+#include <immintrin.h>
+#endif
 
-#define M_REGISTER  4
-#define N_REGISTER  24
+#ifdef __AVX512F__
+#define USE_AVX512
+
+#if 0
+#undef  M_CACHE
+#define M_CACHE  135
+#endif
+
+#include <immintrin.h>
+#endif
+
+#ifdef __INTELLISENSE__
+#undef __AVX__
+#define __AVX__ 1
+#undef __AVX512F__
+#define __AVX512F__ 1
+#endif
 
 
 #define PACK_CYCLES 0
+
+
+struct blis_arch {
+    template <int MC, int NC, int KC>
+    struct make_arch {
+        enum : int {
+            M_CACHE = MC,
+            N_CACHE = NC,
+            K_CACHE = KC,
+        };
+    };
+
+    struct haswell : make_arch<144, 4080, 256> {};
+    struct knl_9x3 : make_arch<144, 4080, 256> {};
+    struct knl_5x5 : make_arch<135, 4080, 256> {};
+};
 

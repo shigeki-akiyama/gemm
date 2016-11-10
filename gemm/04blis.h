@@ -7,17 +7,15 @@
 #undef NODEBUG
 
 
-template <class Kernel>
+template <class Arch, class Kernel>
 struct blisL2 {
     enum : int {
-        BLOCK_M = M_CACHE,
-        BLOCK_N = N_CACHE,
-        BLOCK_K = K_CACHE,
+        BLOCK_M = Arch::M_CACHE,
+        BLOCK_N = Arch::N_CACHE,
+        BLOCK_K = Arch::K_CACHE,
     };
     static_assert(BLOCK_M % Kernel::BLOCK_M == 0, "BLOCK_M is invalid.");
     static_assert(BLOCK_N % Kernel::BLOCK_N == 0, "BLOCK_N is invalid.");
-
- 
 
     struct alignas(LINE_SIZE) blis_buffer {
         float Br[BLOCK_K * Kernel::BLOCK_N];    // L1: 256x24
@@ -107,16 +105,17 @@ struct blisL2 {
         }
     }
 };
-template <class Kernel>
-typename blisL2<Kernel>::blis_buffer * blisL2<Kernel>::s_buf = nullptr;
+template <class Arch, class Kernel>
+typename blisL2<Arch, Kernel>::blis_buffer *
+blisL2<Arch, Kernel>::s_buf = nullptr;
 
 
-template <class Kernel>
+template <class Arch, class Kernel>
 struct blis {
     enum : int {
-        BLOCK_M = M_CACHE,
-        BLOCK_N = N_CACHE,
-        BLOCK_K = K_CACHE,
+        BLOCK_M = Arch::M_CACHE,
+        BLOCK_N = Arch::N_CACHE,
+        BLOCK_K = Arch::K_CACHE,
     };
 
     struct alignas(LINE_SIZE) blis_buffer {
@@ -241,5 +240,5 @@ struct blis {
         }
     }
 };
-template <class Kernel>
-typename blis<Kernel>::blis_buffer * blis<Kernel>::s_buf = nullptr;
+template <class Arch, class Kernel>
+typename blis<Arch, Kernel>::blis_buffer * blis<Arch, Kernel>::s_buf = nullptr;
