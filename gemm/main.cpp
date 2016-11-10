@@ -245,6 +245,21 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
         blis::initialize();
         push("blis512_copyL3_9x3", blis::gemm);
     }
+#if 1
+    // 6-1. BLIS-based implementation w/ copy with stride format on L1/L2
+    {
+        using blis = blisL2<register_avx512_9x3>;
+        blis::intiialize();
+        push("blis512_packL2_9x3", blis::gemm);
+    }
+    
+    // 6-2. BLIS-based implementation w/ copy with stride format on L1/L2
+    {
+        using blis = blis<register_avx512_9x3>;
+        blis::intiialize();
+        push("blis512_packL3_9x3", blis::gemm);
+    }
+#endif
 #endif
 
     return pairs;
