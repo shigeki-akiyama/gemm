@@ -220,6 +220,7 @@ struct register_avx512_9x3 {
         auto vab22 = _mm512_setzero_ps(); auto vab23 = _mm512_setzero_ps();
         auto vab24 = _mm512_setzero_ps(); auto vab25 = _mm512_setzero_ps();
         auto vab26 = _mm512_setzero_ps();
+
         for (int k = 0; k < K; k++) {
             auto pa = &A[lda * k + 0];
             auto pb = &B[ldb * k + 0];
@@ -323,6 +324,7 @@ struct register_avx512_9x3 {
         vc25 = _mm512_add_ps(vc25, vab25);
         vc26 = _mm512_add_ps(vc26, vab26);
 
+
         _mm512_store_ps(C + ldc * 0 + 16 * 0, vc00);
         _mm512_store_ps(C + ldc * 0 + 16 * 1, vc01);
         _mm512_store_ps(C + ldc * 0 + 16 * 2, vc02);
@@ -350,6 +352,360 @@ struct register_avx512_9x3 {
         _mm512_store_ps(C + ldc * 8 + 16 * 0, vc24);
         _mm512_store_ps(C + ldc * 8 + 16 * 1, vc25);
         _mm512_store_ps(C + ldc * 8 + 16 * 2, vc26);
+    }
+
+    template <bool PACKED = false>
+    static void matmul(
+        int M, int N, int K, float *A, int lda,
+        float *B, int ldb, float *C, int ldc)
+    {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+
+        for (int i = 0; i < M; i += BLOCK_M) {
+            for (int j = 0; j < N; j += BLOCK_N) {
+                auto Ar = A + lda * i + 0;
+                auto Br = B + ldb * 0 + j;
+                auto Cr = C + ldc * i + j;
+                if (PACKED)
+                    matmul_register_packed(
+                        BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
+                else
+                    matmul_register(
+                        BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
+            }
+        }
+    }
+
+    template <int PACKED = false>
+    static void gemm(
+        int M, int N, int K, float alpha, float *A, int lda,
+        float *B, int ldb, float beta, float *C, int ldc)
+    {
+        scale_matrix(A, lda, M, K, alpha);
+        scale_matrix(C, ldc, M, N, beta);
+
+        matmul<PACKED>(M, N, K, A, lda, B, ldb, C, ldc);
+    }
+};
+
+struct register_avx512_5x5 {
+
+    enum : int {
+        BLOCK_M = 5,
+        BLOCK_N = 16 * 5,
+    };
+
+    // 5x80 matrix multiplication
+    static void matmul_register(
+        int M, int N, int K, float *A, int lda, float *B, int ldb,
+        float *C, int ldc)
+    {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+
+        //       b0    b1    b2    b3    b4
+        // a0 vab00 vab01 vab02 vab03 vab04 
+        // a1 vab05 vab06 vab07 vab08 vab09
+        // a2 vab10 vab11 vab12 vab13 vab14
+        // a3 vab15 vab16 vab17 vab18 vab19
+        // a4 vab20 vab21 vab22 vab23 vab24
+        
+        auto vab00 = _mm512_setzero_ps(); auto vab01 = _mm512_setzero_ps();
+        auto vab02 = _mm512_setzero_ps(); auto vab03 = _mm512_setzero_ps();
+        auto vab04 = _mm512_setzero_ps(); auto vab05 = _mm512_setzero_ps();
+        auto vab06 = _mm512_setzero_ps(); auto vab07 = _mm512_setzero_ps();
+        auto vab08 = _mm512_setzero_ps(); auto vab09 = _mm512_setzero_ps();
+        auto vab10 = _mm512_setzero_ps(); auto vab11 = _mm512_setzero_ps();
+        auto vab12 = _mm512_setzero_ps(); auto vab13 = _mm512_setzero_ps();
+        auto vab14 = _mm512_setzero_ps(); auto vab15 = _mm512_setzero_ps();
+        auto vab16 = _mm512_setzero_ps(); auto vab17 = _mm512_setzero_ps();
+        auto vab18 = _mm512_setzero_ps(); auto vab19 = _mm512_setzero_ps();
+        auto vab20 = _mm512_setzero_ps(); auto vab21 = _mm512_setzero_ps();
+        auto vab22 = _mm512_setzero_ps(); auto vab23 = _mm512_setzero_ps();
+        auto vab24 = _mm512_setzero_ps();
+
+        for (int k = 0; k < K; k++) {
+            auto pa = &A[lda * 0 + k];
+            auto pb = &B[ldb * k + 0];
+
+            auto vb0 = _mm512_load_ps(pb + 16 * 0);
+            auto vb1 = _mm512_load_ps(pb + 16 * 1);
+            auto vb2 = _mm512_load_ps(pb + 16 * 2);
+            auto vb3 = _mm512_load_ps(pb + 16 * 3);
+            auto vb4 = _mm512_load_ps(pb + 16 * 4);
+
+            auto va0 = _mm512_broadcast_ss(pa + lda * 0);
+            vab00 = _mm512_fmadd_ps(va0, vb0, vab00);
+            vab01 = _mm512_fmadd_ps(va0, vb1, vab01);
+            vab02 = _mm512_fmadd_ps(va0, vb2, vab02);
+            vab03 = _mm512_fmadd_ps(va0, vb3, vab03);
+            vab04 = _mm512_fmadd_ps(va0, vb4, vab04);
+
+            auto va1 = _mm512_broadcast_ss(pa + lda * 1);
+            vab05 = _mm512_fmadd_ps(va1, vb0, vab05);
+            vab06 = _mm512_fmadd_ps(va1, vb1, vab06);
+            vab07 = _mm512_fmadd_ps(va1, vb2, vab07);
+            vab08 = _mm512_fmadd_ps(va1, vb3, vab08);
+            vab09 = _mm512_fmadd_ps(va1, vb4, vab09);
+
+            auto va2 = _mm512_broadcast_ss(pa + lda * 2);
+            vab10 = _mm512_fmadd_ps(va2, vb0, vab10);
+            vab11 = _mm512_fmadd_ps(va2, vb1, vab11);
+            vab12 = _mm512_fmadd_ps(va2, vb2, vab12);
+            vab13 = _mm512_fmadd_ps(va2, vb3, vab13);
+            vab14 = _mm512_fmadd_ps(va2, vb4, vab14);
+
+            auto va3 = _mm512_broadcast_ss(pa + lda * 3);
+            vab15 = _mm512_fmadd_ps(va3, vb0, vab15);
+            vab16 = _mm512_fmadd_ps(va3, vb1, vab16);
+            vab17 = _mm512_fmadd_ps(va3, vb2, vab17);
+            vab18 = _mm512_fmadd_ps(va3, vb3, vab18);
+            vab19 = _mm512_fmadd_ps(va3, vb4, vab19);
+
+            auto va4 = _mm512_broadcast_ss(pa + lda * 4);
+            vab20 = _mm512_fmadd_ps(va4, vb0, vab20);
+            vab21 = _mm512_fmadd_ps(va4, vb1, vab21);
+            vab22 = _mm512_fmadd_ps(va4, vb2, vab22);
+            vab23 = _mm512_fmadd_ps(va4, vb3, vab23);
+            vab24 = _mm512_fmadd_ps(va4, vb4, vab24);
+        }
+
+        auto vc00 = _mm512_load_ps(C + ldc * 0 + 16 * 0);
+        auto vc01 = _mm512_load_ps(C + ldc * 0 + 16 * 1);
+        auto vc02 = _mm512_load_ps(C + ldc * 0 + 16 * 2);
+        auto vc03 = _mm512_load_ps(C + ldc * 0 + 16 * 3);
+        auto vc04 = _mm512_load_ps(C + ldc * 0 + 16 * 4);
+        auto vc05 = _mm512_load_ps(C + ldc * 1 + 16 * 0);
+        auto vc06 = _mm512_load_ps(C + ldc * 1 + 16 * 1);
+        auto vc07 = _mm512_load_ps(C + ldc * 1 + 16 * 2);
+        auto vc08 = _mm512_load_ps(C + ldc * 1 + 16 * 3);
+        auto vc09 = _mm512_load_ps(C + ldc * 1 + 16 * 4);
+        auto vc10 = _mm512_load_ps(C + ldc * 2 + 16 * 0);
+        auto vc11 = _mm512_load_ps(C + ldc * 2 + 16 * 1);
+        auto vc12 = _mm512_load_ps(C + ldc * 2 + 16 * 2);
+        auto vc13 = _mm512_load_ps(C + ldc * 2 + 16 * 3);
+        auto vc14 = _mm512_load_ps(C + ldc * 2 + 16 * 4);
+        auto vc15 = _mm512_load_ps(C + ldc * 3 + 16 * 0);
+        auto vc16 = _mm512_load_ps(C + ldc * 3 + 16 * 1);
+        auto vc17 = _mm512_load_ps(C + ldc * 3 + 16 * 2);
+        auto vc18 = _mm512_load_ps(C + ldc * 3 + 16 * 3);
+        auto vc19 = _mm512_load_ps(C + ldc * 3 + 16 * 4);
+        auto vc20 = _mm512_load_ps(C + ldc * 4 + 16 * 0);
+        auto vc21 = _mm512_load_ps(C + ldc * 4 + 16 * 1);
+        auto vc22 = _mm512_load_ps(C + ldc * 4 + 16 * 2);
+        auto vc23 = _mm512_load_ps(C + ldc * 4 + 16 * 3);
+        auto vc24 = _mm512_load_ps(C + ldc * 4 + 16 * 4);
+
+        vc00 = _mm512_add_ps(vc00, vab00);
+        vc01 = _mm512_add_ps(vc01, vab01);
+        vc02 = _mm512_add_ps(vc02, vab02);
+        vc03 = _mm512_add_ps(vc03, vab03);
+        vc04 = _mm512_add_ps(vc04, vab04);
+        vc05 = _mm512_add_ps(vc05, vab05);
+        vc06 = _mm512_add_ps(vc06, vab06);
+        vc07 = _mm512_add_ps(vc07, vab07);
+        vc08 = _mm512_add_ps(vc08, vab08);
+        vc09 = _mm512_add_ps(vc09, vab09);
+        vc10 = _mm512_add_ps(vc10, vab10);
+        vc11 = _mm512_add_ps(vc11, vab11);
+        vc12 = _mm512_add_ps(vc12, vab12);
+        vc13 = _mm512_add_ps(vc13, vab13);
+        vc14 = _mm512_add_ps(vc14, vab14);
+        vc15 = _mm512_add_ps(vc15, vab15);
+        vc16 = _mm512_add_ps(vc16, vab16);
+        vc17 = _mm512_add_ps(vc17, vab17);
+        vc18 = _mm512_add_ps(vc18, vab18);
+        vc19 = _mm512_add_ps(vc19, vab19);
+        vc20 = _mm512_add_ps(vc20, vab20);
+        vc21 = _mm512_add_ps(vc21, vab21);
+        vc22 = _mm512_add_ps(vc22, vab22);
+        vc23 = _mm512_add_ps(vc23, vab23);
+        vc24 = _mm512_add_ps(vc24, vab24);
+
+        _mm512_store_ps(C + ldc * 0 + 16 * 0, vc00);
+        _mm512_store_ps(C + ldc * 0 + 16 * 1, vc01);
+        _mm512_store_ps(C + ldc * 0 + 16 * 2, vc02);
+        _mm512_store_ps(C + ldc * 0 + 16 * 3, vc03);
+        _mm512_store_ps(C + ldc * 0 + 16 * 4, vc04);
+        _mm512_store_ps(C + ldc * 1 + 16 * 0, vc05);
+        _mm512_store_ps(C + ldc * 1 + 16 * 1, vc06);
+        _mm512_store_ps(C + ldc * 1 + 16 * 2, vc07);
+        _mm512_store_ps(C + ldc * 1 + 16 * 3, vc08);
+        _mm512_store_ps(C + ldc * 1 + 16 * 4, vc09);
+        _mm512_store_ps(C + ldc * 2 + 16 * 0, vc10);
+        _mm512_store_ps(C + ldc * 2 + 16 * 1, vc11);
+        _mm512_store_ps(C + ldc * 2 + 16 * 2, vc12);
+        _mm512_store_ps(C + ldc * 2 + 16 * 3, vc13);
+        _mm512_store_ps(C + ldc * 2 + 16 * 4, vc14);
+        _mm512_store_ps(C + ldc * 3 + 16 * 0, vc15);
+        _mm512_store_ps(C + ldc * 3 + 16 * 1, vc16);
+        _mm512_store_ps(C + ldc * 3 + 16 * 2, vc17);
+        _mm512_store_ps(C + ldc * 3 + 16 * 3, vc18);
+        _mm512_store_ps(C + ldc * 3 + 16 * 4, vc19);
+        _mm512_store_ps(C + ldc * 4 + 16 * 0, vc20);
+        _mm512_store_ps(C + ldc * 4 + 16 * 1, vc21);
+        _mm512_store_ps(C + ldc * 4 + 16 * 2, vc22);
+        _mm512_store_ps(C + ldc * 4 + 16 * 3, vc23);
+        _mm512_store_ps(C + ldc * 4 + 16 * 4, vc24);
+    }
+
+    static void matmul_register_packed(
+        int M, int N, int K, float *A, int lda, float *B, int ldb,
+        float *C, int ldc)
+    {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+        assert(lda == BLOCK_M);
+        assert(ldb == BLOCK_N);
+
+        lda = BLOCK_M;
+        ldb = BLOCK_N;
+
+        //       b0    b1    b2    b3    b4
+        // a0 vab00 vab01 vab02 vab03 vab04 
+        // a1 vab05 vab06 vab07 vab08 vab09
+        // a2 vab10 vab11 vab12 vab13 vab14
+        // a3 vab15 vab16 vab17 vab18 vab19
+        // a4 vab20 vab21 vab22 vab23 vab24
+        
+        auto vab00 = _mm512_setzero_ps(); auto vab01 = _mm512_setzero_ps();
+        auto vab02 = _mm512_setzero_ps(); auto vab03 = _mm512_setzero_ps();
+        auto vab04 = _mm512_setzero_ps(); auto vab05 = _mm512_setzero_ps();
+        auto vab06 = _mm512_setzero_ps(); auto vab07 = _mm512_setzero_ps();
+        auto vab08 = _mm512_setzero_ps(); auto vab09 = _mm512_setzero_ps();
+        auto vab10 = _mm512_setzero_ps(); auto vab11 = _mm512_setzero_ps();
+        auto vab12 = _mm512_setzero_ps(); auto vab13 = _mm512_setzero_ps();
+        auto vab14 = _mm512_setzero_ps(); auto vab15 = _mm512_setzero_ps();
+        auto vab16 = _mm512_setzero_ps(); auto vab17 = _mm512_setzero_ps();
+        auto vab18 = _mm512_setzero_ps(); auto vab19 = _mm512_setzero_ps();
+        auto vab20 = _mm512_setzero_ps(); auto vab21 = _mm512_setzero_ps();
+        auto vab22 = _mm512_setzero_ps(); auto vab23 = _mm512_setzero_ps();
+        auto vab24 = _mm512_setzero_ps();
+
+        for (int k = 0; k < K; k++) {
+            auto pa = A + lda * k;
+            auto pb = B + ldb * k;
+
+            auto vb0 = _mm512_load_ps(pb + 16 * 0);
+            auto vb1 = _mm512_load_ps(pb + 16 * 1);
+            auto vb2 = _mm512_load_ps(pb + 16 * 2);
+            auto vb3 = _mm512_load_ps(pb + 16 * 3);
+            auto vb4 = _mm512_load_ps(pb + 16 * 4);
+
+            auto va0 = _mm512_broadcast_ss(pa + 0);
+            vab00 = _mm512_fmadd_ps(va0, vb0, vab00);
+            vab01 = _mm512_fmadd_ps(va0, vb1, vab01);
+            vab02 = _mm512_fmadd_ps(va0, vb2, vab02);
+            vab03 = _mm512_fmadd_ps(va0, vb3, vab03);
+            vab04 = _mm512_fmadd_ps(va0, vb4, vab04);
+
+            auto va1 = _mm512_broadcast_ss(pa + 1);
+            vab05 = _mm512_fmadd_ps(va1, vb0, vab05);
+            vab06 = _mm512_fmadd_ps(va1, vb1, vab06);
+            vab07 = _mm512_fmadd_ps(va1, vb2, vab07);
+            vab08 = _mm512_fmadd_ps(va1, vb3, vab08);
+            vab09 = _mm512_fmadd_ps(va1, vb4, vab09);
+
+            auto va2 = _mm512_broadcast_ss(pa + 2);
+            vab10 = _mm512_fmadd_ps(va2, vb0, vab10);
+            vab11 = _mm512_fmadd_ps(va2, vb1, vab11);
+            vab12 = _mm512_fmadd_ps(va2, vb2, vab12);
+            vab13 = _mm512_fmadd_ps(va2, vb3, vab13);
+            vab14 = _mm512_fmadd_ps(va2, vb4, vab14);
+
+            auto va3 = _mm512_broadcast_ss(pa + 3);
+            vab15 = _mm512_fmadd_ps(va3, vb0, vab15);
+            vab16 = _mm512_fmadd_ps(va3, vb1, vab16);
+            vab17 = _mm512_fmadd_ps(va3, vb2, vab17);
+            vab18 = _mm512_fmadd_ps(va3, vb3, vab18);
+            vab19 = _mm512_fmadd_ps(va3, vb4, vab19);
+
+            auto va4 = _mm512_broadcast_ss(pa + 4);
+            vab20 = _mm512_fmadd_ps(va4, vb0, vab20);
+            vab21 = _mm512_fmadd_ps(va4, vb1, vab21);
+            vab22 = _mm512_fmadd_ps(va4, vb2, vab22);
+            vab23 = _mm512_fmadd_ps(va4, vb3, vab23);
+            vab24 = _mm512_fmadd_ps(va4, vb4, vab24);
+        }
+
+        auto vc00 = _mm512_load_ps(C + ldc * 0 + 16 * 0);
+        auto vc01 = _mm512_load_ps(C + ldc * 0 + 16 * 1);
+        auto vc02 = _mm512_load_ps(C + ldc * 0 + 16 * 2);
+        auto vc03 = _mm512_load_ps(C + ldc * 0 + 16 * 3);
+        auto vc04 = _mm512_load_ps(C + ldc * 0 + 16 * 4);
+        auto vc05 = _mm512_load_ps(C + ldc * 1 + 16 * 0);
+        auto vc06 = _mm512_load_ps(C + ldc * 1 + 16 * 1);
+        auto vc07 = _mm512_load_ps(C + ldc * 1 + 16 * 2);
+        auto vc08 = _mm512_load_ps(C + ldc * 1 + 16 * 3);
+        auto vc09 = _mm512_load_ps(C + ldc * 1 + 16 * 4);
+        auto vc10 = _mm512_load_ps(C + ldc * 2 + 16 * 0);
+        auto vc11 = _mm512_load_ps(C + ldc * 2 + 16 * 1);
+        auto vc12 = _mm512_load_ps(C + ldc * 2 + 16 * 2);
+        auto vc13 = _mm512_load_ps(C + ldc * 2 + 16 * 3);
+        auto vc14 = _mm512_load_ps(C + ldc * 2 + 16 * 4);
+        auto vc15 = _mm512_load_ps(C + ldc * 3 + 16 * 0);
+        auto vc16 = _mm512_load_ps(C + ldc * 3 + 16 * 1);
+        auto vc17 = _mm512_load_ps(C + ldc * 3 + 16 * 2);
+        auto vc18 = _mm512_load_ps(C + ldc * 3 + 16 * 3);
+        auto vc19 = _mm512_load_ps(C + ldc * 3 + 16 * 4);
+        auto vc20 = _mm512_load_ps(C + ldc * 4 + 16 * 0);
+        auto vc21 = _mm512_load_ps(C + ldc * 4 + 16 * 1);
+        auto vc22 = _mm512_load_ps(C + ldc * 4 + 16 * 2);
+        auto vc23 = _mm512_load_ps(C + ldc * 4 + 16 * 3);
+        auto vc24 = _mm512_load_ps(C + ldc * 4 + 16 * 4);
+
+        vc00 = _mm512_add_ps(vc00, vab00);
+        vc01 = _mm512_add_ps(vc01, vab01);
+        vc02 = _mm512_add_ps(vc02, vab02);
+        vc03 = _mm512_add_ps(vc03, vab03);
+        vc04 = _mm512_add_ps(vc04, vab04);
+        vc05 = _mm512_add_ps(vc05, vab05);
+        vc06 = _mm512_add_ps(vc06, vab06);
+        vc07 = _mm512_add_ps(vc07, vab07);
+        vc08 = _mm512_add_ps(vc08, vab08);
+        vc09 = _mm512_add_ps(vc09, vab09);
+        vc10 = _mm512_add_ps(vc10, vab10);
+        vc11 = _mm512_add_ps(vc11, vab11);
+        vc12 = _mm512_add_ps(vc12, vab12);
+        vc13 = _mm512_add_ps(vc13, vab13);
+        vc14 = _mm512_add_ps(vc14, vab14);
+        vc15 = _mm512_add_ps(vc15, vab15);
+        vc16 = _mm512_add_ps(vc16, vab16);
+        vc17 = _mm512_add_ps(vc17, vab17);
+        vc18 = _mm512_add_ps(vc18, vab18);
+        vc19 = _mm512_add_ps(vc19, vab19);
+        vc20 = _mm512_add_ps(vc20, vab20);
+        vc21 = _mm512_add_ps(vc21, vab21);
+        vc22 = _mm512_add_ps(vc22, vab22);
+        vc23 = _mm512_add_ps(vc23, vab23);
+        vc24 = _mm512_add_ps(vc24, vab24);
+
+        _mm512_store_ps(C + ldc * 0 + 16 * 0, vc00);
+        _mm512_store_ps(C + ldc * 0 + 16 * 1, vc01);
+        _mm512_store_ps(C + ldc * 0 + 16 * 2, vc02);
+        _mm512_store_ps(C + ldc * 0 + 16 * 3, vc03);
+        _mm512_store_ps(C + ldc * 0 + 16 * 4, vc04);
+        _mm512_store_ps(C + ldc * 1 + 16 * 0, vc05);
+        _mm512_store_ps(C + ldc * 1 + 16 * 1, vc06);
+        _mm512_store_ps(C + ldc * 1 + 16 * 2, vc07);
+        _mm512_store_ps(C + ldc * 1 + 16 * 3, vc08);
+        _mm512_store_ps(C + ldc * 1 + 16 * 4, vc09);
+        _mm512_store_ps(C + ldc * 2 + 16 * 0, vc10);
+        _mm512_store_ps(C + ldc * 2 + 16 * 1, vc11);
+        _mm512_store_ps(C + ldc * 2 + 16 * 2, vc12);
+        _mm512_store_ps(C + ldc * 2 + 16 * 3, vc13);
+        _mm512_store_ps(C + ldc * 2 + 16 * 4, vc14);
+        _mm512_store_ps(C + ldc * 3 + 16 * 0, vc15);
+        _mm512_store_ps(C + ldc * 3 + 16 * 1, vc16);
+        _mm512_store_ps(C + ldc * 3 + 16 * 2, vc17);
+        _mm512_store_ps(C + ldc * 3 + 16 * 3, vc18);
+        _mm512_store_ps(C + ldc * 3 + 16 * 4, vc19);
+        _mm512_store_ps(C + ldc * 4 + 16 * 0, vc20);
+        _mm512_store_ps(C + ldc * 4 + 16 * 1, vc21);
+        _mm512_store_ps(C + ldc * 4 + 16 * 2, vc22);
+        _mm512_store_ps(C + ldc * 4 + 16 * 3, vc23);
+        _mm512_store_ps(C + ldc * 4 + 16 * 4, vc24);
     }
 
     template <bool PACKED = false>
