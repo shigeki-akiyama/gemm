@@ -6,8 +6,7 @@
 
 #ifdef USE_AVX512
 
-#define _mm512_broadcast_ss(p) \
-    _mm512_broadcast_f32x4(_mm_broadcast_ss(p))
+#define _mm512_broadcast_ss(p) _mm512_set1_ps(*(p))
 
 struct register_avx512_9x3 {
 
@@ -60,24 +59,23 @@ struct register_avx512_9x3 {
 
             auto va0 = _mm512_broadcast_ss(&pa[lda * 0]);
             auto va1 = _mm512_broadcast_ss(&pa[lda * 1]);
+            auto va2 = _mm512_broadcast_ss(&pa[lda * 2]);
             vab00 = _mm512_fmadd_ps(va0, vb0, vab00);
             vab01 = _mm512_fmadd_ps(va0, vb1, vab01);
             vab02 = _mm512_fmadd_ps(va0, vb2, vab02);
             vab03 = _mm512_fmadd_ps(va1, vb0, vab03);
             vab04 = _mm512_fmadd_ps(va1, vb1, vab04);
             vab05 = _mm512_fmadd_ps(va1, vb2, vab05);
-
-            auto va2 = _mm512_broadcast_ss(&pa[lda * 2]);
-            auto va3 = _mm512_broadcast_ss(&pa[lda * 3]);
             vab06 = _mm512_fmadd_ps(va2, vb0, vab06);
             vab07 = _mm512_fmadd_ps(va2, vb1, vab07);
             vab08 = _mm512_fmadd_ps(va2, vb2, vab08);
+
+            auto va3 = _mm512_broadcast_ss(&pa[lda * 3]);
+            auto va4 = _mm512_broadcast_ss(&pa[lda * 4]);
+            auto va5 = _mm512_broadcast_ss(&pa[lda * 5]);
             vab09 = _mm512_fmadd_ps(va3, vb0, vab09);
             vab10 = _mm512_fmadd_ps(va3, vb1, vab10);
             vab11 = _mm512_fmadd_ps(va3, vb2, vab11);
-
-            auto va4 = _mm512_broadcast_ss(&pa[lda * 4]);
-            auto va5 = _mm512_broadcast_ss(&pa[lda * 5]);
             vab12 = _mm512_fmadd_ps(va4, vb0, vab12);
             vab13 = _mm512_fmadd_ps(va4, vb1, vab13);
             vab14 = _mm512_fmadd_ps(va4, vb2, vab14);
@@ -87,14 +85,13 @@ struct register_avx512_9x3 {
 
             auto va6 = _mm512_broadcast_ss(&pa[lda * 6]);
             auto va7 = _mm512_broadcast_ss(&pa[lda * 7]);
+            auto va8 = _mm512_broadcast_ss(&pa[lda * 8]);
             vab18 = _mm512_fmadd_ps(va6, vb0, vab18);
             vab19 = _mm512_fmadd_ps(va6, vb1, vab19);
             vab20 = _mm512_fmadd_ps(va6, vb2, vab20);
             vab21 = _mm512_fmadd_ps(va7, vb0, vab21);
             vab22 = _mm512_fmadd_ps(va7, vb1, vab22);
             vab23 = _mm512_fmadd_ps(va7, vb2, vab23);
-
-            auto va8 = _mm512_broadcast_ss(&pa[lda * 8]);
             vab24 = _mm512_fmadd_ps(va8, vb0, vab24);
             vab25 = _mm512_fmadd_ps(va8, vb1, vab25);
             vab26 = _mm512_fmadd_ps(va8, vb2, vab26);
