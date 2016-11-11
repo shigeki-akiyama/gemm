@@ -291,7 +291,7 @@ static void benchmark(
 #else
     auto gflops = flop / (1e9 * r.avg_time);
 #endif
-    std::printf("%-20s\t%10.3f\t%10.9f\t%10.9f\t%10.9f\t%6zu\n",
+    std::printf("%-25s %10.3f %10.9f %10.9f %10.9f %6zu\n",
         name, gflops, r.avg_time, r.min_time, r.max_time,
         n_times);
     std::fflush(stdout);

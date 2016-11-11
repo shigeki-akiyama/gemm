@@ -474,11 +474,11 @@ static int real_main(
     }
 
     auto freq = get_cpu_freq();
-    std::printf("%-20s\t%10.3f\n", "Frequency", freq);
+    std::printf("%-25s %10.3f\n", "Frequency", freq);
     // freq * AVX * FMA * dual-issue
     auto peak_gflops = freq * 8 * 2 * 2;
-    std::printf("%-20s\t%10.3f\n", "PEAK_AVX", peak_gflops);
-    std::printf("%-20s\t%10.3f\n", "PEAK_AVX512", peak_gflops * 2);
+    std::printf("%-25s %10.3f\n", "PEAK_AVX", peak_gflops);
+    std::printf("%-25s %10.3f\n", "PEAK_AVX512", peak_gflops * 2);
 
     papix papi;
     for (auto& bench : benchs) {
