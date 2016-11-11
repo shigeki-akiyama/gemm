@@ -223,6 +223,12 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
         blis::intiialize();
         push("blis_packL3_4x3", blis::gemm);
     }
+
+    {
+        using blis = blis<haswell, register_avx_3_4x3asm>;
+        blis::intiialize();
+        push("blis_packL3_4x3asm", blis::gemm);
+    }
 #endif
 #ifdef USE_AVX512
 #if 1
