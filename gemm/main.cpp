@@ -335,6 +335,13 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
         blis::intiialize();
         push("blis512_packL3_5x5asm", blis::gemm);
     }
+
+    // 9-3. AVX512 assembly implementation based on BLIS (unrolled)
+    {
+        using blis = blis<knl_5x5, register_avx512_5x5asm_unroll>;
+        blis::intiialize();
+        push("blis512_packL3_5x5asm_unr", blis::gemm);
+    }
 #endif
 #endif
 
