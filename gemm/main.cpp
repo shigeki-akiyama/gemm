@@ -313,13 +313,28 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
         push("blis512_packL2_5x5", blis::gemm);
     }
     
-    // 8-2. BLIS-based implementation w/ copy with stride format on L1/L2
+    // 8-2. BLIS-based implementation w/ copy with stride format on L1/L2/L3
     {
         using blis = blis<knl_5x5, register_avx512_5x5>;
         blis::intiialize();
         push("blis512_packL3_5x5", blis::gemm);
     }
 
+#if 0
+    // 9-1. AVX512 implementation based on naive BLIS
+    {
+        using blis = blis_copy<knl_5x5, register_avx512_5x5asm, option::naive>;
+        blis::initialize();
+        push("blis512_naive_5x5asm", blis::gemm);
+    }
+#endif
+
+    // 9-2. AVX512 assembly implementation based on BLIS
+    {
+        using blis = blis<knl_5x5, register_avx512_5x5asm>;
+        blis::intiialize();
+        push("blis512_packL3_5x5asm", blis::gemm);
+    }
 #endif
 #endif
 
