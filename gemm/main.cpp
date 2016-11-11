@@ -25,6 +25,10 @@
 #include <blis/cblas.h>
 #define USE_CBLAS
 #define CBLAS_IMPL "BLIS"
+#elif defined(USE_OBLAS)
+#define USE_CBLAS
+#define CBLAS_IMPL "OpenBLAS"
+#include <cblas.h>
 #endif
 
 using elem_type = float;
