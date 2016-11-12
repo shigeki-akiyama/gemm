@@ -4,6 +4,7 @@
 #include "02cache.h"
 #include "03blis.h"
 #include "04blis.h"
+#include "05blis_omp.h"
 #include "util.h"
 
 #ifdef USE_AVX512
@@ -230,6 +231,14 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
         push("blis_packL3_4x3asm", blis::gemm);
     }
 #endif
+#if 1
+    {
+        using blis = blis_omp<haswell, register_avx_3_4x3asm>;
+        blis::intiialize();
+        push("blis_omp_4x3asm", blis::gemm);
+    }
+#endif
+
 #ifdef USE_AVX512
 #if 1
     // 5-1. AVX512 implementation based on naive BLIS
