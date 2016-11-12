@@ -1,5 +1,12 @@
 #pragma once
 
+#ifdef __INTELLISENSE__
+#undef __AVX__
+#define __AVX__ 1
+#undef __AVX512F__
+#define __AVX512F__ 1
+#endif
+
 #ifdef __AVX__
 #define USE_AVX
 #include <immintrin.h>
@@ -14,13 +21,6 @@
 #endif
 
 #include <immintrin.h>
-#endif
-
-#ifdef __INTELLISENSE__
-#undef __AVX__
-#define __AVX__ 1
-#undef __AVX512F__
-#define __AVX512F__ 1
 #endif
 
 
