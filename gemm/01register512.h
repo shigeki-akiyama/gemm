@@ -759,7 +759,7 @@ struct register_avx512_5x5asm {
             M, N, K, A, lda, B, ldb, C, ldc);
     }
 
-    static void matmul_register_packed(
+    static NOINLINE void matmul_register_packed(
         int M, int N, int K, float *A, int lda, float *B, int ldb,
         float *C, int ldc)
     {
@@ -1000,7 +1000,7 @@ struct register_avx512_5x5asm_unroll {
             M, N, K, A, lda, B, ldb, C, ldc);
     }
 
-    static void matmul_register_packed(
+    static NOINLINE void matmul_register_packed(
         int M, int N, int K, float *A, int lda, float *B, int ldb,
         float *C, int ldc)
     {
