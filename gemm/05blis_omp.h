@@ -6,7 +6,9 @@
 #include <cassert>
 #undef NODEBUG
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 template <class Arch, class Kernel>
 struct blis_omp {
@@ -90,10 +92,12 @@ struct blis_omp {
                     auto Ac = A + lda * i + k;
                     auto Cc = C + ldc * i + j;
                     auto Mc = std::min<int>(M - i, BLOCK_M);
-
+#ifdef _OPENMP
                     auto tid = omp_get_thread_num();
                     assert(tid < MAX_THREADS);
-
+#else
+                    auto tid = 0;
+#endif
                     auto t = rdtsc();
 
                     // Copy A (144x256) to L2 cache buffer
@@ -148,4 +152,5 @@ struct blis_omp {
     }
 };
 template <class Arch, class Kernel>
-typename blis_omp<Arch, Kernel>::blis_buffer * blis_omp<Arch, Kernel>::s_buf = nullptr;
+typename blis_omp<Arch, Kernel>::blis_buffer * 
+blis_omp<Arch, Kernel>::s_buf = nullptr;
