@@ -134,6 +134,7 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
     push("L3_blocking", cache_blocking_L3::gemm);
 #endif
 
+#ifdef USE_AVX
     using option = blis_opt;
     using haswell = blis_arch::haswell;
     using knl_9x3 = blis_arch::knl_9x3;
@@ -244,6 +245,7 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
         blis::intiialize();
         push("blis_th_4x3asm", blis::gemm);
     }
+#endif
 #endif
 
 #ifdef USE_AVX512
@@ -433,6 +435,8 @@ static int real_main(
     return 0;
 #endif
 
+    set_affinity();
+
     int lda = K;
     int ldb = N;
     int ldc = N;
@@ -506,7 +510,10 @@ static int real_main(
     // freq * AVX * FMA * dual-issue
     auto peak_gflops = freq * 8 * 2 * 2;
     std::printf("%-25s %10.3f\n", "PEAK_AVX", peak_gflops);
+
+#ifdef USE_AVX512
     std::printf("%-25s %10.3f\n", "PEAK_AVX512", peak_gflops * 2);
+#endif
 
     papix papi;
     for (auto& bench : benchs) {

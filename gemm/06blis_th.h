@@ -7,83 +7,40 @@
 #include <cassert>
 #undef NODEBUG
 
-#include <pthread.h>
+#include <omp.h>
+#include <hwloc.h>
 
+static void set_affinity()
+{
+    hwloc_topology_t topo;
 
-class spmd_master {
-    size_t n_workers_;
-    pthread_barrier_t barrier_;
+    hwloc_topology_init(&topo);
+    hwloc_topology_load(topo);
 
-public:
-    spmd_master(size_t n_workers) : n_workers_(n_workers)
+    auto depth = hwloc_topology_get_depth(topo);
+
+    auto last = depth - 1;
+    auto n_objs = hwloc_get_nbobjs_by_depth(topo, last);
+
+    #pragma omp parallel
     {
-        pthread_barrier_init(&barrier_, nullptr, n_workers_);
+        auto me = omp_get_thread_num();
+
+        auto obj = hwloc_get_obj_by_depth(topo, last, me);
+        assert(obj != nullptr);
+
+        auto cpuset = hwloc_bitmap_dup(obj->cpuset);
+        hwloc_bitmap_singlify(cpuset);
+
+        auto flags = HWLOC_CPUBIND_THREAD | HWLOC_CPUBIND_STRICT;
+        auto r = hwloc_set_cpubind(topo, cpuset, flags);
+        assert(r == 0);
+
+        hwloc_bitmap_free(cpuset);
     }
 
-    ~spmd_master()
-    {
-        pthread_barrier_destroy(&barrier_);
-    }
-
-    size_t n_workers() const { return n_workers_; }
-
-    void barrier()
-    {
-        pthread_barrier_wait(&barrier_);
-    }
-};
-
-class spmd_ops {
-    spmd_master * master_;
-    size_t id_;
-
-public:
-    spmd_ops(spmd_master& master, size_t id)
-        : master_(&master)
-        , id_(id)
-    {
-    }
-
-    spmd_ops() : master_(nullptr), id_(0) {}
-    spmd_ops(const spmd_ops& ops) = default;
-    spmd_ops& operator=(const spmd_ops& ops) = default;
-
-    size_t id() { return id_; }
-
-    size_t n_workers() { return master_->n_workers(); }
-
-    void barrier()
-    {
-        master_->barrier();
-    }
-};
-
-class spmd_workers {
-    spmd_master master_;
-    std::vector<spmd_ops> spmd_ops_buf_;
-    std::vector<std::thread> threads_;
-
-public:
-    template <class F, class... Args>
-    spmd_workers(size_t n_workers, F start, Args... args)
-        : master_(n_workers)
-        , spmd_ops_buf_(n_workers)
-        , threads_(n_workers)
-    {
-        for (size_t i = 0; i < n_workers; i++) {
-            spmd_ops ops(master_, i);
-            threads_[i] = std::thread([=]{
-                start(ops, args...);
-            });
-        }
-
-        for (auto& th : threads_) {
-            th.join();
-        }
-    }
-
-    ~spmd_workers() = default;
-};
+    hwloc_topology_destroy(topo);
+}
 
 template <class Arch, class Kernel>
 struct blis_th {
@@ -96,8 +53,8 @@ struct blis_th {
     };
 
     struct blis_buffer {
-        float Ac[MAX_THREADS][BLOCK_M * BLOCK_K];    // L2: 144x256
-        float Bc[BLOCK_K * BLOCK_N];    // L3: 256x3072
+        float Ac[MAX_THREADS][BLOCK_M * BLOCK_K];       // L2: 144x256
+        float Bc[BLOCK_K * BLOCK_N];                    // L3: 256x3072
     };
 
     static blis_buffer * s_buf;
@@ -124,36 +81,47 @@ struct blis_th {
         }
     }
 
-    static void matmul_spmd(
-        spmd_ops spmd,
-        int M, int N, int K, float *A, int lda,
-        float *B, int ldb, float *C, int ldc)
+    static void divide_M(size_t me, size_t n_workers, int M,
+                         int * M_begin, int * M_end)
     {
-        auto me = spmd.id();
-        auto n_workers = spmd.n_workers();
         auto n_blocks = (M + BLOCK_M - 1) / BLOCK_M;
 
         auto n_blocks_per_worker = n_blocks / n_workers;
         auto remain = n_blocks % n_workers;
 
-        int M_begin, M_end;
+        int begin, end;
         {
             int offset = 0;
             for (size_t i = 0; i < n_workers; i++) {
-                M_begin = offset;
+                begin = offset;
                 offset += n_blocks_per_worker;
                 if (i < remain) offset += 1;
-                M_end = offset;
+                end = offset;
 
                 if (i == me) break;
             }
            
-            M_begin *= BLOCK_M;
-            M_end *= BLOCK_M;
+            begin *= BLOCK_M;
+            end *= BLOCK_M;
 
             if (me == n_workers - 1)
-                M_end = M;
+                end = M;
         }
+
+        *M_begin = begin;
+        *M_end = end;
+    }
+
+    static void matmul_spmd(
+        int M, int N, int K, float *A, int lda,
+        float *B, int ldb, float *C, int ldc)
+    {
+        auto me = omp_get_thread_num();
+        auto n_workers = omp_get_num_threads();
+
+        int M_begin, M_end;
+        divide_M(me, n_workers, M, &M_begin, &M_end);
+
 #if 0
         std::printf("%zu/%zu: M_begin = %10d, M_end = %10d\n",
                     me, n_workers, M_begin, M_end);
@@ -184,7 +152,7 @@ struct blis_th {
                     matmul_cache(Mc, Nc, Kc, Ac, lda_c, Bc, ldb_c, Cc, ldc);
                 }
 
-                spmd.barrier();
+                #pragma omp barrier
             }
         }
     }
@@ -196,10 +164,10 @@ struct blis_th {
         scale_matrix(A, lda, M, K, alpha);
         scale_matrix(C, ldc, M, N, beta);
 
-        size_t n_workers = 4;
-        spmd_workers workers(n_workers, [=](spmd_ops spmd){
-            matmul_spmd(spmd, M, N, K, A, lda, B, ldb, C, ldc);
-        });
+        #pragma omp parallel
+        {
+            matmul_spmd(M, N, K, A, lda, B, ldb, C, ldc);
+        }
     }
 
     static void intiialize()
