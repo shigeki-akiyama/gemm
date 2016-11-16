@@ -24,6 +24,7 @@ static void set_affinity()
 
     #pragma omp parallel
     {
+#if THREAD_BIND
         auto me = omp_get_thread_num();
 
         auto obj = hwloc_get_obj_by_depth(topo, last, me);
@@ -37,6 +38,7 @@ static void set_affinity()
         assert(r == 0);
 
         hwloc_bitmap_free(cpuset);
+#endif
     }
 
     hwloc_topology_destroy(topo);
@@ -81,37 +83,6 @@ struct blis_th {
         }
     }
 
-    static void divide_M(size_t me, size_t n_workers, int M,
-                         int * M_begin, int * M_end)
-    {
-        auto n_blocks = (M + BLOCK_M - 1) / BLOCK_M;
-
-        auto n_blocks_per_worker = n_blocks / n_workers;
-        auto remain = n_blocks % n_workers;
-
-        int begin, end;
-        {
-            int offset = 0;
-            for (size_t i = 0; i < n_workers; i++) {
-                begin = offset;
-                offset += n_blocks_per_worker;
-                if (i < remain) offset += 1;
-                end = offset;
-
-                if (i == me) break;
-            }
-           
-            begin *= BLOCK_M;
-            end *= BLOCK_M;
-
-            if (me == n_workers - 1)
-                end = M;
-        }
-
-        *M_begin = begin;
-        *M_end = end;
-    }
-
     static void matmul_spmd(
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
@@ -120,12 +91,12 @@ struct blis_th {
         auto n_workers = omp_get_num_threads();
 
         int M_begin, M_end;
-        divide_M(me, n_workers, M, &M_begin, &M_end);
+        partition(me, n_workers, M, &M_begin, &M_end);
 
-#if 0
-        std::printf("%zu/%zu: M_begin = %10d, M_end = %10d\n",
-                    me, n_workers, M_begin, M_end);
-#endif
+        if (0) {
+            std::printf("%zu: M_begin = %10d, M_end = %10d\n",
+                        me, n_workers, M_begin, M_end);
+        }
 
         for (int j = 0; j < N; j += BLOCK_N) {
             for (int k = 0; k < K; k += BLOCK_K) {
@@ -133,15 +104,40 @@ struct blis_th {
                 auto Nc = std::min<int>(N - j, BLOCK_N);
                 auto Kc = std::min<int>(K - k, BLOCK_K);
 
-                // Copy B (256x3072) to L3 cache buffer
-                pack2d<float, 0, Kernel::BLOCK_N>(Bc, ldb, Kc, Nc, s_buf->Bc);
+#if 1
+                // Parallel packing
+                {
+                    int Nc_begin, Nc_end;
+                    partition(me, n_workers, Nc, &Nc_begin, &Nc_end);
+
+                    if (0) {
+                        printf("%d: Nc_begin = %5d, Nc_end = %5d\n",
+                               me, Nc_begin, Nc_end);
+                    }
+
+                    // Copy B (256x3072) to L3 cache buffer
+                    pack2d_col_spmd<float, Kernel::BLOCK_N>(
+                        Bc, ldb, Kc, Nc_begin, Nc_end, s_buf->Bc);
+                }
+#else
+                // Sequential packing
+                if (me == 0) {
+                    // Copy B (256x3072) to L3 cache buffer
+                    pack2d<float,0, Kernel::BLOCK_N>(
+                        Bc, ldb, Kc, Nc, s_buf->Bc);
+                }
+#endif
                 Bc = s_buf->Bc;
                 auto ldb_c = Kernel::BLOCK_N;
-                
+
+                #pragma omp barrier
+               
                 for (int i = M_begin; i < M_end; i += BLOCK_M) {
                     auto Ac = A + lda * i + k;
                     auto Cc = C + ldc * i + j;
-                    auto Mc = std::min<int>(M - i, BLOCK_M);
+                    auto Mc = std::min<int>(M_end - i, BLOCK_M);
+
+                    if (0) printf("Mc = %d, M_end = %d\n", Mc, M_end);
 
                     // Copy A (144x256) to L2 cache buffer
                     pack2d<float, Kernel::BLOCK_M, 0>(
@@ -177,6 +173,40 @@ struct blis_th {
             memset(s_buf, 0, sizeof(blis_buffer));
         }
     }
+
+private:
+
+    static void partition(size_t me, size_t n_workers, int N,
+                          int * N_begin, int * N_end)
+    {
+        size_t per_worker = N / n_workers;
+        size_t remain = N % n_workers;
+        
+        int begin, end;
+        if (me < remain) {
+            begin = (per_worker + 1) * me;
+            end   = begin + (per_worker + 1);
+        } else {
+            begin = (per_worker + 1) * remain + per_worker * (me - remain);
+            end   = begin + per_worker;
+        }
+
+        *N_begin = begin;
+        *N_end   = end;
+    }
+
+    template <class T, int CS>
+    static void pack2d_col_spmd(
+        const T *A, int lda, int M, int N_begin, int N_end, T *B)
+    {
+        for (int i = N_begin; i < N_end; i += CS) {
+            auto Ab = A + i;
+            auto Bb = B + M * i;
+
+            copy2d(Ab, lda, M, CS, Bb, CS);
+        }
+    }
+
 };
 template <class Arch, class Kernel>
 typename blis_th<Arch, Kernel>::blis_buffer *

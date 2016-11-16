@@ -165,24 +165,18 @@ template <class T, int RS, int CS>
 static NOINLINE void pack2d(const T *A, int lda, int M, int N, T *B)
 {
     if (RS > 0) {           // for matrix A
-        int b_idx = 0;
         for (int i = 0; i < M; i += RS) {
             auto Ab = A + lda * i;
-            auto Bb = B + b_idx;
+            auto Bb = B + N * i;
 
             transpose_matrix(Ab, lda, RS, N, Bb);
-
-            b_idx += RS * N;
         }
     } else if (CS > 0) {    // for matrix B
-        int b_idx = 0;
         for (int i = 0; i < N; i += CS) {
             auto Ab = A + i;
-            auto Bb = B + b_idx;
+            auto Bb = B + M * i;
 
             copy2d(Ab, lda, M, CS, Bb, CS);
-
-            b_idx += M * CS;
         }
     }
 }
