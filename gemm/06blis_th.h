@@ -24,7 +24,7 @@ static void set_affinity()
 
     #pragma omp parallel
     {
-#if THREAD_BIND
+#ifndef NO_BIND
         auto me = omp_get_thread_num();
 
         auto obj = hwloc_get_obj_by_depth(topo, last, me);
@@ -50,6 +50,7 @@ struct blis_th {
         BLOCK_M = Arch::M_CACHE,
         BLOCK_N = Arch::N_CACHE,
         BLOCK_K = Arch::K_CACHE,
+        SMT     = Arch::THREADS_PER_CORE,
 
         MAX_THREADS = 256,
     };
@@ -61,15 +62,33 @@ struct blis_th {
 
     static blis_buffer * s_buf;
 
-    static void matmul_cache(
+    static void matmul_cache_spmd(
+        int me, int n_workers,
         int M, int N, int K, float *A, int lda,
         float *B, int ldb, float *C, int ldc)
     {
         assert(M % Kernel::BLOCK_M == 0);
         assert(N % Kernel::BLOCK_N == 0);
         assert(K <= BLOCK_K);
+        assert(n_workers == 1 || n_workers % SMT == 0);
 
-        for (int j = 0; j < N; j += Kernel::BLOCK_N) {
+        auto smt_me = me % SMT;
+
+        int N_begin, N_end;
+        if (n_workers == 1) {
+            N_begin = 0;
+            N_end   = N;
+        } else {
+            auto align = Kernel::BLOCK_N;
+            partition(smt_me, SMT, N, align, &N_begin, &N_end);
+        }
+
+        if (0) {
+            std::printf("%2d: Nc_begin = %10d, Nc_end = %10d\n",
+                        me, N_begin, N_end);
+        }
+
+        for (int j = N_begin; j < N_end; j += Kernel::BLOCK_N) {
             auto Br = B + K * j;
 
             for (int i = 0; i < M; i += Kernel::BLOCK_M) {
@@ -90,8 +109,19 @@ struct blis_th {
         auto me = omp_get_thread_num();
         auto n_workers = omp_get_num_threads();
 
+        assert(n_workers == 1 || n_workers % SMT == 0);
+
+        int M_me, M_workers;
+        if (n_workers == 1) {
+            M_me = 0;
+            M_workers = 1;
+        } else {
+            M_me = me / SMT;
+            M_workers = n_workers / SMT;
+        } 
+
         int M_begin, M_end;
-        partition(me, n_workers, M, 1, &M_begin, &M_end);
+        partition(M_me, M_workers, M, 1, &M_begin, &M_end);
 
         if (0) {
             std::printf("%2d: M_begin = %10d, M_end = %10d\n",
@@ -140,13 +170,24 @@ struct blis_th {
 
                     if (0) printf("Mc = %d, M_end = %d\n", Mc, M_end);
 
-                    // Copy A (144x256) to L2 cache buffer
-                    pack2d<float, Kernel::BLOCK_M, 0>(
-                        Ac, lda, Mc, Kc, s_buf->Ac[me]);
-                    Ac = s_buf->Ac[me];
+                    // single HW thread packing
+                    auto head = me / SMT * SMT;
+                    if (me == head) {
+                        // Copy A (144x256) to L2 cache buffer
+                        pack2d<float, Kernel::BLOCK_M, 0>(
+                            Ac, lda, Mc, Kc, s_buf->Ac[me]);
+                    }
+
+                    #pragma omp barrier
+
+                    // Shared among HW threads
+                    Ac = s_buf->Ac[head];
                     auto lda_c = Kernel::BLOCK_M;
 
-                    matmul_cache(Mc, Nc, Kc, Ac, lda_c, Bc, ldb_c, Cc, ldc);
+                    matmul_cache_spmd(me, n_workers, Mc, Nc, Kc,
+                                      Ac, lda_c, Bc, ldb_c, Cc, ldc);
+
+                    #pragma omp barrier
                 }
 
                 #pragma omp barrier

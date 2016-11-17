@@ -28,17 +28,18 @@
 
 
 struct blis_arch {
-    template <int MC, int NC, int KC>
+    template <int MC, int NC, int KC, int THREADS>
     struct make_arch {
         enum : int {
             M_CACHE = MC,
             N_CACHE = NC,
             K_CACHE = KC,
+            THREADS_PER_CORE = THREADS,
         };
     };
 
-    struct haswell : make_arch<144, 4080, 256> {};
-    struct knl_9x3 : make_arch<144, 4080, 256> {};
-    struct knl_5x5 : make_arch<135, 4080, 256> {};
+    struct haswell : make_arch<144, 4080, 256, 2> {};
+    struct knl_9x3 : make_arch<144, 4080, 256, 4> {};
+    struct knl_5x5 : make_arch<135, 4080, 256, 4> {};
 };
 
