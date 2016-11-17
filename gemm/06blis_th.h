@@ -91,11 +91,11 @@ struct blis_th {
         auto n_workers = omp_get_num_threads();
 
         int M_begin, M_end;
-        partition(me, n_workers, M, &M_begin, &M_end);
+        partition(me, n_workers, M, 1, &M_begin, &M_end);
 
         if (0) {
-            std::printf("%zu: M_begin = %10d, M_end = %10d\n",
-                        me, n_workers, M_begin, M_end);
+            std::printf("%2d: M_begin = %10d, M_end = %10d\n",
+                        me, M_begin, M_end);
         }
 
         for (int j = 0; j < N; j += BLOCK_N) {
@@ -108,7 +108,8 @@ struct blis_th {
                 // Parallel packing
                 {
                     int Nc_begin, Nc_end;
-                    partition(me, n_workers, Nc, &Nc_begin, &Nc_end);
+                    int align = Kernel::BLOCK_N;
+                    partition(me, n_workers, Nc, align, &Nc_begin, &Nc_end);
 
                     if (0) {
                         printf("%d: Nc_begin = %5d, Nc_end = %5d\n",
@@ -176,7 +177,7 @@ struct blis_th {
 
 private:
 
-    static void partition(size_t me, size_t n_workers, int N,
+    static void partition(size_t me, size_t n_workers, int N, int align,
                           int * N_begin, int * N_end)
     {
         size_t per_worker = N / n_workers;
@@ -191,6 +192,12 @@ private:
             end   = begin + per_worker;
         }
 
+        begin = begin / align * align;
+        end   = end / align * align;
+
+        if (me == n_workers - 1)
+            end = N;
+
         *N_begin = begin;
         *N_end   = end;
     }
@@ -199,6 +206,8 @@ private:
     static void pack2d_col_spmd(
         const T *A, int lda, int M, int N_begin, int N_end, T *B)
     {
+        assert((N_end - N_begin) % CS == 0);
+
         for (int i = N_begin; i < N_end; i += CS) {
             auto Ab = A + i;
             auto Bb = B + M * i;
