@@ -368,9 +368,9 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
     }
 
     {
-        using blis = blis_pth<knl_5x5, register_avx512_5x5asm_unroll>;
+        using blis = blis_th<knl_5x5, register_avx512_5x5asm_unroll>;
         blis::intiialize();
-        push("blis512_pth_5x5asm", blis::gemm);
+        push("blis512_th_5x5asm", blis::gemm);
     }
 #endif
 #endif
@@ -453,9 +453,11 @@ static int real_main(
     auto buf_size = 16 * 1024 * 1024 / sizeof(elem_type);
     auto buf = make_aligned_array<elem_type>(buf_size, align, 0.1);
 
-    fill_random(A.get(), M * lda, 0);
-    fill_random(B.get(), K * ldb, 1);
+    if (verify) {
+        fill_random(A.get(), M * lda, 0);
+        fill_random(B.get(), K * ldb, 1);
 //    fill_random(C.get(), M * ldc, 2);
+    }
 
 #if 0
     for (int i = 0; i < M; i++)
