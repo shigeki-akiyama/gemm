@@ -24,7 +24,7 @@
 #endif
 
 
-#define PACK_CYCLES 0
+//#define PACK_CYCLES
 
 
 struct blis_arch {
