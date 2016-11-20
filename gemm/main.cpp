@@ -230,12 +230,18 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
         blis::intiialize();
         push("blis_packL3_4x3asm", blis::gemm);
     }
+
+    {
+        using blis = blis<haswell, register_avx_3_4x3asmpf>;
+        blis::intiialize();
+        push("blis_packL3_4x3asmpf", blis::gemm);
+    }
 #endif
 #if 1
     {
-        using blis = blis_omp<haswell, register_avx_3_4x3asm>;
+        using blis = blis_omp<haswell, register_avx_3_4x3asmpf>;
         blis::intiialize();
-        push("blis_omp_4x3asm", blis::gemm);
+        push("blis_omp_4x3asmpf", blis::gemm);
     }
 #endif
 

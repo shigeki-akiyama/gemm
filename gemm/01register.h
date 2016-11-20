@@ -1099,6 +1099,252 @@ struct register_avx_3_4x3asm {
     }
 };
 
+struct register_avx_3_4x3asmpf {
+
+    enum : int {
+        BLOCK_M = 4,
+        BLOCK_N = 8 * 3,
+        BLOCK_K = 32,
+    };
+
+    // for 6x16 matrix
+    static NOINLINE void matmul_register(
+        int M, int N, int K, float *A, int lda, float *B, int ldb,
+        float *C, int ldc)
+    {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+
+        register_avx_3_4x3::matmul_register(M, N, K, A, lda, B, ldb, C, ldc);
+    }
+
+    static void NOINLINE matmul_register_packed(
+        int M, int N, int K, float *A, int lda, float *B, int ldb,
+        float *C, int ldc)
+    {
+#if 0
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+        assert(lda == BLOCK_M);
+        assert(ldb == BLOCK_N);
+#endif
+
+#ifdef _MSC_VER
+        register_avx_3_4x3::matmul_register_packed(
+            M, N, K, A, lda, B, ldb, C, ldc);
+#else
+        int64_t K64 = K;
+        int64_t ldc64 = ldc;
+
+        __asm__ __volatile__ (
+            "                                                   \n\t"
+            "vzeroall                                           \n\t"
+            "                                                   \n\t"
+            "mov                %0, %%rax                       \n\t" // A
+            "mov                %1, %%rbx                       \n\t" // B
+            "mov                %2, %%rcx                       \n\t" // C
+            "mov                %3, %%rsi                       \n\t" // K
+            "mov                %4, %%rdi                       \n\t" // ldc
+            "                                                   \n\t"
+            "lea                (,%%rdi,2), %%r10               \n\t" // rdi*2
+            "lea                (%%r10,%%rdi), %%r11            \n\t" // rdi*3
+            "prefetcht0          0(%%rcx)                       \n\t"
+            "prefetcht0         64(%%rcx)                       \n\t"
+            "prefetcht0          0(%%rcx,%%rdi,4)               \n\t"
+            "prefetcht0         64(%%rcx,%%rdi,4)               \n\t"
+            "prefetcht0          0(%%rcx,%%r10,4)               \n\t"
+            "prefetcht0         64(%%rcx,%%r10,4)               \n\t"
+            "prefetcht0          0(%%rcx,%%r11,4)               \n\t"
+            "prefetcht0         64(%%rcx,%%r11,4)               \n\t"
+            "                                                   \n\t"
+            "lea                (,%%rsi,4), %%r8                \n\t"
+            "lea                (%%rax,%%r8,4), %%r9            \n\t"
+            "                                                   \n\t"
+            ".KLOOP_4x3asmpf:                                   \n\t"
+            "                                                   \n\t"
+            "cmp                %%rax, %%r9                     \n\t"
+            "je                 .KLOOP_4x3asmpf_EXIT            \n\t"
+            "                                                   \n\t"
+            "vmovaps            0 * 32(%%rbx), %%ymm12          \n\t"
+            "vmovaps            1 * 32(%%rbx), %%ymm13          \n\t"
+            "vmovaps            2 * 32(%%rbx), %%ymm14          \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       0 * 4(%%rax), %%ymm15           \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm0        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm1        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm2        \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       1 * 4(%%rax), %%ymm15           \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm3        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm4        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm5        \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       2 * 4(%%rax), %%ymm15           \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm6        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm7        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm8        \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       3 * 4(%%rax), %%ymm15           \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm9        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm10       \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm11       \n\t"
+            "                                                   \n\t"
+            "vmovaps            3 * 32(%%rbx), %%ymm12          \n\t"
+            "vmovaps            4 * 32(%%rbx), %%ymm13          \n\t"
+            "vmovaps            5 * 32(%%rbx), %%ymm14          \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       4 * 4(%%rax), %%ymm15           \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm0        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm1        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm2        \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       5 * 4(%%rax), %%ymm15           \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm3        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm4        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm5        \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       6 * 4(%%rax), %%ymm15           \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm6        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm7        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm8        \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       7 * 4(%%rax), %%ymm15           \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm9        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm10       \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm11       \n\t"
+            "                                                   \n\t"
+            "vmovaps            6 * 32(%%rbx), %%ymm12          \n\t"
+            "vmovaps            7 * 32(%%rbx), %%ymm13          \n\t"
+            "vmovaps            8 * 32(%%rbx), %%ymm14          \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       8 * 4(%%rax), %%ymm15           \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm0        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm1        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm2        \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       9 * 4(%%rax), %%ymm15           \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm3        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm4        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm5        \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       10 * 4(%%rax), %%ymm15          \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm6        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm7        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm8        \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       11 * 4(%%rax), %%ymm15          \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm9        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm10       \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm11       \n\t"
+            "                                                   \n\t"
+            "vmovaps             9 * 32(%%rbx), %%ymm12         \n\t"
+            "vmovaps            10 * 32(%%rbx), %%ymm13         \n\t"
+            "vmovaps            11 * 32(%%rbx), %%ymm14         \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       12 * 4(%%rax), %%ymm15          \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm0        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm1        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm2        \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       13 * 4(%%rax), %%ymm15          \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm3        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm4        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm5        \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       14 * 4(%%rax), %%ymm15          \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm6        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm7        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm8        \n\t"
+            "                                                   \n\t"
+            "vbroadcastss       15 * 4(%%rax), %%ymm15          \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm12, %%ymm9        \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm13, %%ymm10       \n\t"
+            "vfmadd231ps        %%ymm15, %%ymm14, %%ymm11       \n\t"
+            "                                                   \n\t"
+            "add                $64, %%rax                      \n\t"
+            "add                $384, %%rbx                     \n\t"
+            "jmp                .KLOOP_4x3asmpf                 \n\t"
+            "                                                   \n\t"
+            ".KLOOP_4x3asmpf_EXIT:                              \n\t"
+            "                                                   \n\t"
+            "vaddps              0(%%rcx), %%ymm0, %%ymm0       \n\t"
+            "vaddps             32(%%rcx), %%ymm1, %%ymm1       \n\t"
+            "vaddps             64(%%rcx), %%ymm2, %%ymm2       \n\t"
+            "vaddps              0(%%rcx,%%rdi,4), %%ymm3, %%ymm3       \n\t"
+            "vaddps             32(%%rcx,%%rdi,4), %%ymm4, %%ymm4       \n\t"
+            "vaddps             64(%%rcx,%%rdi,4), %%ymm5, %%ymm5       \n\t"
+            "vaddps              0(%%rcx,%%r10,4), %%ymm6, %%ymm6       \n\t"
+            "vaddps             32(%%rcx,%%r10,4), %%ymm7, %%ymm7       \n\t"
+            "vaddps             64(%%rcx,%%r10,4), %%ymm8, %%ymm8       \n\t"
+            "vaddps              0(%%rcx,%%r11,4), %%ymm9, %%ymm9       \n\t"
+            "vaddps             32(%%rcx,%%r11,4), %%ymm10, %%ymm10     \n\t"
+            "vaddps             64(%%rcx,%%r11,4), %%ymm11, %%ymm11     \n\t"
+            "                                                   \n\t"
+            "vmovaps            %%ymm0,   0(%%rcx)              \n\t"
+            "vmovaps            %%ymm1,  32(%%rcx)              \n\t"
+            "vmovaps            %%ymm2,  64(%%rcx)              \n\t"
+            "vmovaps            %%ymm3,   0(%%rcx,%%rdi,4)      \n\t"
+            "vmovaps            %%ymm4,  32(%%rcx,%%rdi,4)      \n\t"
+            "vmovaps            %%ymm5,  64(%%rcx,%%rdi,4)      \n\t"
+            "vmovaps            %%ymm6,   0(%%rcx,%%r10,4)      \n\t"
+            "vmovaps            %%ymm7,  32(%%rcx,%%r10,4)      \n\t"
+            "vmovaps            %%ymm8,  64(%%rcx,%%r10,4)      \n\t"
+            "vmovaps            %%ymm9,   0(%%rcx,%%r11,4)      \n\t"
+            "vmovaps            %%ymm10, 32(%%rcx,%%r11,4)      \n\t"
+            "vmovaps            %%ymm11, 64(%%rcx,%%r11,4)      \n\t"
+            "                                                   \n\t"
+            : // output operands
+            : // input operands
+              "m" (A)
+            , "m" (B)
+            , "m" (C)
+            , "m" (K64)
+            , "m" (ldc64)
+            : // clobbered registers
+              "rax", "rbx", "rcx", "rdx", "rsi", "rdi"
+            , "r8", "r9", "r10", "r11" //, "r12", "r13", "r14", "r15"
+            , "xmm0", "xmm1", "xmm2", "xmm3", "xmm4"
+            , "xmm5", "xmm6", "xmm7", "xmm8", "xmm9"
+            , "xmm10", "xmm11", "xmm12", "xmm13", "xmm14"
+            , "memory"
+        );
+#endif
+    }
+
+    template <bool PACKED = false>
+    static void matmul(
+        int M, int N, int K, float *A, int lda,
+        float *B, int ldb, float *C, int ldc)
+    {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+
+        for (int i = 0; i < M; i += BLOCK_M) {
+            for (int j = 0; j < N; j += BLOCK_N) {
+                auto Ar = A + lda * i + 0;
+                auto Br = B + ldb * 0 + j;
+                auto Cr = C + ldc * i + j;
+                if (PACKED)
+                    matmul_register_packed(
+                        BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
+                else
+                    matmul_register(
+                        BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
+            }
+        }
+    }
+
+    template <int PACKED = false>
+    static void gemm(
+        int M, int N, int K, float alpha, float *A, int lda,
+        float *B, int ldb, float beta, float *C, int ldc)
+    {
+        scale_matrix(A, lda, M, K, alpha);
+        scale_matrix(C, ldc, M, N, beta);
+
+        matmul<PACKED>(M, N, K, A, lda, B, ldb, C, ldc);
+    }
+};
 
 #include "01register512.h"
 
