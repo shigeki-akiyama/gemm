@@ -26,6 +26,7 @@
     <ClInclude Include="03blis.h" />
     <ClInclude Include="04blis.h" />
     <ClInclude Include="05blis_omp.h" />
+    <ClInclude Include="06blis_th.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="gemm_util.h" />
     <ClInclude Include="papix.h" />
