@@ -8,10 +8,18 @@
 #undef NODEBUG
 
 #include <omp.h>
+
+#ifndef NO_BIND
 #include <hwloc.h>
+#endif
 
 static void set_affinity()
 {
+#ifdef NO_BIND
+    #pragma omp parallel
+    {
+    }
+#else
     hwloc_topology_t topo;
 
     hwloc_topology_init(&topo);
@@ -24,7 +32,6 @@ static void set_affinity()
 
     #pragma omp parallel
     {
-#ifndef NO_BIND
         auto me = omp_get_thread_num();
 
         auto obj = hwloc_get_obj_by_depth(topo, last, me);
@@ -38,10 +45,10 @@ static void set_affinity()
         assert(r == 0);
 
         hwloc_bitmap_free(cpuset);
-#endif
     }
 
     hwloc_topology_destroy(topo);
+#endif
 }
 
 template <class Arch, class Kernel>
