@@ -139,7 +139,7 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
     using haswell = blis_arch::haswell;
     using knl_9x3 = blis_arch::knl_9x3;
     using knl_5x5 = blis_arch::knl_5x5;
-    using knl_7x4 = blis_arch::knl_7x4;
+    using knl_28x1 = blis_arch::knl_28x1;
 
 #if 1
     // 3-1. BLIS-based implementation
@@ -384,9 +384,9 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
     }
 
     {
-        using blis = blis<knl_7x4, register_avx512_7x4asmpf_ebcast>;
+        using blis = blis<knl_28x1, register_avx512_28x1asmpf_ebcast>;
         blis::intiialize();
-        push("blis512_packL3_7x4asmpf_ebcast", blis::gemm);
+        push("blis512_packL3_28x1asmpf_ebcast", blis::gemm);
     }
 
     {

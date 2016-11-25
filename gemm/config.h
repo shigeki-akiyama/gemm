@@ -41,6 +41,6 @@ struct blis_arch {
     struct haswell : make_arch<144, 4080, 256, 2> {};
     struct knl_9x3 : make_arch<144, 4080, 256, 4> {};
     struct knl_5x5 : make_arch<135, 4080, 256, 4> {};
-    struct knl_7x4 : make_arch<140, 4080, 256, 4> {};
+    struct knl_28x1 : make_arch<140, 4080, 256, 4> {};
 };
 
