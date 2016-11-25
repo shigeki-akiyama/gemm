@@ -1839,13 +1839,13 @@ struct register_avx512_28x1asmpf_ebcast {
         BLOCK_N = 16 * 1,
     };
 
-    // 5x80 matrix multiplication
+    // 28x16 matrix multiplication
     static void matmul_register(
         int M, int N, int K, float *A, int lda, float *B, int ldb,
         float *C, int ldc)
     {
 #if 0
-        register_avx512_7x4::matmul_register(
+        register_avx512_28x1::matmul_register(
             M, N, K, A, lda, B, ldb, C, ldc);
 #else
         assert(0);
@@ -1862,7 +1862,7 @@ struct register_avx512_28x1asmpf_ebcast {
         assert(ldb == BLOCK_N);
 
 #ifdef _MSC_VER
-        register_avx512_7x4::matmul_register_packed(
+        register_avx512_28x1::matmul_register_packed(
             M, N, K, A, lda, B, ldb, C, ldc);
 #else
         int64_t K64 = K;
@@ -1978,6 +1978,397 @@ struct register_avx512_28x1asmpf_ebcast {
             "                                                           \n\t"
             ".KLOOP_EXIT_28x1PF_EBCAST:                                 \n\t"
             "                                                           \n\t"
+            "vaddps             (%%rcx),         %%zmm0,  %%zmm0        \n\t"
+            "vmovaps            %%zmm0,  (%%rcx)                        \n\t"
+            "vaddps             (%%rcx,%%r10),   %%zmm1,  %%zmm1        \n\t"
+            "vmovaps            %%zmm1,  (%%rcx,%%r10)                  \n\t"
+            "vaddps             (%%rcx,%%r11),   %%zmm2,  %%zmm2        \n\t"
+            "vmovaps            %%zmm2,  (%%rcx,%%r11)                  \n\t"
+            "vaddps             (%%rcx,%%r12),   %%zmm3,  %%zmm3        \n\t"
+            "vmovaps            %%zmm3,  (%%rcx,%%r12)                  \n\t"
+            "                                                           \n\t"
+            "lea                (%%rcx,%%r10,4), %%r13                  \n\t"
+            "vaddps             (%%r13),         %%zmm4,  %%zmm4        \n\t"
+            "vmovaps            %%zmm4,  (%%r13)                        \n\t"
+            "vaddps             (%%r13,%%r10),   %%zmm5,  %%zmm5        \n\t"
+            "vmovaps            %%zmm5,  (%%r13,%%r10)                  \n\t"
+            "vaddps             (%%r13,%%r11),   %%zmm6,  %%zmm6        \n\t"
+            "vmovaps            %%zmm6,  (%%r13,%%r11)                  \n\t"
+            "vaddps             (%%r13,%%r12),   %%zmm7,  %%zmm7        \n\t"
+            "vmovaps            %%zmm7,  (%%r13,%%r12)                  \n\t"
+            "                                                           \n\t"
+            "lea                (%%r13,%%r10,4), %%r13                  \n\t"
+            "vaddps             (%%r13),         %%zmm8,  %%zmm8        \n\t"
+            "vmovaps            %%zmm8,  (%%r13)                        \n\t"
+            "vaddps             (%%r13,%%r10),   %%zmm9,  %%zmm9        \n\t"
+            "vmovaps            %%zmm9,  (%%r13,%%r10)                  \n\t"
+            "vaddps             (%%r13,%%r11),   %%zmm10, %%zmm10       \n\t"
+            "vmovaps            %%zmm10, (%%r13,%%r11)                  \n\t"
+            "vaddps             (%%r13,%%r12),   %%zmm11, %%zmm11       \n\t"
+            "vmovaps            %%zmm11, (%%r13,%%r12)                  \n\t"
+            "                                                           \n\t"
+            "lea                (%%r13,%%r10,4), %%r13                  \n\t"
+            "vaddps             (%%r13),         %%zmm12, %%zmm12       \n\t"
+            "vmovaps            %%zmm12, (%%r13)                        \n\t"
+            "vaddps             (%%r13,%%r10),   %%zmm13, %%zmm13       \n\t"
+            "vmovaps            %%zmm13, (%%r13,%%r10)                  \n\t"
+            "vaddps             (%%r13,%%r11),   %%zmm14, %%zmm14       \n\t"
+            "vmovaps            %%zmm14, (%%r13,%%r11)                  \n\t"
+            "vaddps             (%%r13,%%r12),   %%zmm15, %%zmm15       \n\t"
+            "vmovaps            %%zmm15, (%%r13,%%r12)                  \n\t"
+            "                                                           \n\t"
+            "lea                (%%r13,%%r10,4), %%r13                  \n\t"
+            "vaddps             (%%r13),         %%zmm16, %%zmm16       \n\t"
+            "vmovaps            %%zmm16, (%%r13)                        \n\t"
+            "vaddps             (%%r13,%%r10),   %%zmm17, %%zmm17       \n\t"
+            "vmovaps            %%zmm17, (%%r13,%%r10)                  \n\t"
+            "vaddps             (%%r13,%%r11),   %%zmm18, %%zmm18       \n\t"
+            "vmovaps            %%zmm18, (%%r13,%%r11)                  \n\t"
+            "vaddps             (%%r13,%%r12),   %%zmm19, %%zmm19       \n\t"
+            "vmovaps            %%zmm19, (%%r13,%%r12)                  \n\t"
+            "                                                           \n\t"
+            "lea                (%%r13,%%r10,4), %%r13                  \n\t"
+            "vaddps             (%%r13),         %%zmm20, %%zmm20       \n\t"
+            "vmovaps            %%zmm20, (%%r13)                        \n\t"
+            "vaddps             (%%r13,%%r10),   %%zmm21, %%zmm21       \n\t"
+            "vmovaps            %%zmm21, (%%r13,%%r10)                  \n\t"
+            "vaddps             (%%r13,%%r11),   %%zmm22, %%zmm22       \n\t"
+            "vmovaps            %%zmm22, (%%r13,%%r11)                  \n\t"
+            "vaddps             (%%r13,%%r12),   %%zmm23, %%zmm23       \n\t"
+            "vmovaps            %%zmm23, (%%r13,%%r12)                  \n\t"
+            "                                                           \n\t"
+            "lea                (%%r13,%%r10,4), %%r13                  \n\t"
+            "vaddps             (%%r13),         %%zmm24, %%zmm24       \n\t"
+            "vmovaps            %%zmm24, (%%r13)                        \n\t"
+            "vaddps             (%%r13,%%r10),   %%zmm25, %%zmm25       \n\t"
+            "vmovaps            %%zmm25, (%%r13,%%r10)                  \n\t"
+            "vaddps             (%%r13,%%r11),   %%zmm26, %%zmm26       \n\t"
+            "vmovaps            %%zmm26, (%%r13,%%r11)                  \n\t"
+            "vaddps             (%%r13,%%r12),   %%zmm27, %%zmm27       \n\t"
+            "vmovaps            %%zmm27, (%%r13,%%r12)                  \n\t"
+            "                                                           \n\t"
+            : // output operands
+            : // input operands
+              "m" (A)
+            , "m" (B)
+            , "m" (C)
+            , "m" (K64)
+            , "m" (ldc64)
+            : // clobbered registers
+              "rax", "rbx", "rcx", "rdx", "rsi", "rdi"
+            , "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
+            , "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7"
+            , "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14"
+            , "xmm15", "xmm16", "xmm17", "xmm18", "xmm19", "xmm20", "xmm21"
+            , "xmm22", "xmm23", "xmm24", "xmm25", "xmm26", "xmm27", "xmm28"
+            , "xmm29", "xmm30", "xmm31"
+            , "memory"
+        );
+#endif
+    }
+
+    template <bool PACKED = false>
+    static void matmul(
+        int M, int N, int K, float *A, int lda,
+        float *B, int ldb, float *C, int ldc)
+    {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+
+        for (int i = 0; i < M; i += BLOCK_M) {
+            for (int j = 0; j < N; j += BLOCK_N) {
+                auto Ar = A + lda * i + 0;
+                auto Br = B + ldb * 0 + j;
+                auto Cr = C + ldc * i + j;
+                if (PACKED)
+                    matmul_register_packed(
+                        BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
+                else
+                    matmul_register(
+                        BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
+            }
+        }
+    }
+
+    template <int PACKED = false>
+    static void gemm(
+        int M, int N, int K, float alpha, float *A, int lda,
+        float *B, int ldb, float beta, float *C, int ldc)
+    {
+        scale_matrix(A, lda, M, K, alpha);
+        scale_matrix(C, ldc, M, N, beta);
+
+        matmul<PACKED>(M, N, K, A, lda, B, ldb, C, ldc);
+    }
+};
+struct register_avx512_28x1asmpf_ebcast_unr { 
+    enum : int {
+        BLOCK_M = 28,
+        BLOCK_N = 16 * 1,
+    };
+
+    // 28x16 matrix multiplication
+    static void matmul_register(
+        int M, int N, int K, float *A, int lda, float *B, int ldb,
+        float *C, int ldc)
+    {
+#if 0
+        register_avx512_28x1::matmul_register(
+            M, N, K, A, lda, B, ldb, C, ldc);
+#else
+        assert(0);
+#endif
+    }
+
+    static NOINLINE void matmul_register_packed(
+        int M, int N, int K, float *A, int lda, float *B, int ldb,
+        float *C, int ldc)
+    {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+        assert(K % 2 == 0);
+        assert(lda == BLOCK_M);
+        assert(ldb == BLOCK_N);
+
+#ifdef _MSC_VER
+        register_avx512_28x1::matmul_register_packed(
+            M, N, K, A, lda, B, ldb, C, ldc);
+#else
+        int64_t K64 = K;
+        int64_t ldc64 = ldc;
+
+        __asm__ __volatile__ (
+            "                                                   \n\t"
+            "vzeroall                                           \n\t"
+            "vpxord             %%zmm16, %%zmm16, %%zmm16       \n\t"
+            "vpxord             %%zmm17, %%zmm17, %%zmm17       \n\t"
+            "vpxord             %%zmm18, %%zmm18, %%zmm18       \n\t"
+            "vpxord             %%zmm19, %%zmm19, %%zmm19       \n\t"
+            "vpxord             %%zmm20, %%zmm20, %%zmm20       \n\t"
+            "vpxord             %%zmm21, %%zmm21, %%zmm21       \n\t"
+            "vpxord             %%zmm22, %%zmm22, %%zmm22       \n\t"
+            "vpxord             %%zmm23, %%zmm23, %%zmm23       \n\t"
+            "vpxord             %%zmm24, %%zmm24, %%zmm24       \n\t"
+            "vpxord             %%zmm25, %%zmm25, %%zmm25       \n\t"
+            "vpxord             %%zmm26, %%zmm26, %%zmm26       \n\t"
+            "vpxord             %%zmm27, %%zmm27, %%zmm27       \n\t"
+            "vpxord             %%zmm28, %%zmm28, %%zmm28       \n\t"
+            "vpxord             %%zmm29, %%zmm29, %%zmm29       \n\t"
+            "vpxord             %%zmm30, %%zmm30, %%zmm30       \n\t"
+            "vpxord             %%zmm31, %%zmm31, %%zmm31       \n\t"
+            "                                                   \n\t"
+            "mov                %0, %%rax                       \n\t" // A
+            "mov                %1, %%rbx                       \n\t" // B
+            "mov                %2, %%rcx                       \n\t" // C
+            "mov                %3, %%rsi                       \n\t" // K
+            "mov                %4, %%rdi                       \n\t" // ldc
+            "                                            \n\t"
+            "lea                (,%%rdi,4), %%r10        \n\t" // ldc*4*1
+            "lea                (,%%r10,2), %%r11        \n\t" // ldc*4*2
+            "lea                (%%r10,%%r11), %%r12     \n\t" // ldc*4*3
+            "                                            \n\t"
+            "prefetcht0         (%%rcx)                  \n\t" // C
+            "prefetcht0         (%%rcx,%%r10)            \n\t"
+            "prefetcht0         (%%rcx,%%r11)            \n\t"
+            "prefetcht0         (%%rcx,%%r12)            \n\t"
+            "lea                (%%rcx,%%r10,4), %%r13   \n\t" // C + ldc*4*4
+            "prefetcht0         (%%r13)                  \n\t"
+            "prefetcht0         (%%r13,%%r10)            \n\t"
+            "prefetcht0         (%%r13,%%r11)            \n\t"
+            "prefetcht0         (%%r13,%%r12)            \n\t"
+            "lea                (%%r13,%%r10,4), %%r13   \n\t" // C + ldc*4*8
+            "prefetcht0         (%%r13)                  \n\t"
+            "prefetcht0         (%%r13,%%r10)            \n\t"
+            "prefetcht0         (%%r13,%%r11)            \n\t"
+            "prefetcht0         (%%r13,%%r12)            \n\t"
+            "lea                (%%r13,%%r10,4), %%r13   \n\t" // C + ldc*4*12
+            "prefetcht0         (%%r13)                  \n\t"
+            "prefetcht0         (%%r13,%%r10)            \n\t"
+            "prefetcht0         (%%r13,%%r11)            \n\t"
+            "prefetcht0         (%%r13,%%r12)            \n\t"
+            "lea                (%%r13,%%r10,4), %%r13   \n\t" // C + ldc*4*16
+            "prefetcht0         (%%r13)                  \n\t"
+            "prefetcht0         (%%r13,%%r10)            \n\t"
+            "prefetcht0         (%%r13,%%r11)            \n\t"
+            "prefetcht0         (%%r13,%%r12)            \n\t"
+            "lea                (%%r13,%%r10,4), %%r13   \n\t" // C + ldc*4*20
+            "prefetcht0         (%%r13)                  \n\t"
+            "prefetcht0         (%%r13,%%r10)            \n\t"
+            "prefetcht0         (%%r13,%%r11)            \n\t"
+            "prefetcht0         (%%r13,%%r12)            \n\t"
+            "lea                (%%r13,%%r10,4), %%r13   \n\t" // C + ldc*4*24
+            "prefetcht0         (%%r13)                  \n\t"
+            "prefetcht0         (%%r13,%%r10)            \n\t"
+            "prefetcht0         (%%r13,%%r11)            \n\t"
+            "prefetcht0         (%%r13,%%r12)            \n\t"
+            "                                            \n\t"
+            "vmovaps            0 * 64(%%rbx), %%zmm28   \n\t"
+            "vmovaps            1 * 64(%%rbx), %%zmm29   \n\t"
+            "vmovaps            2 * 64(%%rbx), %%zmm30   \n\t"
+            "vmovaps            3 * 64(%%rbx), %%zmm31   \n\t"
+            "                                            \n\t"
+            "prefetcht0          0 * 64(%%rax)           \n\t"
+            "prefetcht0          1 * 64(%%rax)           \n\t"
+            "prefetcht0          2 * 64(%%rax)           \n\t"
+            "prefetcht0          3 * 64(%%rax)           \n\t"
+            "prefetcht0          4 * 64(%%rax)           \n\t"
+            "prefetcht0          5 * 64(%%rax)           \n\t"
+            "prefetcht0          6 * 64(%%rax)           \n\t"
+            "prefetcht0          7 * 64(%%rax)           \n\t"
+            "prefetcht0          8 * 64(%%rax)           \n\t"
+            "prefetcht0          9 * 64(%%rax)           \n\t"
+            "prefetcht0         10 * 64(%%rax)           \n\t"
+            "prefetcht0         11 * 64(%%rax)           \n\t"
+            "prefetcht0         12 * 64(%%rax)           \n\t"
+            "prefetcht0         13 * 64(%%rax)           \n\t"
+            "prefetcht0         14 * 64(%%rax)           \n\t"
+            "prefetcht0         15 * 64(%%rax)           \n\t"
+            "                                            \n\t"
+            "lea                (,%%rsi,8), %%r8         \n\t" // 8*K
+            "lea                (%%rbx,%%r8,8), %%r9     \n\t" // %rbx + 64*K
+            "                                                            \n\t"
+            ".KLOOP_28x1PF_EBCAST_UNR:                                   \n\t"
+            "                                                            \n\t"
+            "cmp                %%rbx, %%r9                              \n\t"
+            "je                 .KLOOP_EXIT_28x1PF_EBCAST_UNR            \n\t"
+            "                                                            \n\t"
+            "prefetcht0         16 * 64(%%rax)                           \n\t"
+            "vfmadd231ps         0 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm0  \n\t"
+            "vfmadd231ps         1 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm1  \n\t"
+            "vfmadd231ps         2 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm2  \n\t"
+            "vfmadd231ps         3 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm3  \n\t"
+            "vfmadd231ps         4 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm4  \n\t"
+            "vfmadd231ps         5 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm5  \n\t"
+            "vfmadd231ps         6 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm6  \n\t"
+            "vfmadd231ps         7 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm7  \n\t"
+            "vfmadd231ps         8 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm8  \n\t"
+            "vfmadd231ps         9 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm9  \n\t"
+            "vfmadd231ps        10 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm10 \n\t"
+            "vfmadd231ps        11 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm11 \n\t"
+            "vfmadd231ps        12 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm12 \n\t"
+            "vfmadd231ps        13 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm13 \n\t"
+            "prefetcht0         16 * 64(%%rbx)                           \n\t"
+            "vfmadd231ps        14 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm14 \n\t"
+            "vfmadd231ps        15 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm15 \n\t"
+            "prefetcht0         17 * 64(%%rax)                           \n\t"
+            "vfmadd231ps        16 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm16 \n\t"
+            "vfmadd231ps        17 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm17 \n\t"
+            "vfmadd231ps        18 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm18 \n\t"
+            "vfmadd231ps        19 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm19 \n\t"
+            "vfmadd231ps        20 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm20 \n\t"
+            "vfmadd231ps        21 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm21 \n\t"
+            "vfmadd231ps        22 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm22 \n\t"
+            "vfmadd231ps        23 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm23 \n\t"
+            "vfmadd231ps        24 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm24 \n\t"
+            "vfmadd231ps        25 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm25 \n\t"
+            "vfmadd231ps        26 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm26 \n\t"
+            "vfmadd231ps        27 * 4(%%rax)%{1to16%}, %%zmm28, %%zmm27 \n\t"
+            "vmovaps            4 * 64(%%rbx), %%zmm28                   \n\t"
+            "                                                            \n\t"
+            "vfmadd231ps        28 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm0  \n\t"
+            "vfmadd231ps        29 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm1  \n\t"
+            "vfmadd231ps        30 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm2  \n\t"
+            "vfmadd231ps        31 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm3  \n\t"
+            "prefetcht0         18 * 64(%%rax)                           \n\t"
+            "vfmadd231ps        32 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm4  \n\t"
+            "vfmadd231ps        33 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm5  \n\t"
+            "vfmadd231ps        34 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm6  \n\t"
+            "vfmadd231ps        35 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm7  \n\t"
+            "vfmadd231ps        36 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm8  \n\t"
+            "vfmadd231ps        37 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm9  \n\t"
+            "vfmadd231ps        38 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm10 \n\t"
+            "vfmadd231ps        39 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm11 \n\t"
+            "vfmadd231ps        40 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm12 \n\t"
+            "vfmadd231ps        41 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm13 \n\t"
+            "prefetcht0         17 * 64(%%rbx)                           \n\t"
+            "vfmadd231ps        42 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm14 \n\t"
+            "vfmadd231ps        43 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm15 \n\t"
+            "vfmadd231ps        44 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm16 \n\t"
+            "vfmadd231ps        45 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm17 \n\t"
+            "vfmadd231ps        46 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm18 \n\t"
+            "vfmadd231ps        47 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm19 \n\t"
+            "prefetcht0         19 * 64(%%rax)                           \n\t"
+            "vfmadd231ps        48 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm20 \n\t"
+            "vfmadd231ps        49 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm21 \n\t"
+            "vfmadd231ps        50 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm22 \n\t"
+            "vfmadd231ps        51 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm23 \n\t"
+            "vfmadd231ps        52 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm24 \n\t"
+            "vfmadd231ps        53 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm25 \n\t"
+            "vfmadd231ps        54 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm26 \n\t"
+            "vfmadd231ps        55 * 4(%%rax)%{1to16%}, %%zmm29, %%zmm27 \n\t"
+            "vmovaps            5 * 64(%%rbx), %%zmm29                   \n\t"
+            "                                                            \n\t"
+            "vfmadd231ps        56 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm0  \n\t"
+            "vfmadd231ps        57 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm1  \n\t"
+            "vfmadd231ps        58 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm2  \n\t"
+            "vfmadd231ps        59 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm3  \n\t"
+            "vfmadd231ps        60 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm4  \n\t"
+            "vfmadd231ps        61 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm5  \n\t"
+            "vfmadd231ps        62 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm6  \n\t"
+            "vfmadd231ps        63 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm7  \n\t"
+            "prefetcht0         20 * 64(%%rax)                           \n\t"
+            "vfmadd231ps        64 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm8  \n\t"
+            "vfmadd231ps        65 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm9  \n\t"
+            "vfmadd231ps        66 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm10 \n\t"
+            "vfmadd231ps        67 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm11 \n\t"
+            "vfmadd231ps        68 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm12 \n\t"
+            "vfmadd231ps        69 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm13 \n\t"
+            "prefetcht0         18 * 64(%%rbx)                           \n\t"
+            "vfmadd231ps        70 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm14 \n\t"
+            "vfmadd231ps        71 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm15 \n\t"
+            "vfmadd231ps        72 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm16 \n\t"
+            "vfmadd231ps        73 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm17 \n\t"
+            "vfmadd231ps        74 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm18 \n\t"
+            "vfmadd231ps        75 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm19 \n\t"
+            "vfmadd231ps        76 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm20 \n\t"
+            "vfmadd231ps        77 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm21 \n\t"
+            "vfmadd231ps        78 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm22 \n\t"
+            "vfmadd231ps        79 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm23 \n\t"
+            "prefetcht0         21 * 64(%%rax)                           \n\t"
+            "vfmadd231ps        80 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm24 \n\t"
+            "vfmadd231ps        81 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm25 \n\t"
+            "vfmadd231ps        82 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm26 \n\t"
+            "vfmadd231ps        83 * 4(%%rax)%{1to16%}, %%zmm30, %%zmm27 \n\t"
+            "vmovaps            6 * 64(%%rbx), %%zmm30                   \n\t"
+            "                                                            \n\t"
+            "vfmadd231ps        84 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm0  \n\t"
+            "vfmadd231ps        85 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm1  \n\t"
+            "vfmadd231ps        86 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm2  \n\t"
+            "vfmadd231ps        87 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm3  \n\t"
+            "vfmadd231ps        88 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm4  \n\t"
+            "vfmadd231ps        89 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm5  \n\t"
+            "vfmadd231ps        90 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm6  \n\t"
+            "vfmadd231ps        91 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm7  \n\t"
+            "vfmadd231ps        92 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm8  \n\t"
+            "vfmadd231ps        93 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm9  \n\t"
+            "vfmadd231ps        94 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm10 \n\t"
+            "vfmadd231ps        95 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm11 \n\t"
+            "prefetcht0         21 * 64(%%rax)                           \n\t"
+            "vfmadd231ps        96 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm12 \n\t"
+            "vfmadd231ps        97 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm13 \n\t"
+            "prefetcht0         19 * 64(%%rbx)                           \n\t"
+            "vfmadd231ps        98 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm14 \n\t"
+            "vfmadd231ps        99 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm15 \n\t"
+            "vfmadd231ps       100 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm16 \n\t"
+            "vfmadd231ps       101 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm17 \n\t"
+            "vfmadd231ps       102 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm18 \n\t"
+            "vfmadd231ps       103 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm19 \n\t"
+            "vfmadd231ps       104 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm20 \n\t"
+            "vfmadd231ps       105 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm21 \n\t"
+            "vfmadd231ps       106 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm22 \n\t"
+            "vfmadd231ps       107 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm23 \n\t"
+            "vfmadd231ps       108 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm24 \n\t"
+            "vfmadd231ps       109 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm25 \n\t"
+            "vfmadd231ps       110 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm26 \n\t"
+            "vfmadd231ps       111 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm27 \n\t"
+            "vmovaps            7 * 64(%%rbx), %%zmm31                   \n\t"
+            "                                                            \n\t"
+            "add                $448, %%rax                              \n\t"
+            "add                $256, %%rbx                              \n\t"
+            "jmp                .KLOOP_28x1PF_EBCAST_UNR                \n\t"
+            "                                                           \n\t"
+            ".KLOOP_EXIT_28x1PF_EBCAST_UNR:                             \n\t"
+            "                                                           \n\t"
 
             "vaddps             (%%rcx),         %%zmm0,  %%zmm0        \n\t"
             "vmovaps            %%zmm0,  (%%rcx)                        \n\t"
@@ -2057,7 +2448,7 @@ struct register_avx512_28x1asmpf_ebcast {
             , "m" (ldc64)
             : // clobbered registers
               "rax", "rbx", "rcx", "rdx", "rsi", "rdi"
-            , "r8", "r9", "r10", "r11", "r12" , "r13", "r14", "r15"
+            , "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
             , "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7"
             , "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14"
             , "xmm15", "xmm16", "xmm17", "xmm18", "xmm19", "xmm20", "xmm21"

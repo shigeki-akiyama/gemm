@@ -388,6 +388,12 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
         blis::intiialize();
         push("blis512_packL3_28x1asmpf_ebcast", blis::gemm);
     }
+    {
+        using blis = blis<knl_28x1, register_avx512_28x1asmpf_ebcast_unr>;
+        blis::intiialize();
+        push("blis512_packL3_28x1asmpf_ebcast_unr", blis::gemm);
+    }
+
 
     {
         using blis = blis_omp<knl_5x5, register_avx512_5x5asm_unroll>;
