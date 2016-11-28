@@ -406,6 +406,11 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
         blis::intiialize();
         push("blis512_th_5x5asm", blis::gemm);
     }
+    {
+        using blis = blis_th<knl_28x1, register_avx512_28x1asmpf_ebcast_unr>;
+        blis::intiialize();
+        push("blis512_th_28x1asm", blis::gemm);
+    }
 #endif
 #endif
 
@@ -479,10 +484,13 @@ static int real_main(
     auto beta = elem_type(1.0); // elem_type(0.25);
 
     int align = 4096; // sizeof(__m256);
-    auto A = make_aligned_array<elem_type>(M * lda, align, elem_type(2.0));
-    auto B = make_aligned_array<elem_type>(K * ldb, align, elem_type(0.5));
-    auto C = make_aligned_array<elem_type>(M * ldc, align, elem_type(0.0));
-    auto result_C = make_aligned_array<elem_type>(M * ldc, align, elem_type(0.0));
+    auto A = make_aligned_array<elem_type>(
+                (size_t)M * lda, align, elem_type(2.0));
+    auto B = make_aligned_array<elem_type>(
+                (size_t)K * ldb, align, elem_type(0.5));
+    auto C = make_aligned_array<elem_type>(
+                (size_t)M * ldc, align, elem_type(0.0));
+    auto result_C = make_aligned_array<elem_type>((size_t)M * ldc, align, elem_type(0.0));
     
     auto buf_size = 16 * 1024 * 1024 / sizeof(elem_type);
     auto buf = make_aligned_array<elem_type>(buf_size, align, 0.1);
