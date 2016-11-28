@@ -15,7 +15,7 @@
 
 static void set_affinity()
 {
-#ifdef NO_BIND
+#ifndef BIND_CORES
     #pragma omp parallel
     {
     }
