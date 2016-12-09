@@ -1,0 +1,200 @@
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 112, N = 112, K = 112
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 224, N = 224, K = 224
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 336, N = 336, K = 336
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 448, N = 448, K = 448
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 560, N = 560, K = 560
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 112, N = 112, K = 112
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis512_packL3_28x1asmpf_ebcast_unr     14.996 0.000192492 0.000187369 0.000207729     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 224, N = 224, K = 224
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+blis512_packL3_28x1asmpf_ebcast_unr     22.027 0.001039403 0.001020531 0.001076680     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 336, N = 336, K = 336
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+blis512_packL3_28x1asmpf_ebcast_unr     29.904 0.002574262 0.002536947 0.002673194     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 448, N = 448, K = 448
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+blis512_packL3_28x1asmpf_ebcast_unr     32.305 0.005690686 0.005566584 0.006237051     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 560, N = 560, K = 560
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     33.623 0.010590786 0.010446296 0.011287398     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 672, N = 672, K = 672
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis512_packL3_28x1asmpf_ebcast_unr     34.942 0.017471738 0.017369373 0.018021350     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 784, N = 784, K = 784
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.199
+blis512_packL3_28x1asmpf_ebcast_unr     37.329 0.025991012 0.025818548 0.026641896     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 896, N = 896, K = 896
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     38.557 0.037479955 0.037311997 0.038310087     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 1008, N = 1008, K = 1008
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     39.630 0.051866915 0.051687475 0.052589631     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 1120, N = 1120, K = 1120
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     41.392 0.068191907 0.067883306 0.069566797     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 1232, N = 1232, K = 1232
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis512_packL3_28x1asmpf_ebcast_unr     42.898 0.087649251 0.087181324 0.089929070     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 1344, N = 1344, K = 1344
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.199
+blis512_packL3_28x1asmpf_ebcast_unr     43.764 0.111168624 0.110946178 0.112169387     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 1456, N = 1456, K = 1456
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis512_packL3_28x1asmpf_ebcast_unr     43.870 0.140928894 0.140716071 0.141655012     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 1568, N = 1568, K = 1568
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     46.116 0.167845972 0.167192789 0.171038705     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 1680, N = 1680, K = 1680
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     46.250 0.206112143 0.205042995 0.209493286     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 1792, N = 1792, K = 1792
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     46.249 0.250216422 0.248849626 0.253629689     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 1904, N = 1904, K = 1904
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     46.888 0.295760669 0.294424039 0.299151634     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 2016, N = 2016, K = 2016
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     47.536 0.346016504 0.344732378 0.349069002     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 2128, N = 2128, K = 2128
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     49.090 0.394529803 0.392600376 0.397100268     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 2240, N = 2240, K = 2240
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     48.504 0.466198052 0.463444198 0.469188882     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 2352, N = 2352, K = 2352
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+blis512_packL3_28x1asmpf_ebcast_unr     48.930 0.533270496 0.531820945 0.535533705     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 2464, N = 2464, K = 2464
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     49.034 0.612128292 0.610180108 0.615417971     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 2576, N = 2576, K = 2576
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis512_packL3_28x1asmpf_ebcast_unr     50.119 0.684502780 0.682123947 0.688730948     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 2688, N = 2688, K = 2688
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     50.005 0.778691420 0.776796924 0.780894465     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 2800, N = 2800, K = 2800
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     49.994 0.880682566 0.878179293 0.883456138     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 2912, N = 2912, K = 2912
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     50.108 0.987610597 0.985599781 0.990222588     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 3024, N = 3024, K = 3024
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis512_packL3_28x1asmpf_ebcast_unr     50.774 1.091611968 1.089271996 1.094163941     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 3136, N = 3136, K = 3136
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     51.993 1.189933838 1.186360075 1.195236663     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 3248, N = 3248, K = 3248
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis512_packL3_28x1asmpf_ebcast_unr     51.393 1.336751026 1.333449210 1.341070100     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 3360, N = 3360, K = 3360
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis512_packL3_28x1asmpf_ebcast_unr     51.333 1.481569775 1.477927778 1.485343269     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 3472, N = 3472, K = 3472
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+blis512_packL3_28x1asmpf_ebcast_unr     51.622 1.625802053 1.621568777 1.628667408     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 3584, N = 3584, K = 3584
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     50.977 1.809742477 1.806187965 1.814935946     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 3696, N = 3696, K = 3696
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis512_packL3_28x1asmpf_ebcast_unr     50.716 1.993847695 1.991046814 1.998433624     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 3808, N = 3808, K = 3808
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     50.625 2.185541239 2.181507429 2.189774833     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 3920, N = 3920, K = 3920
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+blis512_packL3_28x1asmpf_ebcast_unr     51.119 2.360826404 2.356729809 2.368425824     10
+Arguments: fnames = { blis512_packL3_28x1asmpf_ebcast_unr }, M = 4032, N = 4032, K = 4032
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis512_packL3_28x1asmpf_ebcast_unr     51.090 2.569240903 2.565999800 2.572921550     10

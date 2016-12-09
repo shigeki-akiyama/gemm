@@ -1,0 +1,105 @@
+Arguments: fnames = { MKL }, M = 192, N = 192, K = 192
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                           40.477 0.000374811 0.000349724 0.000407943     10
+Arguments: fnames = { MKL }, M = 384, N = 384, K = 384
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                           52.086 0.002196060 0.002174213 0.002242463     10
+Arguments: fnames = { MKL }, M = 576, N = 576, K = 576
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                           57.772 0.006675452 0.006615713 0.006835733     10
+Arguments: fnames = { MKL }, M = 768, N = 768, K = 768
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                           57.651 0.015791465 0.015714673 0.016081597     10
+Arguments: fnames = { MKL }, M = 960, N = 960, K = 960
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                           61.795 0.028757654 0.028634375 0.029010348     10
+Arguments: fnames = { MKL }, M = 1152, N = 1152, K = 1152
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                           62.105 0.049330244 0.049233364 0.049539288     10
+Arguments: fnames = { MKL }, M = 1344, N = 1344, K = 1344
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                           63.675 0.076389985 0.076253869 0.076630164     10
+Arguments: fnames = { MKL }, M = 1536, N = 1536, K = 1536
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                           60.340 0.120243282 0.120114829 0.120401305     10
+Arguments: fnames = { MKL }, M = 1728, N = 1728, K = 1728
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                           62.647 0.164891149 0.164725311 0.165167579     10
+Arguments: fnames = { MKL }, M = 1920, N = 1920, K = 1920
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                           64.588 0.220122280 0.219171293 0.223033121     10
+Arguments: fnames = { MKL }, M = 1920, N = 1920, K = 1920
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                           64.588 0.220110797 0.219171912 0.223298244     10
+Arguments: fnames = { MKL }, M = 2112, N = 2112, K = 2112
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+MKL                           64.681 0.292575681 0.291296138 0.296108765     10
+Arguments: fnames = { MKL }, M = 2304, N = 2304, K = 2304
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                           63.959 0.384570439 0.382448273 0.388440035     10
+Arguments: fnames = { MKL }, M = 2496, N = 2496, K = 2496
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                           65.292 0.478300655 0.476323430 0.481699910     10
+Arguments: fnames = { MKL }, M = 2688, N = 2688, K = 2688
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                           65.466 0.595622205 0.593333517 0.599436102     10
+Arguments: fnames = { MKL }, M = 2880, N = 2880, K = 2880
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                           65.480 0.733159544 0.729623918 0.737568458     10
+Arguments: fnames = { MKL }, M = 3072, N = 3072, K = 3072
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+MKL                           58.584 0.992626716 0.989724672 0.996716570     10
+Arguments: fnames = { MKL }, M = 3264, N = 3264, K = 3264
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                           65.662 1.062230093 1.059163872 1.067785601     10
+Arguments: fnames = { MKL }, M = 3456, N = 3456, K = 3456
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                           65.531 1.262337810 1.259808581 1.265330098     10
+Arguments: fnames = { MKL }, M = 3648, N = 3648, K = 3648
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+MKL                           65.867 1.478701157 1.474103428 1.486750825     10
+Arguments: fnames = { MKL }, M = 3840, N = 3840, K = 3840
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                           64.998 1.747444117 1.742296637 1.755179826     10

@@ -1,0 +1,12 @@
+Arguments: fnames = { MKL, blis512_naive_5x5, blis512_copyL1_5x5, blis512_copyL2_5x5, blis512_copyL3_5x5, blis512_naive_5x5asm, blis512_packL3_5x5asm, blis512_packL3_5x5asm_unr, blis512_packL3_5x5asmpf_unr }, M = 3840, N = 3840, K = 3840
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                           64.954 1.747724517 1.743481087 1.753689667     10
+blis512_naive_5x5             38.032 2.979795816 2.977664325 2.986204112     10
+blis512_copyL1_5x5            36.242 3.126246178 3.124762600 3.132119214     10
+blis512_copyL2_5x5            36.213 3.128613753 3.127220144 3.131523833     10
+blis512_copyL3_5x5            35.808 3.164430297 3.162551335 3.168278387     10
+blis512_packL3_5x5asm         41.248 2.746568329 2.745504711 2.749667969     10
+blis512_packL3_5x5asm_unr     42.864 2.643290536 2.641963024 2.646384853     10
+blis512_packL3_5x5asmpf_unr     44.365 2.553776060 2.552597265 2.555394011     10

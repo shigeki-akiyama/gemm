@@ -1,0 +1,144 @@
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 160, N = 160, K = 160
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+MKL                           42.363 0.000204568 0.000193378 0.000233878     10
+blis512_th_5x5asm             43.264 0.000210153 0.000189348 0.000308467     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 320, N = 320, K = 320
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                           87.533 0.000791286 0.000748698 0.000842777     10
+blis512_th_5x5asm             55.247 0.001214370 0.001186226 0.001322386     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 480, N = 480, K = 480
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                           99.516 0.002243974 0.002222599 0.002302598     10
+blis512_th_5x5asm             64.341 0.003486539 0.003437662 0.003670339     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 640, N = 640, K = 640
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+MKL                          108.672 0.004865769 0.004824509 0.005005425     10
+blis512_th_5x5asm             66.444 0.007952568 0.007890673 0.008161126     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 800, N = 800, K = 800
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                          114.560 0.008988472 0.008938578 0.009212613     10
+blis512_th_5x5asm             68.147 0.015108627 0.015026275 0.015373689     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 960, N = 960, K = 960
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                          117.679 0.015088967 0.015036410 0.015283931     10
+blis512_th_5x5asm             71.856 0.024717457 0.024625239 0.025166540     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 1120, N = 1120, K = 1120
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                          118.303 0.023842938 0.023751412 0.024003208     10
+blis512_th_5x5asm             71.373 0.039517819 0.039368591 0.039999370     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 1280, N = 1280, K = 1280
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                          116.164 0.036273163 0.036106732 0.036461997     10
+blis512_th_5x5asm             74.041 0.056946528 0.056648584 0.058068631     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 1440, N = 1440, K = 1440
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+MKL                          119.798 0.049952782 0.049850111 0.050128459     10
+blis512_th_5x5asm             73.878 0.081467353 0.080835302 0.083539555     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 1600, N = 1600, K = 1600
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                          121.964 0.067404504 0.067167478 0.067691557     10
+blis512_th_5x5asm             74.096 0.111140901 0.110558828 0.112939131     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 1760, N = 1760, K = 1760
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                          122.585 0.089408335 0.088946632 0.090609789     10
+blis512_th_5x5asm             75.279 0.145388790 0.144841310 0.147760194     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 1920, N = 1920, K = 1920
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+MKL                          123.535 0.115191440 0.114588854 0.116425636     10
+blis512_th_5x5asm             75.455 0.188215791 0.187605994 0.191111929     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 2080, N = 2080, K = 2080
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+MKL                          122.715 0.147417936 0.146663903 0.149913481     10
+blis512_th_5x5asm             76.182 0.237250922 0.236248616 0.239973820     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 2240, N = 2240, K = 2240
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+MKL                          125.470 0.180121902 0.179156959 0.182776529     10
+blis512_th_5x5asm             75.434 0.300390078 0.297991864 0.302560764     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 2400, N = 2400, K = 2400
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+MKL                          123.474 0.224952862 0.223917526 0.227513287     10
+blis512_th_5x5asm             75.903 0.365866284 0.364252709 0.366826700     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 2560, N = 2560, K = 2560
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                          117.727 0.286301308 0.285018495 0.288840985     10
+blis512_th_5x5asm             70.719 0.475567345 0.474473252 0.476413067     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 2720, N = 2720, K = 2720
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+MKL                          123.555 0.326845103 0.325744547 0.329512729     10
+blis512_th_5x5asm             76.517 0.527492962 0.525994542 0.529279923     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 2880, N = 2880, K = 2880
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                          126.189 0.380074372 0.378605541 0.384817495     10
+blis512_th_5x5asm             76.114 0.630861065 0.627683522 0.634500445     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 3040, N = 3040, K = 3040
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+MKL                          124.956 0.451190274 0.449670147 0.453072222     10
+blis512_th_5x5asm             73.431 0.767919145 0.765194936 0.769926992     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 3200, N = 3200, K = 3200
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+MKL                          126.678 0.519607140 0.517342086 0.522227493     10
+blis512_th_5x5asm             74.371 0.883413471 0.881208105 0.885539574     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 3360, N = 3360, K = 3360
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                          127.590 0.596603583 0.594607802 0.599044124     10
+blis512_th_5x5asm             75.340 1.008798028 1.006987682 1.010855987     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 3520, N = 3520, K = 3520
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                          127.338 0.687820335 0.685014315 0.691006727     10
+blis512_th_5x5asm             75.535 1.157674354 1.154803926 1.160264279     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 3680, N = 3680, K = 3680
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+MKL                          127.849 0.782187677 0.779606114 0.785881197     10
+blis512_th_5x5asm             73.076 1.366007889 1.363948144 1.367833389     10
+Arguments: fnames = { MKL, blis512_th_5x5asm }, M = 3840, N = 3840, K = 3840
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+MKL                          124.385 0.913493438 0.910447568 0.916687677     10
+blis512_th_5x5asm             71.215 1.591887310 1.590198659 1.595286324     10

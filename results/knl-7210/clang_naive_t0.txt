@@ -1,0 +1,33 @@
+Arguments: fnames = { naive, naive_avx }, M = 192, N = 192, K = 192
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+naive                          0.403 0.035232263 0.035148492 0.035593053     10
+naive_avx                      3.251 0.004372317 0.004354129 0.004410717     10
+Arguments: fnames = { naive, naive_avx }, M = 384, N = 384, K = 384
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.199
+naive                          0.404 0.282300666 0.280347202 0.289240795     10
+naive_avx                      2.888 0.039246636 0.039215125 0.039343565     10
+Arguments: fnames = { naive, naive_avx }, M = 576, N = 576, K = 576
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+naive_avx                      1.251 0.310158121 0.305496144 0.322013444     10
+Arguments: fnames = { naive, naive_avx }, M = 768, N = 768, K = 768
+Frequency                      1.300
+PEAK_AVX                      41.599
+PEAK_AVX512                   83.198
+naive_avx                      0.900 1.015419186 1.006635076 1.024882993     10
+Arguments: fnames = { naive, naive_avx }, M = 960, N = 960, K = 960
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+naive                          0.204 8.708966487 8.690220186 8.731644357     10
+naive_avx                      1.227 1.444525075 1.441603578 1.465944951     10
+Arguments: fnames = { naive_avx }, M = 1152, N = 1152, K = 1152
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+naive_avx                      0.985 3.111997337 3.104184166 3.121621669     10

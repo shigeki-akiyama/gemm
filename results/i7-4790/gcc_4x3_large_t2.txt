@@ -1,0 +1,80 @@
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 128
+Frequency                      3.592
+PEAK_AVX                     114.936
+BLIS                         190.256 0.124242575 0.124006132 0.124496197     10
+blis_th_4x3asm               193.334 0.122989967 0.122032174 0.123588999     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 256
+Frequency                      3.592
+PEAK_AVX                     114.935
+BLIS                         201.674 0.234231038 0.233970906 0.234857551     10
+blis_th_4x3asm               203.522 0.232493362 0.231846774 0.234212863     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 384
+Frequency                      3.592
+PEAK_AVX                     114.935
+BLIS                         197.357 0.358833122 0.358633614 0.358992878     10
+blis_th_4x3asm               199.880 0.355257875 0.354106791 0.356452679     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 512
+Frequency                      3.592
+PEAK_AVX                     114.935
+BLIS                         202.245 0.467610541 0.466620993 0.468224500     10
+blis_th_4x3asm               204.685 0.462357522 0.461059196 0.463646290     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 640
+Frequency                      3.592
+PEAK_AVX                     114.934
+BLIS                         199.806 0.592186565 0.590396678 0.595481010     10
+blis_th_4x3asm               198.544 0.616208533 0.594148976 0.624601046     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 768
+Frequency                      3.592
+PEAK_AVX                     114.936
+BLIS                         202.134 0.701186261 0.700316546 0.703181002     10
+blis_th_4x3asm               204.216 0.714575964 0.693177501 0.735095770     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 896
+Frequency                      3.592
+PEAK_AVX                     114.935
+BLIS                         201.272 0.825927376 0.820534647 0.849764276     10
+blis_th_4x3asm               202.830 0.816255108 0.814231691 0.817982526     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 1024
+Frequency                      3.592
+PEAK_AVX                     114.935
+BLIS                         202.935 0.933854157 0.930071529 0.965704466     10
+blis_th_4x3asm               204.400 0.924799832 0.923402756 0.926445171     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 1152
+Frequency                      3.592
+PEAK_AVX                     114.934
+BLIS                         199.745 1.063798645 1.063039164 1.064705911     10
+blis_th_4x3asm               203.285 1.046289979 1.044527046 1.047894990     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 1280
+Frequency                      3.592
+PEAK_AVX                     114.934
+BLIS                         203.003 1.183588023 1.162200399 1.189845789     10
+blis_th_4x3asm               203.036 1.185911275 1.162009098 1.239513702     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 1408
+Frequency                      3.592
+PEAK_AVX                     114.935
+BLIS                         201.720 1.295490645 1.286548874 1.309463018     10
+blis_th_4x3asm               202.165 1.321181826 1.283719330 1.364291346     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 1536
+Frequency                      3.592
+PEAK_AVX                     114.935
+BLIS                         203.366 1.393200537 1.392147080 1.394531238     10
+blis_th_4x3asm               204.032 1.417852793 1.387601363 1.455911138     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 1664
+Frequency                      3.592
+PEAK_AVX                     114.935
+BLIS                         201.684 1.525438429 1.520740368 1.533282949     10
+blis_th_4x3asm               203.172 1.533318780 1.509597933 1.597835338     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 1792
+Frequency                      3.592
+PEAK_AVX                     114.935
+BLIS                         203.540 1.637501620 1.622784320 1.730757543     10
+blis_th_4x3asm               204.833 1.628284978 1.612539689 1.653161728     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 1920
+Frequency                      3.592
+PEAK_AVX                     114.935
+BLIS                         200.818 1.777755399 1.762266587 1.879413301     10
+blis_th_4x3asm               202.662 1.784099558 1.746231620 1.873632425     10
+Arguments: fnames = { BLIS, blis_th_4x3asm }, M = 9600, N = 9600, K = 2048
+Frequency                      3.592
+PEAK_AVX                     114.935
+BLIS                         202.649 1.868577599 1.862760717 1.873697323     10
+blis_th_4x3asm               204.646 1.873555759 1.844590192 1.969998115     10

@@ -1,0 +1,116 @@
+Arguments: fnames = { MKL, naive, naive_avx, register_avx_0, register_avx_1, register_avx_2, cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 192, N = 192, K = 192
+Frequency                      3.592
+PEAK_AVX                     114.936
+naive                          2.487 0.005714332 0.005692259 0.005770796     10
+naive_avx                     12.726 0.001115265 0.001112367 0.001120117     10
+register_avx_0                27.380 0.000525494 0.000517008 0.000536647     10
+register_avx_1                68.608 0.000210167 0.000206330 0.000216745     10
+register_avx_2                64.738 0.000224913 0.000218661 0.000230151     10
+cache_oblivious               77.475 0.000185805 0.000182715 0.000197109     10
+L1_blocking                   81.313 0.000176506 0.000174089 0.000181339     10
+L2_blocking                   81.102 0.000177308 0.000174542 0.000181167     10
+L3_blocking                   80.450 0.000179192 0.000175958 0.000186659     10
+Arguments: fnames = { MKL, naive, naive_avx, register_avx_0, register_avx_1, register_avx_2, cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 384, N = 384, K = 384
+Frequency                      3.592
+PEAK_AVX                     114.935
+naive                          2.141 0.052935010 0.052882539 0.053243843     10
+naive_avx                     11.304 0.010034180 0.010018076 0.010078116     10
+register_avx_0                23.652 0.004852223 0.004788036 0.004936742     10
+register_avx_1                36.658 0.003119761 0.003089268 0.003156230     10
+register_avx_2                35.105 0.003248709 0.003225923 0.003309232     10
+cache_oblivious               73.494 0.001561173 0.001540901 0.001636785     10
+L1_blocking                   73.883 0.001546795 0.001532775 0.001597906     10
+L2_blocking                   78.629 0.001450715 0.001440251 0.001483314     10
+L3_blocking                   78.746 0.001447201 0.001438129 0.001478507     10
+Arguments: fnames = { MKL, naive, naive_avx, register_avx_0, register_avx_1, register_avx_2, cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 576, N = 576, K = 576
+Frequency                      3.592
+PEAK_AVX                     114.936
+naive                          2.296 0.166550457 0.166486375 0.166942681     10
+naive_avx                     11.193 0.034165209 0.034146787 0.034205702     10
+register_avx_0                24.419 0.015708872 0.015652295 0.015753587     10
+register_avx_1                37.133 0.010329232 0.010292906 0.010437586     10
+register_avx_2                35.385 0.010846013 0.010801222 0.010936963     10
+cache_oblivious               68.670 0.005590990 0.005565796 0.005657101     10
+L1_blocking                   69.133 0.005578027 0.005528588 0.005790739     10
+L2_blocking                   77.278 0.004973684 0.004945835 0.005050104     10
+L3_blocking                   77.711 0.004934904 0.004918284 0.004988383     10
+Arguments: fnames = { MKL, naive, naive_avx, register_avx_0, register_avx_1, register_avx_2, cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 768, N = 768, K = 768
+Frequency                      3.592
+PEAK_AVX                     114.935
+naive                          1.394 0.649826971 0.649678107 0.650158804     10
+naive_avx                     10.878 0.083333809 0.083288292 0.083365037     10
+register_avx_0                22.611 0.040176101 0.040066864 0.040592297     10
+register_avx_1                39.685 0.023150176 0.022828971 0.025199298     10
+register_avx_2                37.397 0.024241585 0.024225440 0.024274693     10
+cache_oblivious               62.084 0.014600600 0.014592690 0.014607430     10
+L1_blocking                   62.851 0.014500901 0.014414476 0.014760380     10
+L2_blocking                   63.365 0.014315112 0.014297561 0.014345508     10
+L3_blocking                   63.080 0.014376277 0.014362316 0.014418219     10
+Arguments: fnames = { MKL, naive, naive_avx, register_avx_0, register_avx_1, register_avx_2, cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 960, N = 960, K = 960
+Frequency                      3.592
+PEAK_AVX                     114.936
+naive                          1.844 0.959697763 0.959600559 0.960119382     10
+naive_avx                     11.217 0.157764997 0.157750740 0.157791759     10
+register_avx_0                25.048 0.070662477 0.070644408 0.070704326     10
+register_avx_1                39.572 0.044738545 0.044715650 0.044766474     10
+register_avx_2                38.008 0.046592185 0.046555312 0.046641525     10
+cache_oblivious               73.418 0.024112752 0.024101342 0.024132315     10
+L1_blocking                   76.499 0.023147339 0.023130802 0.023165041     10
+L2_blocking                   78.548 0.022561528 0.022527150 0.022748474     10
+L3_blocking                   77.964 0.022724319 0.022695992 0.022773157     10
+Arguments: fnames = { MKL, naive, naive_avx, register_avx_0, register_avx_1, register_avx_2, cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 1152, N = 1152, K = 1152
+Frequency                      3.592
+PEAK_AVX                     114.935
+naive                          0.321 9.529861162 9.529493410 9.530114473     10
+naive_avx                      2.728 1.120895704 1.120834710 1.121013995     10
+register_avx_0                12.008 0.254689643 0.254627919 0.254718936     10
+register_avx_1                16.210 0.188680296 0.188628423 0.188733554     10
+register_avx_2                15.988 0.191320865 0.191249013 0.191386715     10
+cache_oblivious               71.062 0.043044039 0.043028024 0.043081848     10
+L1_blocking                   65.946 0.046394674 0.046366041 0.046452223     10
+L2_blocking                   73.075 0.041864444 0.041842586 0.041874843     10
+L3_blocking                   75.145 0.040699004 0.040689713 0.040731075     10
+Arguments: fnames = { naive_avx, register_avx_0, register_avx_1, register_avx_2, cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 1344, N = 1344, K = 1344
+Frequency                      3.592
+PEAK_AVX                     114.935
+naive_avx                      2.465 1.970022355 1.969876747 1.970196230     10
+register_avx_0                 9.744 0.501176317 0.498295795 0.505003135     10
+register_avx_1                11.087 0.438026834 0.437941486 0.438192555     10
+register_avx_2                10.873 0.446697825 0.446570290 0.446849824     10
+cache_oblivious               72.742 0.066774329 0.066749042 0.066794612     10
+L1_blocking                   55.568 0.087449118 0.087378856 0.087595165     10
+L2_blocking                   66.601 0.074686227 0.072903717 0.075782610     10
+L3_blocking                   65.205 0.074534049 0.074464229 0.074609904     10
+Arguments: fnames = { naive_avx, register_avx_0, register_avx_1, register_avx_2, cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 1536, N = 1536, K = 1536
+Frequency                      3.592
+PEAK_AVX                     114.936
+naive_avx                      2.458 2.948864150 2.948341905 2.949217372     10
+register_avx_0                 8.357 0.868322219 0.867217484 0.869372084     10
+register_avx_1                12.696 0.571229848 0.570856712 0.571569924     10
+register_avx_2                12.155 0.596725801 0.596278647 0.597240786     10
+cache_oblivious               57.917 0.125376748 0.125141352 0.127093990     10
+L1_blocking                   49.874 0.145379098 0.145320896 0.145440275     10
+L2_blocking                   56.865 0.127503944 0.127454406 0.127568156     10
+L3_blocking                   60.476 0.119869401 0.119846158 0.119910493     10
+Arguments: fnames = { naive_avx, register_avx_0, register_avx_1, register_avx_2, cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 1728, N = 1728, K = 1728
+Frequency                      3.592
+PEAK_AVX                     114.935
+naive_avx                      2.257 4.571705568 4.571476268 4.572205070     10
+register_avx_0                 8.756 1.178619981 1.178515965 1.178797752     10
+register_avx_1                11.248 0.919014614 0.917491097 0.919416827     10
+register_avx_2                10.734 0.961836634 0.961422225 0.962479483     10
+cache_oblivious               72.131 0.143624893 0.143066169 0.148292649     10
+L1_blocking                   52.057 0.201058038 0.198234666 0.201449808     10
+L2_blocking                   59.543 0.173368862 0.173314145 0.173419431     10
+L3_blocking                   70.533 0.146594239 0.146309202 0.148896643     10
+Arguments: fnames = { naive_avx, register_avx_0, register_avx_1, register_avx_2, cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 1920, N = 1920, K = 1920
+Frequency                      3.592
+PEAK_AVX                     114.935
+naive_avx                      2.152 6.578426335 6.578012681 6.578841143     10
+register_avx_0                 8.677 1.631658478 1.631477990 1.631819540     10
+register_avx_1                10.687 1.325531230 1.324530410 1.326137673     10
+register_avx_2                10.233 1.383871803 1.383331470 1.384497813     10
+cache_oblivious               72.252 0.196385671 0.195921979 0.200129578     10
+L1_blocking                   49.848 0.286897621 0.283978200 0.287305793     10
+L2_blocking                   58.951 0.240191428 0.240126363 0.240259855     10
+L3_blocking                   71.568 0.198120570 0.197795064 0.200788219     10

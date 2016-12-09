@@ -1,0 +1,80 @@
+Arguments: fnames = { cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 192, N = 192, K = 192
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+cache_oblivious               11.042 0.001319530 0.001281942 0.001413030     10
+L1_blocking                    7.916 0.001815651 0.001788175 0.001965812     10
+L2_blocking                    7.644 0.001867660 0.001851864 0.001906163     10
+L3_blocking                   11.025 0.001308872 0.001284002 0.001373021     10
+Arguments: fnames = { cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 384, N = 384, K = 384
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+cache_oblivious               10.938 0.010566899 0.010353276 0.011248006     10
+L1_blocking                    7.839 0.014604297 0.014447011 0.014901656     10
+L2_blocking                    8.123 0.013987897 0.013940907 0.014080085     10
+L3_blocking                   11.344 0.010058111 0.009982930 0.010148058     10
+Arguments: fnames = { cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 576, N = 576, K = 576
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+cache_oblivious                7.590 0.050716872 0.050353821 0.052501225     10
+L1_blocking                    9.731 0.039505273 0.039278649 0.039799800     10
+L2_blocking                   10.620 0.036538666 0.035987722 0.038689887     10
+L3_blocking                    7.582 0.050614828 0.050409961 0.051159902     10
+Arguments: fnames = { cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 768, N = 768, K = 768
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+cache_oblivious                7.523 0.121041310 0.120424529 0.123007404     10
+L1_blocking                    8.352 0.109037622 0.108467323 0.110483729     10
+L2_blocking                    9.792 0.092695881 0.092519915 0.092867674     10
+L3_blocking                    7.619 0.119495010 0.118901652 0.122369535     10
+Arguments: fnames = { cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 960, N = 960, K = 960
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+cache_oblivious                7.632 0.232860342 0.231837540 0.234813117     10
+L1_blocking                    8.579 0.206786575 0.206263861 0.209028461     10
+L2_blocking                   10.499 0.169234142 0.168530496 0.172278505     10
+L3_blocking                    7.545 0.235127023 0.234537680 0.238140390     10
+Arguments: fnames = { cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 1152, N = 1152, K = 1152
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+cache_oblivious                7.586 0.404225501 0.403063398 0.406622664     10
+L1_blocking                    8.148 0.376652819 0.375284799 0.379506352     10
+L2_blocking                    9.876 0.310407607 0.309600502 0.313866675     10
+L3_blocking                    7.462 0.410517507 0.409784091 0.413971694     10
+Arguments: fnames = { cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 1344, N = 1344, K = 1344
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+cache_oblivious               10.570 0.461551537 0.459378121 0.465340609     10
+L1_blocking                    6.465 0.753213590 0.751064872 0.756491070     10
+L2_blocking                    7.661 0.634584954 0.633800765 0.638372758     10
+L3_blocking                   10.619 0.458242023 0.457252377 0.462275421     10
+Arguments: fnames = { cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 1536, N = 1536, K = 1536
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+cache_oblivious                7.657 0.949882661 0.946559871 0.952224893     10
+L1_blocking                    7.996 0.907448753 0.906477702 0.912060415     10
+L2_blocking                    9.938 0.730420899 0.729304788 0.734995710     10
+L3_blocking                    7.716 0.940689317 0.939358258 0.945277777     10
+Arguments: fnames = { cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 1728, N = 1728, K = 1728
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+cache_oblivious               10.765 0.962527561 0.958630987 0.965689286     10
+L1_blocking                    6.392 1.616034712 1.614496840 1.620695266     10
+L2_blocking                    7.763 1.330294929 1.329316854 1.335240615     10
+L3_blocking                   10.794 0.959318583 0.956030529 0.972576348     10
+Arguments: fnames = { cache_oblivious, L1_blocking, L2_blocking, L3_blocking }, M = 1920, N = 1920, K = 1920
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+cache_oblivious               10.866 1.307033008 1.302711064 1.314570923     10
+L1_blocking                    6.461 2.193183334 2.190918924 2.197781253     10
+L2_blocking                    7.710 1.837319441 1.835959694 1.842011378     10
+L3_blocking                   10.890 1.301069861 1.299933880 1.301771119     10

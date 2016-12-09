@@ -1,0 +1,7 @@
+Arguments: fnames = { MKL, blis512_packL3_28x1asmpf_ebcast, blis512_packL3_28x1asmpf_ebcast_unr }, M = 4032, N = 4032, K = 4032
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+MKL                           66.165 1.985125367 1.981359624 1.990640398     10
+blis512_packL3_28x1asmpf_ebcast     40.178 3.264655626 3.262933604 3.268505708     10
+blis512_packL3_28x1asmpf_ebcast_unr     53.311 2.461575946 2.459112407 2.467888520     10

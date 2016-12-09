@@ -1,0 +1,70 @@
+Arguments: fnames = { blis_copyL1_4x3, blis_copyL2_4x3, blis_copyL3_4x3 }, M = 192, N = 192, K = 192
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis_copyL1_4x3               10.988 0.001314744 0.001288289 0.001395998     10
+blis_copyL2_4x3               10.290 0.001444175 0.001375638 0.001867120     10
+blis_copyL3_4x3                7.003 0.002050487 0.002021338 0.002123136     10
+Arguments: fnames = { blis_copyL1_4x3, blis_copyL2_4x3, blis_copyL3_4x3 }, M = 384, N = 384, K = 384
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+blis_copyL1_4x3                7.698 0.015022661 0.014711892 0.016086461     10
+blis_copyL2_4x3                7.597 0.014998689 0.014905891 0.015214038     10
+blis_copyL3_4x3               11.039 0.010303862 0.010258698 0.010397297     10
+Arguments: fnames = { blis_copyL1_4x3, blis_copyL2_4x3, blis_copyL3_4x3 }, M = 576, N = 576, K = 576
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis_copyL1_4x3                7.737 0.049921475 0.049400500 0.051173681     10
+blis_copyL2_4x3                7.783 0.049248971 0.049106984 0.049518428     10
+blis_copyL3_4x3               11.042 0.034968969 0.034613306 0.037525590     10
+Arguments: fnames = { blis_copyL1_4x3, blis_copyL2_4x3, blis_copyL3_4x3 }, M = 768, N = 768, K = 768
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis_copyL1_4x3                7.247 0.126205762 0.125020115 0.130815568     10
+blis_copyL2_4x3                7.232 0.125875064 0.125276084 0.128089686     10
+blis_copyL3_4x3               10.708 0.084786115 0.084608516 0.085239374     10
+Arguments: fnames = { blis_copyL1_4x3, blis_copyL2_4x3, blis_copyL3_4x3 }, M = 960, N = 960, K = 960
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis_copyL1_4x3               10.425 0.170504645 0.169739071 0.172764809     10
+blis_copyL2_4x3               10.461 0.169647127 0.169151543 0.172685649     10
+blis_copyL3_4x3                7.332 0.244916191 0.241324315 0.251764873     10
+Arguments: fnames = { blis_copyL1_4x3, blis_copyL2_4x3, blis_copyL3_4x3 }, M = 1152, N = 1152, K = 1152
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis_copyL1_4x3                7.692 0.399590956 0.397490560 0.402491830     10
+blis_copyL2_4x3                7.678 0.400096622 0.398256210 0.403095460     10
+blis_copyL3_4x3               10.870 0.282064651 0.281280620 0.286149730     10
+Arguments: fnames = { blis_copyL1_4x3, blis_copyL2_4x3, blis_copyL3_4x3 }, M = 1344, N = 1344, K = 1344
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+blis_copyL1_4x3               10.512 0.464221072 0.461881983 0.467708071     10
+blis_copyL2_4x3               10.484 0.464448897 0.463105982 0.467444093     10
+blis_copyL3_4x3                7.493 0.648988801 0.647966468 0.652025482     10
+Arguments: fnames = { blis_copyL1_4x3, blis_copyL2_4x3, blis_copyL3_4x3 }, M = 1536, N = 1536, K = 1536
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+blis_copyL1_4x3                7.033 1.036369599 1.030565554 1.045914261     10
+blis_copyL2_4x3                7.186 1.011300872 1.008620414 1.016669483     10
+blis_copyL3_4x3               10.477 0.692572847 0.691791172 0.694297717     10
+Arguments: fnames = { blis_copyL1_4x3, blis_copyL2_4x3, blis_copyL3_4x3 }, M = 1728, N = 1728, K = 1728
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis_copyL1_4x3                7.739 1.337717447 1.333382420 1.343918278     10
+blis_copyL2_4x3                7.740 1.334172128 1.333191580 1.339181422     10
+blis_copyL3_4x3               11.084 0.932046515 0.931012387 0.935369234     10
+Arguments: fnames = { blis_copyL1_4x3, blis_copyL2_4x3, blis_copyL3_4x3 }, M = 1920, N = 1920, K = 1920
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis_copyL1_4x3               10.752 1.320438664 1.316519934 1.326760633     10
+blis_copyL2_4x3               10.761 1.316693741 1.315510738 1.321621894     10
+blis_copyL3_4x3                7.554 1.874926149 1.873992384 1.880928826     10

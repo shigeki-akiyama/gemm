@@ -1,0 +1,80 @@
+Arguments: fnames = { register_avx_0, register_avx_1, register_avx_2, register_avx_3_6x2, register_avx_3_4x3 }, M = 192, N = 192, K = 192
+Frequency                      3.592
+PEAK_AVX                     114.935
+register_avx_0                26.124 0.000559766 0.000541868 0.000605904     10
+register_avx_1                65.907 0.000224923 0.000214785 0.000232875     10
+register_avx_2                62.312 0.000233555 0.000227175 0.000241545     10
+register_avx_3_6x2            65.222 0.000224254 0.000217041 0.000232718     10
+register_avx_3_4x3            72.246 0.000202914 0.000195939 0.000212447     10
+Arguments: fnames = { register_avx_0, register_avx_1, register_avx_2, register_avx_3_6x2, register_avx_3_4x3 }, M = 384, N = 384, K = 384
+Frequency                      3.592
+PEAK_AVX                     114.935
+register_avx_0                23.428 0.004952221 0.004833726 0.005631609     10
+register_avx_1                35.893 0.003184132 0.003155129 0.003222167     10
+register_avx_2                34.535 0.003315250 0.003279132 0.003371183     10
+register_avx_3_6x2            41.225 0.002808151 0.002747053 0.002866974     10
+register_avx_3_4x3            43.864 0.002617407 0.002581763 0.002640753     10
+Arguments: fnames = { register_avx_0, register_avx_1, register_avx_2, register_avx_3_6x2, register_avx_3_4x3 }, M = 576, N = 576, K = 576
+Frequency                      3.592
+PEAK_AVX                     114.935
+register_avx_0                24.391 0.016060286 0.015669980 0.017977939     10
+register_avx_1                37.219 0.010301263 0.010269124 0.010416326     10
+register_avx_2                35.579 0.010807958 0.010742345 0.010932106     10
+register_avx_3_6x2            43.326 0.008943926 0.008821627 0.009397428     10
+register_avx_3_4x3            46.129 0.008351342 0.008285521 0.008509247     10
+Arguments: fnames = { register_avx_0, register_avx_1, register_avx_2, register_avx_3_6x2, register_avx_3_4x3 }, M = 768, N = 768, K = 768
+Frequency                      3.592
+PEAK_AVX                     114.936
+register_avx_0                24.738 0.036721223 0.036622770 0.037454592     10
+register_avx_1                39.742 0.022852295 0.022796226 0.023124819     10
+register_avx_2                37.461 0.024200580 0.024184260 0.024251062     10
+register_avx_3_6x2            49.723 0.018237021 0.018220469 0.018257339     10
+register_avx_3_4x3            46.702 0.019412414 0.019398974 0.019425410     10
+Arguments: fnames = { register_avx_0, register_avx_1, register_avx_2, register_avx_3_6x2, register_avx_3_4x3 }, M = 960, N = 960, K = 960
+Frequency                      3.592
+PEAK_AVX                     114.936
+register_avx_0                25.242 0.070164987 0.070100705 0.070625894     10
+register_avx_1                39.681 0.044623145 0.044592148 0.044647429     10
+register_avx_2                38.125 0.046444692 0.046412209 0.046477316     10
+register_avx_3_6x2            49.430 0.035845055 0.035797652 0.035889431     10
+register_avx_3_4x3            47.906 0.036967249 0.036935987 0.037015218     10
+Arguments: fnames = { register_avx_0, register_avx_1, register_avx_2, register_avx_3_6x2, register_avx_3_4x3 }, M = 1152, N = 1152, K = 1152
+Frequency                      3.592
+PEAK_AVX                     114.935
+register_avx_0                12.161 0.252129121 0.251435073 0.254209596     10
+register_avx_1                17.323 0.176587059 0.176512005 0.176636999     10
+register_avx_2                17.088 0.186331890 0.178940535 0.199890706     10
+register_avx_3_6x2            25.924 0.117995040 0.117946001 0.118053327     10
+register_avx_3_4x3            24.880 0.122977026 0.122896869 0.123041868     10
+Arguments: fnames = { register_avx_0, register_avx_1, register_avx_2, register_avx_3_6x2, register_avx_3_4x3 }, M = 1344, N = 1344, K = 1344
+Frequency                      3.592
+PEAK_AVX                     114.936
+register_avx_0                10.334 0.470471266 0.469844371 0.471056697     10
+register_avx_1                14.732 0.330815146 0.329589170 0.331900775     10
+register_avx_2                14.360 0.338696903 0.338131402 0.339190371     10
+register_avx_3_6x2            20.285 0.240463347 0.239362972 0.241299083     10
+register_avx_3_4x3            20.029 0.247746833 0.242414892 0.290421460     10
+Arguments: fnames = { register_avx_0, register_avx_1, register_avx_2, register_avx_3_6x2, register_avx_3_4x3 }, M = 1536, N = 1536, K = 1536
+Frequency                      3.592
+PEAK_AVX                     114.935
+register_avx_0                 8.461 0.859832014 0.856632904 0.861528533     10
+register_avx_1                12.980 0.558899092 0.558381485 0.559308224     10
+register_avx_2                12.360 0.586908070 0.586392929 0.587517159     10
+register_avx_3_6x2            15.017 0.483177755 0.482640869 0.484262289     10
+register_avx_3_4x3            16.419 0.441979524 0.441438145 0.442657006     10
+Arguments: fnames = { register_avx_0, register_avx_1, register_avx_2, register_avx_3_6x2, register_avx_3_4x3 }, M = 1728, N = 1728, K = 1728
+Frequency                      3.592
+PEAK_AVX                     114.935
+register_avx_0                 7.784 1.326350320 1.325795304 1.327188382     10
+register_avx_1                11.316 0.912344819 0.911921030 0.912761226     10
+register_avx_2                10.814 0.954775193 0.954244148 0.955265551     10
+register_avx_3_6x2            13.072 0.790061876 0.789456691 0.790764851     10
+register_avx_3_4x3            14.594 0.707509383 0.707117823 0.708144680     10
+Arguments: fnames = { register_avx_0, register_avx_1, register_avx_2, register_avx_3_6x2, register_avx_3_4x3 }, M = 1920, N = 1920, K = 1920
+Frequency                      3.592
+PEAK_AVX                     114.935
+register_avx_0                 7.318 1.935769435 1.934473431 1.937286222     10
+register_avx_1                10.624 1.333140053 1.332404156 1.333479824     10
+register_avx_2                10.197 1.388699793 1.388201147 1.389202127     10
+register_avx_3_6x2            12.596 1.124147031 1.123866879 1.124401992     10
+register_avx_3_4x3            13.786 1.027308067 1.026826704 1.028221192     10

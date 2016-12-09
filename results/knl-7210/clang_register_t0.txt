@@ -1,0 +1,50 @@
+Arguments: fnames = { register_avx_3_4x3 }, M = 192, N = 192, K = 192
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+register_avx_3_4x3             8.434 0.001686935 0.001678358 0.001695918     10
+Arguments: fnames = { register_avx_3_4x3 }, M = 384, N = 384, K = 384
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.199
+register_avx_3_4x3             8.535 0.013552026 0.013269186 0.015283842     10
+Arguments: fnames = { register_avx_3_4x3 }, M = 576, N = 576, K = 576
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+register_avx_3_4x3             2.990 0.130069801 0.127820829 0.138676815     10
+Arguments: fnames = { register_avx_3_4x3 }, M = 768, N = 768, K = 768
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+register_avx_3_4x3             2.581 0.353686777 0.351077845 0.361509679     10
+Arguments: fnames = { register_avx_3_4x3 }, M = 960, N = 960, K = 960
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+register_avx_3_4x3             2.674 0.665820531 0.661823136 0.670148950     10
+Arguments: fnames = { register_avx_3_4x3 }, M = 1152, N = 1152, K = 1152
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+register_avx_3_4x3             2.624 1.168558317 1.165106574 1.172426638     10
+Arguments: fnames = { register_avx_3_4x3 }, M = 1344, N = 1344, K = 1344
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+register_avx_3_4x3             2.904 1.677933370 1.672252010 1.685804120     10
+Arguments: fnames = { register_avx_3_4x3 }, M = 1536, N = 1536, K = 1536
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+register_avx_3_4x3             2.327 3.120592377 3.114284021 3.126694093     10
+Arguments: fnames = { register_avx_3_4x3 }, M = 1728, N = 1728, K = 1728
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+register_avx_3_4x3             3.071 3.373198347 3.360665350 3.394732240     10
+Arguments: fnames = { register_avx_3_4x3 }, M = 1920, N = 1920, K = 1920
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+register_avx_3_4x3             2.645 5.362061712 5.352168884 5.385795988     10

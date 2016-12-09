@@ -1,0 +1,60 @@
+Arguments: fnames = { blis_packL2_4x3, blis_packL3_4x3 }, M = 192, N = 192, K = 192
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis_packL2_4x3               10.766 0.001347380 0.001314808 0.001439316     10
+blis_packL3_4x3               11.500 0.001248138 0.001230949 0.001284878     10
+Arguments: fnames = { blis_packL2_4x3, blis_packL3_4x3 }, M = 384, N = 384, K = 384
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis_packL2_4x3               11.366 0.010156163 0.009963690 0.010790537     10
+blis_packL3_4x3               12.479 0.009268098 0.009074784 0.010489978     10
+Arguments: fnames = { blis_packL2_4x3, blis_packL3_4x3 }, M = 576, N = 576, K = 576
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis_packL2_4x3               11.084 0.034774305 0.034481619 0.035505411     10
+blis_packL3_4x3               12.763 0.030059696 0.029946871 0.030112658     10
+Arguments: fnames = { blis_packL2_4x3, blis_packL3_4x3 }, M = 768, N = 768, K = 768
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.199
+blis_packL2_4x3               10.497 0.087304128 0.086308584 0.091977454     10
+blis_packL3_4x3               13.094 0.069590299 0.069190004 0.072003554     10
+Arguments: fnames = { blis_packL2_4x3, blis_packL3_4x3 }, M = 960, N = 960, K = 960
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis_packL2_4x3               10.624 0.167107467 0.166547957 0.169243859     10
+blis_packL3_4x3               13.433 0.132451850 0.131725092 0.135503906     10
+Arguments: fnames = { blis_packL2_4x3, blis_packL3_4x3 }, M = 1152, N = 1152, K = 1152
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.202
+blis_packL2_4x3                7.772 0.395187741 0.393416808 0.399098349     10
+blis_packL3_4x3                8.704 0.353259079 0.351286533 0.357894004     10
+Arguments: fnames = { blis_packL2_4x3, blis_packL3_4x3 }, M = 1344, N = 1344, K = 1344
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+blis_packL2_4x3                7.375 0.661674183 0.658331480 0.664770393     10
+blis_packL3_4x3                9.083 0.535577313 0.534546975 0.540568873     10
+Arguments: fnames = { blis_packL2_4x3, blis_packL3_4x3 }, M = 1536, N = 1536, K = 1536
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.200
+blis_packL2_4x3                7.191 1.012371164 1.007846758 1.026653387     10
+blis_packL3_4x3                9.160 0.792631826 0.791219121 0.797703218     10
+Arguments: fnames = { blis_packL2_4x3, blis_packL3_4x3 }, M = 1728, N = 1728, K = 1728
+Frequency                      1.300
+PEAK_AVX                      41.601
+PEAK_AVX512                   83.201
+blis_packL2_4x3               10.946 0.946927261 0.942733499 0.949427439     10
+blis_packL3_4x3               13.769 0.750664471 0.749475418 0.755517277     10
+Arguments: fnames = { blis_packL2_4x3, blis_packL3_4x3 }, M = 1920, N = 1920, K = 1920
+Frequency                      1.300
+PEAK_AVX                      41.600
+PEAK_AVX512                   83.201
+blis_packL2_4x3                7.459 1.902507959 1.897870281 1.909452755     10
+blis_packL3_4x3                9.244 1.533698294 1.531407016 1.539271897     10
