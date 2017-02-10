@@ -7,6 +7,7 @@
 #ifdef USE_AVX512
 
 #define _mm512_broadcast_ss(p) _mm512_set1_ps(*(p))
+#define mm_prefetch(p, type)   _mm_prefetch((char *)(p), (type))
 
 struct register_avx512_9x3 {
 
@@ -2074,34 +2075,34 @@ struct register_avx512_28x1pf_unr {
         auto vab24 = _mm512_setzero_ps(); auto vab25 = _mm512_setzero_ps();
         auto vab26 = _mm512_setzero_ps(); auto vab27 = _mm512_setzero_ps();
 
-        _mm_prefetch(C + ldc *  0, _MM_HINT_T0);
-        _mm_prefetch(C + ldc *  1, _MM_HINT_T0);
-        _mm_prefetch(C + ldc *  2, _MM_HINT_T0);
-        _mm_prefetch(C + ldc *  3, _MM_HINT_T0);
-        _mm_prefetch(C + ldc *  4, _MM_HINT_T0);
-        _mm_prefetch(C + ldc *  5, _MM_HINT_T0);
-        _mm_prefetch(C + ldc *  6, _MM_HINT_T0);
-        _mm_prefetch(C + ldc *  7, _MM_HINT_T0);
-        _mm_prefetch(C + ldc *  8, _MM_HINT_T0);
-        _mm_prefetch(C + ldc *  9, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 10, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 11, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 12, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 13, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 14, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 15, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 16, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 17, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 18, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 19, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 20, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 21, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 22, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 23, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 24, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 25, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 26, _MM_HINT_T0);
-        _mm_prefetch(C + ldc * 27, _MM_HINT_T0);
+        mm_prefetch(C + ldc *  0, _MM_HINT_T0);
+        mm_prefetch(C + ldc *  1, _MM_HINT_T0);
+        mm_prefetch(C + ldc *  2, _MM_HINT_T0);
+        mm_prefetch(C + ldc *  3, _MM_HINT_T0);
+        mm_prefetch(C + ldc *  4, _MM_HINT_T0);
+        mm_prefetch(C + ldc *  5, _MM_HINT_T0);
+        mm_prefetch(C + ldc *  6, _MM_HINT_T0);
+        mm_prefetch(C + ldc *  7, _MM_HINT_T0);
+        mm_prefetch(C + ldc *  8, _MM_HINT_T0);
+        mm_prefetch(C + ldc *  9, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 10, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 11, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 12, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 13, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 14, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 15, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 16, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 17, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 18, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 19, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 20, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 21, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 22, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 23, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 24, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 25, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 26, _MM_HINT_T0);
+        mm_prefetch(C + ldc * 27, _MM_HINT_T0);
 
         auto pb = B + ldb * 0;
         auto vb0 = _mm512_load_ps(pb + 16 * 0);
@@ -2109,45 +2110,45 @@ struct register_avx512_28x1pf_unr {
         auto vb2 = _mm512_load_ps(pb + 16 * 2);
         auto vb3 = _mm512_load_ps(pb + 16 * 3);
 
-        _mm_prefetch(A + lda + 16 *  0, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 *  1, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 *  2, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 *  3, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 *  4, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 *  5, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 *  6, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 *  7, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 *  8, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 *  9, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 * 10, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 * 11, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 * 12, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 * 13, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 * 14, _MM_HINT_T0);
-        _mm_prefetch(A + lda + 16 * 15, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 *  0, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 *  1, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 *  2, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 *  3, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 *  4, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 *  5, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 *  6, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 *  7, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 *  8, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 *  9, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 * 10, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 * 11, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 * 12, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 * 13, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 * 14, _MM_HINT_T0);
+        mm_prefetch(A + lda + 16 * 15, _MM_HINT_T0);
 
-        _mm_prefetch(B + ldb + 16 *  0, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 *  1, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 *  2, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 *  3, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 *  4, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 *  5, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 *  6, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 *  7, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 *  8, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 *  9, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 * 10, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 * 11, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 * 12, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 * 13, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 * 14, _MM_HINT_T0);
-        _mm_prefetch(B + ldb + 16 * 15, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 *  0, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 *  1, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 *  2, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 *  3, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 *  4, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 *  5, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 *  6, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 *  7, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 *  8, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 *  9, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 * 10, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 * 11, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 * 12, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 * 13, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 * 14, _MM_HINT_T0);
+        mm_prefetch(B + ldb + 16 * 15, _MM_HINT_T0);
 
         for (int k = 0; k < K; k += 4) {
             auto pa = A + lda * k;
             auto pb = B + ldb * (k + 4);
 
-            _mm_prefetch(pa + 16 * 16, _MM_HINT_T0);
+            mm_prefetch(pa + 16 * 16, _MM_HINT_T0);
             vab00 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 +  0), vb0, vab00);
             vab01 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 +  1), vb0, vab01);
             vab02 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 +  2), vb0, vab02);
@@ -2161,11 +2162,11 @@ struct register_avx512_28x1pf_unr {
             vab10 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 10), vb0, vab10);
             vab11 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 11), vb0, vab11);
             vab12 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 12), vb0, vab12);
-            _mm_prefetch(pb + 16 * 12, _MM_HINT_T0);
+            mm_prefetch(pb + 16 * 12, _MM_HINT_T0);
             vab13 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 13), vb0, vab13);
             vab14 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 14), vb0, vab14);
             vab15 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 15), vb0, vab15);
-            _mm_prefetch(pa + 16 * 17, _MM_HINT_T0);
+            mm_prefetch(pa + 16 * 17, _MM_HINT_T0);
             vab16 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 16), vb0, vab16);
             vab17 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 17), vb0, vab17);
             vab18 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 18), vb0, vab18);
@@ -2184,7 +2185,7 @@ struct register_avx512_28x1pf_unr {
             vab01 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  1), vb1, vab01);
             vab02 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  2), vb1, vab02);
             vab03 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  3), vb1, vab03);
-            _mm_prefetch(pa + 16 * 18, _MM_HINT_T0);
+            mm_prefetch(pa + 16 * 18, _MM_HINT_T0);
             vab04 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  4), vb1, vab04);
             vab05 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  5), vb1, vab05);
             vab06 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  6), vb1, vab06);
@@ -2195,14 +2196,14 @@ struct register_avx512_28x1pf_unr {
             vab11 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 11), vb1, vab11);
             vab12 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 12), vb1, vab12);
             vab13 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 13), vb1, vab13);
-            _mm_prefetch(pb + 16 * 13, _MM_HINT_T0);
+            mm_prefetch(pb + 16 * 13, _MM_HINT_T0);
             vab14 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 14), vb1, vab14);
             vab15 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 15), vb1, vab15);
             vab16 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 16), vb1, vab16);
             vab17 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 17), vb1, vab17);
             vab18 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 18), vb1, vab18);
             vab19 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 19), vb1, vab19);
-            _mm_prefetch(pa + 16 * 19, _MM_HINT_T0);
+            mm_prefetch(pa + 16 * 19, _MM_HINT_T0);
             vab20 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 20), vb1, vab20);
             vab21 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 21), vb1, vab21);
             vab22 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 22), vb1, vab22);
@@ -2221,14 +2222,14 @@ struct register_avx512_28x1pf_unr {
             vab05 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  5), vb2, vab05);
             vab06 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  6), vb2, vab06);
             vab07 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  7), vb2, vab07);
-            _mm_prefetch(pa + 16 * 20, _MM_HINT_T0);
+            mm_prefetch(pa + 16 * 20, _MM_HINT_T0);
             vab08 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  8), vb2, vab08);
             vab09 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  9), vb2, vab09);
             vab10 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 10), vb2, vab10);
             vab11 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 11), vb2, vab11);
             vab12 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 12), vb2, vab12);
             vab13 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 13), vb2, vab13);
-            _mm_prefetch(pb + 16 * 14, _MM_HINT_T0);
+            mm_prefetch(pb + 16 * 14, _MM_HINT_T0);
             vab14 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 14), vb2, vab14);
             vab15 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 15), vb2, vab15);
             vab16 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 16), vb2, vab16);
@@ -2239,7 +2240,7 @@ struct register_avx512_28x1pf_unr {
             vab21 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 21), vb2, vab21);
             vab22 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 22), vb2, vab22);
             vab23 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 23), vb2, vab23);
-            _mm_prefetch(pa + 16 * 21, _MM_HINT_T0);
+            mm_prefetch(pa + 16 * 21, _MM_HINT_T0);
             vab24 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 24), vb2, vab24);
             vab25 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 25), vb2, vab25);
             vab26 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 26), vb2, vab26);
@@ -2258,10 +2259,10 @@ struct register_avx512_28x1pf_unr {
             vab09 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 +  9), vb3, vab09);
             vab10 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 10), vb3, vab10);
             vab11 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 11), vb3, vab11);
-            _mm_prefetch(pa + 16 * 22, _MM_HINT_T0);
+            mm_prefetch(pa + 16 * 22, _MM_HINT_T0);
             vab12 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 12), vb3, vab12);
             vab13 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 13), vb3, vab13);
-            _mm_prefetch(pb + 16 * 15, _MM_HINT_T0);
+            mm_prefetch(pb + 16 * 15, _MM_HINT_T0);
             vab14 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 14), vb3, vab14);
             vab15 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 15), vb3, vab15);
             vab16 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 16), vb3, vab16);
