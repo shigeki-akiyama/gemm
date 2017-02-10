@@ -1833,6 +1833,575 @@ struct register_avx512_5x5asmpf_ebcast {
     }
 };
 
+struct register_avx512_28x1 {
+    enum : int {
+        BLOCK_M = 28,
+        BLOCK_N = 16 * 1,
+    };
+
+    // 28x16 matrix multiplication
+    static void matmul_register(
+        int M, int N, int K, float *A, int lda, float *B, int ldb,
+        float *C, int ldc)
+    {
+        assert(0);
+    }
+
+    static NOINLINE void matmul_register_packed(
+        int M, int N, int K, float *A, int lda, float *B, int ldb,
+        float *C, int ldc)
+    {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+        assert(lda == BLOCK_M);
+        assert(ldb == BLOCK_N);
+
+        lda = BLOCK_M;
+        ldb = BLOCK_N;
+       
+        auto vab00 = _mm512_setzero_ps(); auto vab01 = _mm512_setzero_ps();
+        auto vab02 = _mm512_setzero_ps(); auto vab03 = _mm512_setzero_ps();
+        auto vab04 = _mm512_setzero_ps(); auto vab05 = _mm512_setzero_ps();
+        auto vab06 = _mm512_setzero_ps(); auto vab07 = _mm512_setzero_ps();
+        auto vab08 = _mm512_setzero_ps(); auto vab09 = _mm512_setzero_ps();
+        auto vab10 = _mm512_setzero_ps(); auto vab11 = _mm512_setzero_ps();
+        auto vab12 = _mm512_setzero_ps(); auto vab13 = _mm512_setzero_ps();
+        auto vab14 = _mm512_setzero_ps(); auto vab15 = _mm512_setzero_ps();
+        auto vab16 = _mm512_setzero_ps(); auto vab17 = _mm512_setzero_ps();
+        auto vab18 = _mm512_setzero_ps(); auto vab19 = _mm512_setzero_ps();
+        auto vab20 = _mm512_setzero_ps(); auto vab21 = _mm512_setzero_ps();
+        auto vab22 = _mm512_setzero_ps(); auto vab23 = _mm512_setzero_ps();
+        auto vab24 = _mm512_setzero_ps(); auto vab25 = _mm512_setzero_ps();
+        auto vab26 = _mm512_setzero_ps(); auto vab27 = _mm512_setzero_ps();
+
+        for (int k = 0; k < K; k++) {
+            auto pa = A + lda * k;
+            auto pb = B + ldb * k;
+
+            auto vb0 = _mm512_load_ps(pb + 16 * 0);
+
+            vab00 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa +  0), vb0, vab00);
+            vab01 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa +  1), vb0, vab01);
+            vab02 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa +  2), vb0, vab02);
+            vab03 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa +  3), vb0, vab03);
+            vab04 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa +  4), vb0, vab04);
+            vab05 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa +  5), vb0, vab05);
+            vab06 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa +  6), vb0, vab06);
+            vab07 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa +  7), vb0, vab07);
+            vab08 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa +  8), vb0, vab08);
+            vab09 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa +  9), vb0, vab09);
+            vab10 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 10), vb0, vab10);
+            vab11 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 11), vb0, vab11);
+            vab12 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 12), vb0, vab12);
+            vab13 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 13), vb0, vab13);
+            vab14 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 14), vb0, vab14);
+            vab15 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 15), vb0, vab15);
+            vab16 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 16), vb0, vab16);
+            vab17 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 17), vb0, vab17);
+            vab18 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 18), vb0, vab18);
+            vab19 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 19), vb0, vab19);
+            vab20 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 20), vb0, vab20);
+            vab21 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 21), vb0, vab21);
+            vab22 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 22), vb0, vab22);
+            vab23 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 23), vb0, vab23);
+            vab24 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 24), vb0, vab24);
+            vab25 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 25), vb0, vab25);
+            vab26 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 26), vb0, vab26);
+            vab27 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 27), vb0, vab27);
+        }
+
+        auto vc00 = _mm512_load_ps(C + ldc *  0);
+        auto vc01 = _mm512_load_ps(C + ldc *  1);
+        auto vc02 = _mm512_load_ps(C + ldc *  2);
+        auto vc03 = _mm512_load_ps(C + ldc *  3);
+        auto vc04 = _mm512_load_ps(C + ldc *  4);
+        auto vc05 = _mm512_load_ps(C + ldc *  5);
+        auto vc06 = _mm512_load_ps(C + ldc *  6);
+        auto vc07 = _mm512_load_ps(C + ldc *  7);
+        auto vc08 = _mm512_load_ps(C + ldc *  8);
+        auto vc09 = _mm512_load_ps(C + ldc *  9);
+        auto vc10 = _mm512_load_ps(C + ldc * 10);
+        auto vc11 = _mm512_load_ps(C + ldc * 11);
+        auto vc12 = _mm512_load_ps(C + ldc * 12);
+        auto vc13 = _mm512_load_ps(C + ldc * 13);
+        auto vc14 = _mm512_load_ps(C + ldc * 14);
+        auto vc15 = _mm512_load_ps(C + ldc * 15);
+        auto vc16 = _mm512_load_ps(C + ldc * 16);
+        auto vc17 = _mm512_load_ps(C + ldc * 17);
+        auto vc18 = _mm512_load_ps(C + ldc * 18);
+        auto vc19 = _mm512_load_ps(C + ldc * 19);
+        auto vc20 = _mm512_load_ps(C + ldc * 20);
+        auto vc21 = _mm512_load_ps(C + ldc * 21);
+        auto vc22 = _mm512_load_ps(C + ldc * 22);
+        auto vc23 = _mm512_load_ps(C + ldc * 23);
+        auto vc24 = _mm512_load_ps(C + ldc * 24);
+        auto vc25 = _mm512_load_ps(C + ldc * 25);
+        auto vc26 = _mm512_load_ps(C + ldc * 26);
+        auto vc27 = _mm512_load_ps(C + ldc * 27);
+
+        vc00 = _mm512_add_ps(vc00, vab00);
+        vc01 = _mm512_add_ps(vc01, vab01);
+        vc02 = _mm512_add_ps(vc02, vab02);
+        vc03 = _mm512_add_ps(vc03, vab03);
+        vc04 = _mm512_add_ps(vc04, vab04);
+        vc05 = _mm512_add_ps(vc05, vab05);
+        vc06 = _mm512_add_ps(vc06, vab06);
+        vc07 = _mm512_add_ps(vc07, vab07);
+        vc08 = _mm512_add_ps(vc08, vab08);
+        vc09 = _mm512_add_ps(vc09, vab09);
+        vc10 = _mm512_add_ps(vc10, vab10);
+        vc11 = _mm512_add_ps(vc11, vab11);
+        vc12 = _mm512_add_ps(vc12, vab12);
+        vc13 = _mm512_add_ps(vc13, vab13);
+        vc14 = _mm512_add_ps(vc14, vab14);
+        vc15 = _mm512_add_ps(vc15, vab15);
+        vc16 = _mm512_add_ps(vc16, vab16);
+        vc17 = _mm512_add_ps(vc17, vab17);
+        vc18 = _mm512_add_ps(vc18, vab18);
+        vc19 = _mm512_add_ps(vc19, vab19);
+        vc20 = _mm512_add_ps(vc20, vab20);
+        vc21 = _mm512_add_ps(vc21, vab21);
+        vc22 = _mm512_add_ps(vc22, vab22);
+        vc23 = _mm512_add_ps(vc23, vab23);
+        vc24 = _mm512_add_ps(vc24, vab24);
+        vc25 = _mm512_add_ps(vc25, vab25);
+        vc26 = _mm512_add_ps(vc26, vab26);
+        vc27 = _mm512_add_ps(vc27, vab27);
+
+        _mm512_store_ps(C + ldc *  0, vc00);
+        _mm512_store_ps(C + ldc *  1, vc01);
+        _mm512_store_ps(C + ldc *  2, vc02);
+        _mm512_store_ps(C + ldc *  3, vc03);
+        _mm512_store_ps(C + ldc *  4, vc04);
+        _mm512_store_ps(C + ldc *  5, vc05);
+        _mm512_store_ps(C + ldc *  6, vc06);
+        _mm512_store_ps(C + ldc *  7, vc07);
+        _mm512_store_ps(C + ldc *  8, vc08);
+        _mm512_store_ps(C + ldc *  9, vc09);
+        _mm512_store_ps(C + ldc * 10, vc10);
+        _mm512_store_ps(C + ldc * 11, vc11);
+        _mm512_store_ps(C + ldc * 12, vc12);
+        _mm512_store_ps(C + ldc * 13, vc13);
+        _mm512_store_ps(C + ldc * 14, vc14);
+        _mm512_store_ps(C + ldc * 15, vc15);
+        _mm512_store_ps(C + ldc * 16, vc16);
+        _mm512_store_ps(C + ldc * 17, vc17);
+        _mm512_store_ps(C + ldc * 18, vc18);
+        _mm512_store_ps(C + ldc * 19, vc19);
+        _mm512_store_ps(C + ldc * 20, vc20);
+        _mm512_store_ps(C + ldc * 21, vc21);
+        _mm512_store_ps(C + ldc * 22, vc22);
+        _mm512_store_ps(C + ldc * 23, vc23);
+        _mm512_store_ps(C + ldc * 24, vc24);
+        _mm512_store_ps(C + ldc * 25, vc25);
+        _mm512_store_ps(C + ldc * 26, vc26);
+        _mm512_store_ps(C + ldc * 27, vc27);
+    }
+
+    template <bool PACKED = false>
+    static void matmul(
+        int M, int N, int K, float *A, int lda,
+        float *B, int ldb, float *C, int ldc)
+    {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+
+        for (int i = 0; i < M; i += BLOCK_M) {
+            for (int j = 0; j < N; j += BLOCK_N) {
+                auto Ar = A + lda * i + 0;
+                auto Br = B + ldb * 0 + j;
+                auto Cr = C + ldc * i + j;
+                if (PACKED)
+                    matmul_register_packed(
+                        BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
+                else
+                    matmul_register(
+                        BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
+            }
+        }
+    }
+
+    template <int PACKED = false>
+    static void gemm(
+        int M, int N, int K, float alpha, float *A, int lda,
+        float *B, int ldb, float beta, float *C, int ldc)
+    {
+        scale_matrix(A, lda, M, K, alpha);
+        scale_matrix(C, ldc, M, N, beta);
+
+        matmul<PACKED>(M, N, K, A, lda, B, ldb, C, ldc);
+    }
+};
+
+struct register_avx512_28x1pf_unr {
+    enum : int {
+        BLOCK_M = 28,
+        BLOCK_N = 16 * 1,
+    };
+
+    // 28x16 matrix multiplication
+    static void matmul_register(
+        int M, int N, int K, float *A, int lda, float *B, int ldb,
+        float *C, int ldc)
+    {
+        assert(0);
+    }
+
+    static NOINLINE void matmul_register_packed(
+        int M, int N, int K, float *A, int lda, float *B, int ldb,
+        float *C, int ldc)
+    {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+        assert(lda == BLOCK_M);
+        assert(ldb == BLOCK_N);
+
+        lda = BLOCK_M;
+        ldb = BLOCK_N;
+       
+        auto vab00 = _mm512_setzero_ps(); auto vab01 = _mm512_setzero_ps();
+        auto vab02 = _mm512_setzero_ps(); auto vab03 = _mm512_setzero_ps();
+        auto vab04 = _mm512_setzero_ps(); auto vab05 = _mm512_setzero_ps();
+        auto vab06 = _mm512_setzero_ps(); auto vab07 = _mm512_setzero_ps();
+        auto vab08 = _mm512_setzero_ps(); auto vab09 = _mm512_setzero_ps();
+        auto vab10 = _mm512_setzero_ps(); auto vab11 = _mm512_setzero_ps();
+        auto vab12 = _mm512_setzero_ps(); auto vab13 = _mm512_setzero_ps();
+        auto vab14 = _mm512_setzero_ps(); auto vab15 = _mm512_setzero_ps();
+        auto vab16 = _mm512_setzero_ps(); auto vab17 = _mm512_setzero_ps();
+        auto vab18 = _mm512_setzero_ps(); auto vab19 = _mm512_setzero_ps();
+        auto vab20 = _mm512_setzero_ps(); auto vab21 = _mm512_setzero_ps();
+        auto vab22 = _mm512_setzero_ps(); auto vab23 = _mm512_setzero_ps();
+        auto vab24 = _mm512_setzero_ps(); auto vab25 = _mm512_setzero_ps();
+        auto vab26 = _mm512_setzero_ps(); auto vab27 = _mm512_setzero_ps();
+
+        _mm_prefetch(C + ldc *  0, _MM_HINT_T0);
+        _mm_prefetch(C + ldc *  1, _MM_HINT_T0);
+        _mm_prefetch(C + ldc *  2, _MM_HINT_T0);
+        _mm_prefetch(C + ldc *  3, _MM_HINT_T0);
+        _mm_prefetch(C + ldc *  4, _MM_HINT_T0);
+        _mm_prefetch(C + ldc *  5, _MM_HINT_T0);
+        _mm_prefetch(C + ldc *  6, _MM_HINT_T0);
+        _mm_prefetch(C + ldc *  7, _MM_HINT_T0);
+        _mm_prefetch(C + ldc *  8, _MM_HINT_T0);
+        _mm_prefetch(C + ldc *  9, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 10, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 11, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 12, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 13, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 14, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 15, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 16, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 17, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 18, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 19, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 20, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 21, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 22, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 23, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 24, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 25, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 26, _MM_HINT_T0);
+        _mm_prefetch(C + ldc * 27, _MM_HINT_T0);
+
+        auto pb = B + ldb * 0;
+        auto vb0 = _mm512_load_ps(pb + 16 * 0);
+        auto vb1 = _mm512_load_ps(pb + 16 * 1);
+        auto vb2 = _mm512_load_ps(pb + 16 * 2);
+        auto vb3 = _mm512_load_ps(pb + 16 * 3);
+
+        _mm_prefetch(A + lda + 16 *  0, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 *  1, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 *  2, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 *  3, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 *  4, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 *  5, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 *  6, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 *  7, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 *  8, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 *  9, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 * 10, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 * 11, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 * 12, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 * 13, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 * 14, _MM_HINT_T0);
+        _mm_prefetch(A + lda + 16 * 15, _MM_HINT_T0);
+
+        _mm_prefetch(B + ldb + 16 *  0, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 *  1, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 *  2, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 *  3, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 *  4, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 *  5, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 *  6, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 *  7, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 *  8, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 *  9, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 * 10, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 * 11, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 * 12, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 * 13, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 * 14, _MM_HINT_T0);
+        _mm_prefetch(B + ldb + 16 * 15, _MM_HINT_T0);
+
+        for (int k = 0; k < K; k += 4) {
+            auto pa = A + lda * k;
+            auto pb = B + ldb * (k + 4);
+
+            _mm_prefetch(pa + 16 * 16, _MM_HINT_T0);
+            vab00 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 +  0), vb0, vab00);
+            vab01 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 +  1), vb0, vab01);
+            vab02 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 +  2), vb0, vab02);
+            vab03 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 +  3), vb0, vab03);
+            vab04 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 +  4), vb0, vab04);
+            vab05 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 +  5), vb0, vab05);
+            vab06 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 +  6), vb0, vab06);
+            vab07 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 +  7), vb0, vab07);
+            vab08 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 +  8), vb0, vab08);
+            vab09 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 +  9), vb0, vab09);
+            vab10 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 10), vb0, vab10);
+            vab11 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 11), vb0, vab11);
+            vab12 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 12), vb0, vab12);
+            _mm_prefetch(pb + 16 * 12, _MM_HINT_T0);
+            vab13 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 13), vb0, vab13);
+            vab14 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 14), vb0, vab14);
+            vab15 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 15), vb0, vab15);
+            _mm_prefetch(pa + 16 * 17, _MM_HINT_T0);
+            vab16 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 16), vb0, vab16);
+            vab17 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 17), vb0, vab17);
+            vab18 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 18), vb0, vab18);
+            vab19 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 19), vb0, vab19);
+            vab20 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 20), vb0, vab20);
+            vab21 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 21), vb0, vab21);
+            vab22 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 22), vb0, vab22);
+            vab23 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 23), vb0, vab23);
+            vab24 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 24), vb0, vab24);
+            vab25 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 25), vb0, vab25);
+            vab26 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 26), vb0, vab26);
+            vab27 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 0 + 27), vb0, vab27);
+            vb0 = _mm512_load_ps(pb + 16 * 0);
+
+            vab00 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  0), vb1, vab00);
+            vab01 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  1), vb1, vab01);
+            vab02 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  2), vb1, vab02);
+            vab03 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  3), vb1, vab03);
+            _mm_prefetch(pa + 16 * 18, _MM_HINT_T0);
+            vab04 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  4), vb1, vab04);
+            vab05 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  5), vb1, vab05);
+            vab06 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  6), vb1, vab06);
+            vab07 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  7), vb1, vab07);
+            vab08 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  8), vb1, vab08);
+            vab09 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 +  9), vb1, vab09);
+            vab10 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 10), vb1, vab10);
+            vab11 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 11), vb1, vab11);
+            vab12 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 12), vb1, vab12);
+            vab13 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 13), vb1, vab13);
+            _mm_prefetch(pb + 16 * 13, _MM_HINT_T0);
+            vab14 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 14), vb1, vab14);
+            vab15 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 15), vb1, vab15);
+            vab16 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 16), vb1, vab16);
+            vab17 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 17), vb1, vab17);
+            vab18 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 18), vb1, vab18);
+            vab19 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 19), vb1, vab19);
+            _mm_prefetch(pa + 16 * 19, _MM_HINT_T0);
+            vab20 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 20), vb1, vab20);
+            vab21 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 21), vb1, vab21);
+            vab22 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 22), vb1, vab22);
+            vab23 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 23), vb1, vab23);
+            vab24 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 24), vb1, vab24);
+            vab25 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 25), vb1, vab25);
+            vab26 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 26), vb1, vab26);
+            vab27 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 1 + 27), vb1, vab27);
+            vb1 = _mm512_load_ps(pb + 16 * 1);
+
+            vab00 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  0), vb2, vab00);
+            vab01 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  1), vb2, vab01);
+            vab02 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  2), vb2, vab02);
+            vab03 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  3), vb2, vab03);
+            vab04 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  4), vb2, vab04);
+            vab05 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  5), vb2, vab05);
+            vab06 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  6), vb2, vab06);
+            vab07 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  7), vb2, vab07);
+            _mm_prefetch(pa + 16 * 20, _MM_HINT_T0);
+            vab08 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  8), vb2, vab08);
+            vab09 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 +  9), vb2, vab09);
+            vab10 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 10), vb2, vab10);
+            vab11 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 11), vb2, vab11);
+            vab12 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 12), vb2, vab12);
+            vab13 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 13), vb2, vab13);
+            _mm_prefetch(pb + 16 * 14, _MM_HINT_T0);
+            vab14 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 14), vb2, vab14);
+            vab15 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 15), vb2, vab15);
+            vab16 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 16), vb2, vab16);
+            vab17 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 17), vb2, vab17);
+            vab18 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 18), vb2, vab18);
+            vab19 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 19), vb2, vab19);
+            vab20 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 20), vb2, vab20);
+            vab21 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 21), vb2, vab21);
+            vab22 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 22), vb2, vab22);
+            vab23 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 23), vb2, vab23);
+            _mm_prefetch(pa + 16 * 21, _MM_HINT_T0);
+            vab24 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 24), vb2, vab24);
+            vab25 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 25), vb2, vab25);
+            vab26 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 26), vb2, vab26);
+            vab27 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 2 + 27), vb2, vab27);
+            vb2 = _mm512_load_ps(pb + 16 * 2);
+
+            vab00 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 +  0), vb3, vab00);
+            vab01 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 +  1), vb3, vab01);
+            vab02 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 +  2), vb3, vab02);
+            vab03 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 +  3), vb3, vab03);
+            vab04 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 +  4), vb3, vab04);
+            vab05 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 +  5), vb3, vab05);
+            vab06 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 +  6), vb3, vab06);
+            vab07 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 +  7), vb3, vab07);
+            vab08 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 +  8), vb3, vab08);
+            vab09 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 +  9), vb3, vab09);
+            vab10 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 10), vb3, vab10);
+            vab11 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 11), vb3, vab11);
+            _mm_prefetch(pa + 16 * 22, _MM_HINT_T0);
+            vab12 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 12), vb3, vab12);
+            vab13 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 13), vb3, vab13);
+            _mm_prefetch(pb + 16 * 15, _MM_HINT_T0);
+            vab14 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 14), vb3, vab14);
+            vab15 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 15), vb3, vab15);
+            vab16 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 16), vb3, vab16);
+            vab17 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 17), vb3, vab17);
+            vab18 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 18), vb3, vab18);
+            vab19 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 19), vb3, vab19);
+            vab20 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 20), vb3, vab20);
+            vab21 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 21), vb3, vab21);
+            vab22 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 22), vb3, vab22);
+            vab23 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 23), vb3, vab23);
+            vab24 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 24), vb3, vab24);
+            vab25 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 25), vb3, vab25);
+            vab26 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 26), vb3, vab26);
+            vab27 = _mm512_fmadd_ps(_mm512_broadcast_ss(pa + 28 * 3 + 27), vb3, vab27);
+            vb3 = _mm512_load_ps(pb + 16 * 3);
+        }
+
+        auto vc00 = _mm512_load_ps(C + ldc *  0);
+        auto vc01 = _mm512_load_ps(C + ldc *  1);
+        auto vc02 = _mm512_load_ps(C + ldc *  2);
+        auto vc03 = _mm512_load_ps(C + ldc *  3);
+        auto vc04 = _mm512_load_ps(C + ldc *  4);
+        auto vc05 = _mm512_load_ps(C + ldc *  5);
+        auto vc06 = _mm512_load_ps(C + ldc *  6);
+        auto vc07 = _mm512_load_ps(C + ldc *  7);
+        auto vc08 = _mm512_load_ps(C + ldc *  8);
+        auto vc09 = _mm512_load_ps(C + ldc *  9);
+        auto vc10 = _mm512_load_ps(C + ldc * 10);
+        auto vc11 = _mm512_load_ps(C + ldc * 11);
+        auto vc12 = _mm512_load_ps(C + ldc * 12);
+        auto vc13 = _mm512_load_ps(C + ldc * 13);
+        auto vc14 = _mm512_load_ps(C + ldc * 14);
+        auto vc15 = _mm512_load_ps(C + ldc * 15);
+        auto vc16 = _mm512_load_ps(C + ldc * 16);
+        auto vc17 = _mm512_load_ps(C + ldc * 17);
+        auto vc18 = _mm512_load_ps(C + ldc * 18);
+        auto vc19 = _mm512_load_ps(C + ldc * 19);
+        auto vc20 = _mm512_load_ps(C + ldc * 20);
+        auto vc21 = _mm512_load_ps(C + ldc * 21);
+        auto vc22 = _mm512_load_ps(C + ldc * 22);
+        auto vc23 = _mm512_load_ps(C + ldc * 23);
+        auto vc24 = _mm512_load_ps(C + ldc * 24);
+        auto vc25 = _mm512_load_ps(C + ldc * 25);
+        auto vc26 = _mm512_load_ps(C + ldc * 26);
+        auto vc27 = _mm512_load_ps(C + ldc * 27);
+
+        vc00 = _mm512_add_ps(vc00, vab00);
+        vc01 = _mm512_add_ps(vc01, vab01);
+        vc02 = _mm512_add_ps(vc02, vab02);
+        vc03 = _mm512_add_ps(vc03, vab03);
+        vc04 = _mm512_add_ps(vc04, vab04);
+        vc05 = _mm512_add_ps(vc05, vab05);
+        vc06 = _mm512_add_ps(vc06, vab06);
+        vc07 = _mm512_add_ps(vc07, vab07);
+        vc08 = _mm512_add_ps(vc08, vab08);
+        vc09 = _mm512_add_ps(vc09, vab09);
+        vc10 = _mm512_add_ps(vc10, vab10);
+        vc11 = _mm512_add_ps(vc11, vab11);
+        vc12 = _mm512_add_ps(vc12, vab12);
+        vc13 = _mm512_add_ps(vc13, vab13);
+        vc14 = _mm512_add_ps(vc14, vab14);
+        vc15 = _mm512_add_ps(vc15, vab15);
+        vc16 = _mm512_add_ps(vc16, vab16);
+        vc17 = _mm512_add_ps(vc17, vab17);
+        vc18 = _mm512_add_ps(vc18, vab18);
+        vc19 = _mm512_add_ps(vc19, vab19);
+        vc20 = _mm512_add_ps(vc20, vab20);
+        vc21 = _mm512_add_ps(vc21, vab21);
+        vc22 = _mm512_add_ps(vc22, vab22);
+        vc23 = _mm512_add_ps(vc23, vab23);
+        vc24 = _mm512_add_ps(vc24, vab24);
+        vc25 = _mm512_add_ps(vc25, vab25);
+        vc26 = _mm512_add_ps(vc26, vab26);
+        vc27 = _mm512_add_ps(vc27, vab27);
+
+        _mm512_store_ps(C + ldc *  0, vc00);
+        _mm512_store_ps(C + ldc *  1, vc01);
+        _mm512_store_ps(C + ldc *  2, vc02);
+        _mm512_store_ps(C + ldc *  3, vc03);
+        _mm512_store_ps(C + ldc *  4, vc04);
+        _mm512_store_ps(C + ldc *  5, vc05);
+        _mm512_store_ps(C + ldc *  6, vc06);
+        _mm512_store_ps(C + ldc *  7, vc07);
+        _mm512_store_ps(C + ldc *  8, vc08);
+        _mm512_store_ps(C + ldc *  9, vc09);
+        _mm512_store_ps(C + ldc * 10, vc10);
+        _mm512_store_ps(C + ldc * 11, vc11);
+        _mm512_store_ps(C + ldc * 12, vc12);
+        _mm512_store_ps(C + ldc * 13, vc13);
+        _mm512_store_ps(C + ldc * 14, vc14);
+        _mm512_store_ps(C + ldc * 15, vc15);
+        _mm512_store_ps(C + ldc * 16, vc16);
+        _mm512_store_ps(C + ldc * 17, vc17);
+        _mm512_store_ps(C + ldc * 18, vc18);
+        _mm512_store_ps(C + ldc * 19, vc19);
+        _mm512_store_ps(C + ldc * 20, vc20);
+        _mm512_store_ps(C + ldc * 21, vc21);
+        _mm512_store_ps(C + ldc * 22, vc22);
+        _mm512_store_ps(C + ldc * 23, vc23);
+        _mm512_store_ps(C + ldc * 24, vc24);
+        _mm512_store_ps(C + ldc * 25, vc25);
+        _mm512_store_ps(C + ldc * 26, vc26);
+        _mm512_store_ps(C + ldc * 27, vc27);
+    }
+
+    template <bool PACKED = false>
+    static void matmul(
+        int M, int N, int K, float *A, int lda,
+        float *B, int ldb, float *C, int ldc)
+    {
+        assert(M % BLOCK_M == 0);
+        assert(N % BLOCK_N == 0);
+
+        for (int i = 0; i < M; i += BLOCK_M) {
+            for (int j = 0; j < N; j += BLOCK_N) {
+                auto Ar = A + lda * i + 0;
+                auto Br = B + ldb * 0 + j;
+                auto Cr = C + ldc * i + j;
+                if (PACKED)
+                    matmul_register_packed(
+                        BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
+                else
+                    matmul_register(
+                        BLOCK_M, BLOCK_N, K, Ar, lda, Br, ldb, Cr, ldc);
+            }
+        }
+    }
+
+    template <int PACKED = false>
+    static void gemm(
+        int M, int N, int K, float alpha, float *A, int lda,
+        float *B, int ldb, float beta, float *C, int ldc)
+    {
+        scale_matrix(A, lda, M, K, alpha);
+        scale_matrix(C, ldc, M, N, beta);
+
+        matmul<PACKED>(M, N, K, A, lda, B, ldb, C, ldc);
+    }
+};
+
 struct register_avx512_28x1asmpf_ebcast { 
     enum : int {
         BLOCK_M = 28,

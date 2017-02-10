@@ -389,6 +389,17 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
         push("blis512_packL3_5x5asmpf_ebcast", blis::gemm);
     }
 
+    // 9-6. AVX512 28x1 implementations
+    {
+        using blis = blis<knl_28x1, register_avx512_28x1>;
+        blis::intiialize();
+        push("blis512_packL3_28x1", blis::gemm);
+    }
+    {
+        using blis = blis<knl_28x1, register_avx512_28x1pf_unr>;
+        blis::intiialize();
+        push("blis512_packL3_28x1pf_unr", blis::gemm);
+    }
     {
         using blis = blis<knl_28x1, register_avx512_28x1asmpf_ebcast>;
         blis::intiialize();
