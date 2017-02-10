@@ -2371,7 +2371,7 @@ struct register_avx512_28x1asmpf_ebcast_unr {
             "vfmadd231ps        93 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm9  \n\t"
             "vfmadd231ps        94 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm10 \n\t"
             "vfmadd231ps        95 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm11 \n\t"
-            "prefetcht0         21 * 64(%%rax)                           \n\t"
+            "prefetcht0         22 * 64(%%rax)                           \n\t"
             "vfmadd231ps        96 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm12 \n\t"
             "vfmadd231ps        97 * 4(%%rax)%{1to16%}, %%zmm31, %%zmm13 \n\t"
             "prefetcht0         19 * 64(%%rbx)                           \n\t"
