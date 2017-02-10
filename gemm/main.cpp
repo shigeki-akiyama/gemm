@@ -115,6 +115,12 @@ static std::vector<bench_pair> make_benchmarks(int M, int N, int K)
 
         // 1-2. Register blocking AVX implementation (blocking with K)
         push("register_avx_2", register_avx_2::gemm);
+
+        // 1-3. 
+        push("register_avx_3_6x2", register_avx_3_6x2::gemm);
+
+        // 1-4. 
+        push("register_avx_3_4x3", register_avx_3_4x3::gemm);
     }
 #endif
 
@@ -511,9 +517,12 @@ static int real_main(
             B[ldb * i + j] = N * i + j;
 #endif
 
+    papix papi;
+
     bench_params<elem_type> bp = {
         M, N, K, alpha, A.get(), lda, B.get(), ldb, beta, 
         C.get(), ldc, result_C.get(), buf.get(), int(buf_size),
+        papi
     };
 
 #if 0
@@ -559,11 +568,10 @@ static int real_main(
     std::printf("%-25s %10.3f\n", "PEAK_AVX512", peak_gflops * 2);
 #endif
 
-    papix papi;
     for (auto& bench : benchs) {
         auto fname = std::get<0>(bench);
         auto f = std::get<1>(bench);
-         benchmark(papi, fname, bp, f, verify);
+         benchmark(fname, bp, f, verify);
     }
 
     papi.print_results();

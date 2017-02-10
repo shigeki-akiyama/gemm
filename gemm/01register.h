@@ -1353,7 +1353,7 @@ struct register_bench {
     template <class T>
     static void performL1(bench_params<T>& bp_)
     {
-        int n_times = 1000 * 1000;
+        int n_times = 100 * 1000;
 
         struct matmul_buffer {
             float A[256 * 256];  // 4 * 128 * 128 = 16KB
@@ -1380,47 +1380,162 @@ struct register_bench {
 #if 0
         {
             auto bp = make_bp(6, 32, 256);
-            benchmark("register_avx_1", bp, register_avx_1::gemm, false, true, n_times);
-            benchmark("register_avx_2", bp, register_avx_2::gemm, false, true, n_times);
+            benchmark("avx_1", bp, register_avx_1::gemm, false, true, n_times);
+            benchmark("avx_2", bp, register_avx_2::gemm, false, true, n_times);
         }
 #endif
+#if 0
         {
             auto bp = make_bp(6, 16, 256);
-            benchmark("register_avx_3_6x2", bp, register_avx_3_6x2::gemm<false>, false, true, n_times);
+            benchmark("avx_3_6x2", bp,
+                      register_avx_3_6x2::gemm<false>, false, true, n_times);
 
-            pack2d<T, 6, 1>(bp.A, bp.lda, bp.M, bp.K, bp.C, 1);
+            pack2d<T, 6, 1>(bp.A, bp.lda, bp.M, bp.K, bp.C);
             std::copy_n(bp.C, bp.M * bp.K, bp.A);
-            pack2d<T, 1, 16>(bp.B, bp.ldb, bp.K, bp.N, bp.C, 1);
+            pack2d<T, 1, 16>(bp.B, bp.ldb, bp.K, bp.N, bp.C);
             std::copy_n(bp.C, bp.K * bp.N, bp.B);
             std::fill_n(bp.C, bp.M * bp.ldc, T(0.0));
             bp.lda = register_avx_3_6x2::BLOCK_M;
             bp.ldb = register_avx_3_6x2::BLOCK_N;
 
-            benchmark("register_avx_3_6x2p", bp, register_avx_3_6x2::gemm<true>, false, true, n_times);
+            benchmark("avx_3_6x2p", bp,
+                      register_avx_3_6x2::gemm<true>, false, true, n_times);
         }
 
-#if 1
         {
             auto bp = make_bp(4, 24, 256);
-            benchmark("register_avx_3_4x3", bp, register_avx_3_4x3::gemm<false>, false, true, n_times);
+            benchmark("avx_3_4x3", bp,
+                      register_avx_3_4x3::gemm<false>, false, true, n_times);
 
-            pack2d<T, 4, 1>(bp.A, bp.lda, bp.M, bp.K, bp.C, 1);
+            pack2d<T, 4, 1>(bp.A, bp.lda, bp.M, bp.K, bp.C);
             std::copy_n(bp.C, bp.M * bp.K, bp.A);
-            pack2d<T, 1, 24>(bp.B, bp.ldb, bp.K, bp.N, bp.C, 1);
+            pack2d<T, 1, 24>(bp.B, bp.ldb, bp.K, bp.N, bp.C);
             std::copy_n(bp.C, bp.K * bp.N, bp.B);
             std::fill_n(bp.C, bp.M * bp.ldc, T(0.0));
             bp.lda = register_avx_3_4x3::BLOCK_M;
             bp.ldb = register_avx_3_4x3::BLOCK_N;
 
-            benchmark("register_avx_3_4x3p", bp, register_avx_3_4x3::gemm<true>, false, true, n_times);
+            benchmark("avx_3_4x3p", bp,
+                      register_avx_3_4x3::gemm<true>, false, true, n_times);
         }
 #endif
 
-
 #ifdef USE_AVX512
+        int K = 128;
+
+#if 0
         {
-            auto bp = make_bp(9, 48, 32);
-            benchmark("register_avx512_9x3", bp, register_avx512_9x3::gemm<false>, false, true, n_times);
+            auto bp = make_bp(9, 48, K);
+            benchmark("avx512_9x3", bp,
+                      register_avx512_9x3::gemm<false>, false, true, n_times);
+        }
+
+        {
+            auto bp = make_bp(5, 80, K);
+            benchmark("avx512_5x5", bp,
+                      register_avx512_5x5::gemm<false>, false, true, n_times);
+        }
+
+        {
+            using kernel = register_avx512_5x5;
+            auto bp = make_bp(5, 80, K);
+
+            pack2d<T, 5, 1>(bp.A, bp.lda, bp.M, bp.K, bp.C);
+            std::copy_n(bp.C, bp.M * bp.K, bp.A);
+            pack2d<T, 1, 80>(bp.B, bp.ldb, bp.K, bp.N, bp.C);
+            std::copy_n(bp.C, bp.K * bp.N, bp.B);
+            std::fill_n(bp.C, bp.M * bp.ldc, T(0.0));
+            bp.lda = kernel::BLOCK_M;
+            bp.ldb = kernel::BLOCK_N;
+
+            benchmark("avx512_5x5p", bp,
+                      kernel::gemm<true>, false, true, n_times);
+        }
+
+        {
+            using kernel = register_avx512_5x5;
+
+            auto bp = make_bp(5, 80, K);
+
+            pack2d<T, 5, 1>(bp.A, bp.lda, bp.M, bp.K, bp.C);
+            std::copy_n(bp.C, bp.M * bp.K, bp.A);
+            pack2d<T, 1, 80>(bp.B, bp.ldb, bp.K, bp.N, bp.C);
+            std::copy_n(bp.C, bp.K * bp.N, bp.B);
+            std::fill_n(bp.C, bp.M * bp.ldc, T(0.0));
+            bp.lda = kernel::BLOCK_M;
+            bp.ldb = kernel::BLOCK_N;
+
+            benchmark("avx512_5x5pasm", bp,
+                      kernel::gemm<true>, false, true, n_times);
+        }
+
+        {
+            using kernel = register_avx512_5x5asm_unroll;
+            auto bp = make_bp(5, 80, K);
+
+            pack2d<T, 5, 1>(bp.A, bp.lda, bp.M, bp.K, bp.C);
+            std::copy_n(bp.C, bp.M * bp.K, bp.A);
+            pack2d<T, 1, 80>(bp.B, bp.ldb, bp.K, bp.N, bp.C);
+            std::copy_n(bp.C, bp.K * bp.N, bp.B);
+            std::fill_n(bp.C, bp.M * bp.ldc, T(0.0));
+            bp.lda = kernel::BLOCK_M;
+            bp.ldb = kernel::BLOCK_N;
+
+            benchmark("avx512_5x5pasm_unr", bp,
+                      kernel::gemm<true>,
+                      false, true, n_times);
+        }
+
+        {
+            using kernel = register_avx512_5x5asmpf_unroll;
+
+            auto bp = make_bp(5, 80, K);
+
+            pack2d<T, 5, 1>(bp.A, bp.lda, bp.M, bp.K, bp.C);
+            std::copy_n(bp.C, bp.M * bp.K, bp.A);
+            pack2d<T, 1, 80>(bp.B, bp.ldb, bp.K, bp.N, bp.C);
+            std::copy_n(bp.C, bp.K * bp.N, bp.B);
+            std::fill_n(bp.C, bp.M * bp.ldc, T(0.0));
+            bp.lda = kernel::BLOCK_M;
+            bp.ldb = kernel::BLOCK_N;
+
+            benchmark("avx512_5x5pasmpf_unr", bp,
+                      kernel::gemm<true>, false, true, n_times);
+        }
+
+        {
+            using kernel = register_avx512_28x1asmpf_ebcast;
+
+            auto bp = make_bp(28, 16, K);
+
+            pack2d<T, 28, 1>(bp.A, bp.lda, bp.M, bp.K, bp.C);
+            std::copy_n(bp.C, bp.M * bp.K, bp.A);
+            pack2d<T, 1, 16>(bp.B, bp.ldb, bp.K, bp.N, bp.C);
+            std::copy_n(bp.C, bp.K * bp.N, bp.B);
+            std::fill_n(bp.C, bp.M * bp.ldc, T(0.0));
+            bp.lda = kernel::BLOCK_M;
+            bp.ldb = kernel::BLOCK_N;
+
+            benchmark("avx512_28x1pasmpf_ebcast", bp,
+                      kernel::gemm<true>, false, true, n_times);
+        }
+#endif
+
+        {
+            using kernel = register_avx512_28x1asmpf_ebcast_unr;
+
+            auto bp = make_bp(28, 16, K);
+
+            pack2d<T, 28, 1>(bp.A, bp.lda, bp.M, bp.K, bp.C);
+            std::copy_n(bp.C, bp.M * bp.K, bp.A);
+            pack2d<T, 1, 16>(bp.B, bp.ldb, bp.K, bp.N, bp.C);
+            std::copy_n(bp.C, bp.K * bp.N, bp.B);
+            std::fill_n(bp.C, bp.M * bp.ldc, T(0.0));
+            bp.lda = kernel::BLOCK_M;
+            bp.ldb = kernel::BLOCK_N;
+
+            benchmark("avx512_28x1pasmpf_ebcast_unr", bp,
+                      kernel::gemm<true>, false, true, n_times);
         }
 #endif
     }

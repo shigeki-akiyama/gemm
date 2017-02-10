@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "util.h"
+#include "papix.h"
 #include <algorithm>
 #include <limits>
 #include <type_traits>
@@ -214,6 +215,7 @@ struct bench_params {
     T *result_C;
     T *buf;
     int buf_size;
+    papix& papi;
 };
 
 template <class T>
@@ -256,15 +258,15 @@ static void ref_gemm(
 
 template <class T, class F>
 static void benchmark(
-    papix& papi, const char *name, bench_params<T>& bp, F f, 
+    const char *name, bench_params<T>& bp, F f, 
     bool verify = true, bool on_cache = false, size_t n_times = 10)
 {
     int M = bp.M, N = bp.N, K = bp.K;
 
     auto preprocess = [&] {
         if (on_cache) {
-            f(bp.M, bp.N, bp.K, bp.alpha, bp.A, bp.lda,
-                bp.B, bp.ldb, bp.beta, bp.C, bp.ldc);
+            //f(bp.M, bp.N, bp.K, bp.alpha, bp.A, bp.lda,
+            //    bp.B, bp.ldb, bp.beta, bp.C, bp.ldc);
             std::fill_n(bp.C, M * bp.ldc, T(0.0));
             std::fill_n(bp.A, M * bp.lda, T(2.0));
             std::fill_n(bp.B, K * bp.ldb, T(0.5));
@@ -274,7 +276,7 @@ static void benchmark(
         }
     };
 
-    auto r = measure_ntimes(papi, name, n_times, preprocess, [&] {
+    auto r = measure_ntimes(bp.papi, name, n_times, preprocess, [&] {
         f(bp.M, bp.N, bp.K, bp.alpha, bp.A, bp.lda,
             bp.B, bp.ldb, bp.beta, bp.C, bp.ldc);
     });

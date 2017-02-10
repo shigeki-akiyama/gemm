@@ -9,7 +9,7 @@
 
 #include <omp.h>
 
-#ifndef NO_BIND
+#ifndef BIND_CORES
 #include <hwloc.h>
 #endif
 
